@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:15
+    container_name: alpineedge_db
+    env_file: .env
+    expose:
+      - '5432'
+    volumes:
+      - alpineedge_data:/var/lib/postgresql/data
+      - ./init_data:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER}']
+      interval: 20s  # How often health checks are made
+      timeout: 5s    # If it takes longer than this, mark as failed
+      retries: 5     # After 5 failed attempts, marks as unhealthy
+
+  web:
+    image: node:lts
+    container_name: alpineedge_web
+    user: 'node'
+    working_dir: /home/node/app
+    env_file: .env
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./:/home/node/app
+      - /home/node/app/node_modules
+    command: 'npm start'
+
+volumes:
+  alpineedge_data:

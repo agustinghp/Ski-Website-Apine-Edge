@@ -1,0 +1,23 @@
+{
+  "name": "ski-website",
+  "version": "1.0.0",
+  "description": "This is our Ski website!",
+  "homepage": "https://github.com/CU-CSCI3308-Fall2025/group-project-agustinghp#readme",
+  "bugs": {
+    "url": "https://github.com/CU-CSCI3308-Fall2025/group-project-agustinghp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CU-CSCI3308-Fall2025/group-project-agustinghp.git"
+  },
+  "license": "ISC",
+  "author": "Charlie Kasic, Agustin Garcia-Huidobro, David Poston",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

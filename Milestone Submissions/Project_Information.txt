@@ -1,0 +1,34 @@
+Team number: 016-1
+
+Team name:
+The Ski bums
+
+Team members:
+1. Agustin Garcia-Huidobro
+2. Charlie Kasic
+3. David Poston
+
+Application Name:
+Alpine Edge
+
+Application Description:
+Users can create posts to sell their skis and services such as training and waxing
+The app will have filters (powder 7 inspiration). 
+You can sell skis, snowboards, and ski equipment. 
+posts will include images, descriptions and prices
+(maybe) add a feature to do negotiations, like back and forth.
+
+Audience:
+People who ski. Colorado, young people, college kids etc.
+
+Vision Statement:
+Keep the value in skiing and make buying easier.
+
+Communication:
+For communication we have created a discord group. 
+
+Meeting Plan:
+We will meet with the TA weekly during his office hours every friday at 2:15 pm on the engineering center.
+Also, the team will meet every Thursday at the engineering center before this lab at 4:30 pm
+
+
