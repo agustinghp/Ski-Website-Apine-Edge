@@ -1,0 +1,4 @@
+Week 1 (10/27 - 11/02):
+- Finished the barebones of the database tables
+- Made the program functional
+    - Can initialize image of docker, and connect database and nodejs
