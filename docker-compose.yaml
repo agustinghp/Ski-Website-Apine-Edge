@@ -22,6 +22,9 @@ services:
     env_file: .env
     environment:
       - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=1
+      - WATCHPACK_POLLING=true
+
     depends_on:
       db:
         condition: service_healthy
@@ -29,8 +32,7 @@ services:
       - '3000:3000'
     volumes:
       - ./:/home/node/app
-      - /home/node/app/node_modules
-    command: 'npm start'
+    command: 'npm run dev'
 
 volumes:
   alpineedge_data:
