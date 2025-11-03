@@ -1,6 +1,0 @@
-Meeting 1:
-10/31, 2:15 PM (15 minutes)
-Everyone attended the meeting, we talked about what we are going to do next week.
-Objectives:
-- Functional barebones html page
-- Setup the docker, javacript file and database do that it runs
