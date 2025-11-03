@@ -28,3 +28,12 @@ CREATE TABLE reviewsSellers (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (reviewer_id, reviewee_id)
 );
+
+CREATE TABLE connections (
+    id SERIAL PRIMARY KEY,
+    requester_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    receiver_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    initiated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'declined')),
+    UNIQUE (requester_id, receiver_id)
+);
