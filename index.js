@@ -13,8 +13,7 @@ const session = require('express-session'); // To set the session object. To sto
 const bcrypt = require('bcryptjs'); //  To hash passwords
 const axios = require('axios'); // To make HTTP requests from our server. We'll learn more about it in Part C.
 require('dotenv').config();
-app.use(express.static(path.join(__dirname, 'public'))); // For Images
-
+app.use(express.static(path.join(__dirname, 'Homepage', 'public'))); // For Images
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
 // *****************************************************
@@ -22,8 +21,8 @@ app.use(express.static(path.join(__dirname, 'public'))); // For Images
 // create `ExpressHandlebars` instance and configure the layouts and partials dir.
 const hbs = handlebars.create({
     extname: 'hbs',
-    layoutsDir: __dirname + '/views/layouts',
-    partialsDir: __dirname + '/views/partials',
+    layoutsDir: __dirname + '/Homepage/views/layouts',
+    partialsDir: __dirname + '/Homepage/views/partials',
 });
 
 // database configuration
@@ -54,7 +53,7 @@ db.connect()
 // Register `hbs` as our view engine using its bound `engine()` function.
 app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'Homepage', 'views'));
 app.use(bodyParser.json()); // specify the usage of JSON for parsing request body.
 
 // initialize session variables
@@ -75,13 +74,29 @@ app.use(
 // Sction 4: Routes
 
 app.get('/', (req, res) => {
-  res.render('home', { title: 'Welcome to Alpine Edge!' });
+  // Add 'pages/' before the view name
+  res.render('pages/home', { title: 'Welcome to Alpine Edge!' });
 });
 
+// ... (new routes) ...
 
+// Render Login Page
+app.get('/login', (req, res) => {
+  res.render('pages/login', { title: 'Login' });
+});
 
+// Render Register Page
+app.get('/register', (req, res) => {
+  res.render('pages/register', { title: 'Register' });
+});
 
-
+// Render Search Page
+app.get('/search', (req, res) => {
+  res.render('pages/search', { 
+    title: 'Search Skis',
+    query: req.query.query 
+  });
+});
 // Start server
 
 const PORT = process.env.PORT || 3000;
