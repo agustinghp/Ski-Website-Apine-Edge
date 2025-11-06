@@ -1,0 +1,63 @@
+/* --- 1. Import Google Font --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+/* --- 2. Define Bright/Colorful Theme (CSS Variables) --- */
+:root {
+    /* This is a bright "ski blue" */
+    --bs-primary: #007bff; 
+    --bs-primary-rgb: 0, 123, 255;
+
+    /* A vibrant "safety orange" or "teal" for contrast */
+    --bs-secondary: #0d6efd; /* You can change this */
+    --bs-secondary-rgb: 13, 110, 253;
+
+    /* Set the default font */
+    --bs-font-sans-serif: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* --- 3. Global Styles --- */
+body {
+    /* Set the font for the whole site */
+    font-family: var(--bs-font-sans-serif);
+}
+
+/* Make primary buttons "pop" more */
+.btn-primary {
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(var(--bs-primary-rgb), 0.2);
+    transition: all 0.3s ease;
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(var(--bs-primary-rgb), 0.3);
+}
+
+/* --- 4. Custom Component Styles --- */
+
+/* Style for the page title header (partials/header.hbs) */
+.page-title-header {
+    /* A subtle gradient */
+    background: linear-gradient(90deg, 
+        rgba(var(--bs-primary-rgb), 0.9), 
+        rgba(var(--bs-secondary-rgb), 0.9)
+    );
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+    color: white;
+}
+
+/* Style for the navbar brand */
+.navbar-brand {
+    font-size: 1.5rem;
+}
+
+/* Style for the listing cards */
+.card {
+    border: none;
+    border-radius: 0.75rem; /* Softer corners */
+    transition: all 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
