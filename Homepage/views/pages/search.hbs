@@ -1,42 +1,121 @@
-<div class="card shadow-sm border-0 mb-4">
-    <div class="card-body">
-        <form action="/search" method="GET" class="d-flex gap-2">
-            <input type="text" name="query" class="form-control form-control-lg" placeholder="Search by brand, size, or condition..." value="{{query}}">
-            <button type="submit" class="btn btn-primary btn-lg">Search</button>
-        </form>
-    </div>
-</div>
-
-<div class="row g-3">
-    
-    <div class="col-md-6 col-lg-4">
-        <div class="card h-100 shadow-sm border-0">
-            <img src="httpsD://placehold.co/600x400?text=Ski+Image" class="card-img-top" alt="Ski Image">
-            <div class="card-body">
-                <h5 class="card-title">2024 Volkl Kendo 88</h5>
-                <h6 class="card-subtitle mb-2 text-muted">177cm</h6>
-                <p class="card-text">Used - Good Condition. Great all-mountain ski. Just selling because I got a new pair.</p>
-            </div>
-            <div class="card-footer bg-transparent border-0 pb-3">
-                <span class="fs-4 fw-bold text-primary">$450.00</span>
-                <a href="#" class="btn btn-secondary float-end">View Listing</a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-6 col-lg-4">
-        <div class="card h-100 shadow-sm border-0">
-            <img src="httpsD://placehold.co/600x400?text=Ski+Image" class="card-img-top" alt="Ski Image">
-            <div class="card-body">
-                <h5 class="card-title">Atomic Bent Chetler 100</h5>
-                <h6 class="card-subtitle mb-2 text-muted">182cm</h6>
-                <p class="card-text">New in wrapper!</p>
-            </div>
-            <div class="card-footer bg-transparent border-0 pb-3">
-                <span class="fs-4 fw-bold text-primary">$600.00</span>
-                <a href="#" class="btn btn-secondary float-end">View Listing</a>
-            </div>
+<div class="container mt-4">
+    <!-- Search Form -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form action="/search" method="GET" class="row g-3">
+                <div class="col-md-8">
+                    <input type="text" name="query" class="form-control form-control-lg" 
+                           placeholder="Search by brand, model, size, or service..." 
+                           value="{{query}}">
+                </div>
+                <div class="col-md-2">
+                    <select name="type" class="form-select form-select-lg">
+                        <option value="all" {{#if (eq searchType 'all')}}selected{{/if}}>All</option>
+                        <option value="products" {{#if (eq searchType 'products')}}selected{{/if}}>Products</option>
+                        <option value="services" {{#if (eq searchType 'services')}}selected{{/if}}>Services</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Search</button>
+                </div>
+            </form>
         </div>
     </div>
 
+    <!-- Results Summary -->
+    {{#if query}}
+    <div class="mb-3">
+        <h5>Search results for: <span class="text-primary">"{{query}}"</span></h5>
+        <p class="text-muted">Found {{resultCount}} result(s)</p>
+    </div>
+    {{/if}}
+
+    {{#unless hasResults}}
+    <div class="alert alert-info" role="alert">
+        {{#if query}}
+            No results found for "{{query}}". Try adjusting your search terms.
+        {{else}}
+            Enter a search term to find products and services.
+        {{/if}}
+    </div>
+    {{/unless}}
+
+    <!-- Products Section -->
+    {{#if products}}
+    {{#if products.length}}
+    <div class="mb-5">
+        <h4 class="mb-3">Products</h4>
+        <div class="row g-3">
+            {{#each products}}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="https://placehold.co/600x400?text={{brand}}+{{model}}" 
+                         class="card-img-top" 
+                         alt="{{productName}}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{brand}} {{model}}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            {{#if skiLength}}{{skiLength}}cm{{/if}}
+                            {{#if skiWidth}} | Width: {{skiWidth}}mm{{/if}}
+                        </h6>
+                        <p class="card-text">{{productDescription}}</p>
+                        <p class="text-muted mb-0">
+                            <small>
+                                <i class="bi bi-person"></i> {{seller_name}}
+                                {{#if seller_location}} | <i class="bi bi-geo-alt"></i> {{seller_location}}{{/if}}
+                            </small>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pb-3">
+                        <span class="fs-4 fw-bold text-primary">${{price}}</span>
+                        <a href="/products/{{id}}" class="btn btn-secondary float-end">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+    {{/if}}
+    {{/if}}
+
+    <!-- Services Section -->
+    {{#if services}}
+    {{#if services.length}}
+    <div class="mb-5">
+        <h4 class="mb-3">Services</h4>
+        <div class="row g-3">
+            {{#each services}}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 bg-light">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start mb-2">
+                            <div class="badge bg-info text-dark me-2">Service</div>
+                        </div>
+                        <h5 class="card-title">{{serviceName}}</h5>
+                        <p class="card-text">{{serviceDescription}}</p>
+                        <p class="text-muted mb-0">
+                            <small>
+                                <i class="bi bi-person"></i> {{provider_name}}
+                                {{#if provider_location}} | <i class="bi bi-geo-alt"></i> {{provider_location}}{{/if}}
+                            </small>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pb-3">
+                        {{#if price}}
+                        <span class="fs-4 fw-bold text-primary">${{price}}</span>
+                        {{else}}
+                        <span class="text-muted">Contact for pricing</span>
+                        {{/if}}
+                        <a href="/services/{{id}}" class="btn btn-secondary float-end">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+    {{/if}}
+    {{/if}}
 </div>
+
+<!-- Add Bootstrap Icons if not already included -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
