@@ -4,8 +4,7 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     location VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    -- Later add fields in user to add specifications for their skiis --
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -16,6 +15,7 @@ CREATE TABLE Services (
     serviceDescription TEXT,
     price DECIMAL(7,2)
 );
+
 
 CREATE TABLE Products (
     id SERIAL PRIMARY KEY,
@@ -28,6 +28,7 @@ CREATE TABLE Products (
     skiWidth DECIMAL(4,1),
     price DECIMAL(7,2)
 );
+
 
 CREATE TABLE connections (
     id SERIAL PRIMARY KEY,
