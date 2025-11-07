@@ -20,37 +20,37 @@ app.use(express.static(path.join(__dirname, 'Homepage', 'public'))); // For Imag
 
 // create `ExpressHandlebars` instance and configure the layouts and partials dir.
 const hbs = handlebars.create({
-    extname: 'hbs',
-    layoutsDir: __dirname + '/Homepage/views/layouts',
-    partialsDir: __dirname + '/Homepage/views/partials',
-    helpers: {
-        // Helper to check equality (used in search.hbs for selected option)
-        eq: function(a, b) {
-            return a === b;
-        }
+  extname: 'hbs',
+  layoutsDir: __dirname + '/Homepage/views/layouts',
+  partialsDir: __dirname + '/Homepage/views/partials',
+  helpers: {
+    // Helper to check equality (used in search.hbs for selected option)
+    eq: function (a, b) {
+      return a === b;
     }
+  }
 });
 
 // database configuration
 const dbConfig = {
-    host: 'db', // the database server
-    port: 5432, // the database port
-    database: process.env.POSTGRES_DB, // the database name
-    user: process.env.POSTGRES_USER, // the user account to connect with
-    password: process.env.POSTGRES_PASSWORD, // the password of the user account
+  host: 'db', // the database server
+  port: 5432, // the database port
+  database: process.env.POSTGRES_DB, // the database name
+  user: process.env.POSTGRES_USER, // the user account to connect with
+  password: process.env.POSTGRES_PASSWORD, // the password of the user account
 };
 
 const db = pgp(dbConfig);
 
 // test your database
 db.connect()
-    .then(obj => {
-        console.log('Database connection successful'); // you can view this message in the docker compose logs
-        obj.done(); // success, release the connection;
-    })
-    .catch(error => {
-        console.log('ERROR:', error.message || error);
-    });
+  .then(obj => {
+    console.log('Database connection successful'); // you can view this message in the docker compose logs
+    obj.done(); // success, release the connection;
+  })
+  .catch(error => {
+    console.log('ERROR:', error.message || error);
+  });
 
 // *****************************************************
 // <!-- Section 3 : App Settings -->
@@ -64,17 +64,17 @@ app.use(bodyParser.json()); // specify the usage of JSON for parsing request bod
 
 // initialize session variables
 app.use(
-    session({
-        secret: process.env.SESSION_SECRET,
-        saveUninitialized: false,
-        resave: false,
-    })
+  session({
+    secret: process.env.SESSION_SECRET,
+    saveUninitialized: false,
+    resave: false,
+  })
 );
 
 app.use(
-    bodyParser.urlencoded({
-        extended: true,
-    })
+  bodyParser.urlencoded({
+    extended: true,
+  })
 );
 
 // *****************************************************
@@ -103,15 +103,15 @@ app.get('/search', async (req, res) => {
   try {
     const searchQuery = req.query.query || '';
     const searchType = req.query.type || 'all';
-    
+
     let products = [];
     let services = [];
-    
+
     // Only search if there's a query
     if (searchQuery.trim()) {
       // Prepare the search pattern for ILIKE (case-insensitive search)
       const searchPattern = `%${searchQuery}%`;
-      
+
       // Search Products if type is 'all' or 'products'
       if (searchType === 'all' || searchType === 'products') {
         const productQuery = `
@@ -137,10 +137,10 @@ app.get('/search', async (req, res) => {
             CAST(p.skiWidth AS TEXT) ILIKE $1
           ORDER BY p.id DESC
         `;
-        
+
         products = await db.any(productQuery, [searchPattern]);
       }
-      
+
       // Search Services if type is 'all' or 'services'
       if (searchType === 'all' || searchType === 'services') {
         const serviceQuery = `
@@ -158,17 +158,17 @@ app.get('/search', async (req, res) => {
             s.serviceDescription ILIKE $1
           ORDER BY s.id DESC
         `;
-        
+
         services = await db.any(serviceQuery, [searchPattern]);
       }
     }
-    
+
     // Calculate total results
     const resultCount = products.length + services.length;
     const hasResults = resultCount > 0;
-    
+
     // Render the search page with results
-    res.render('pages/search', { 
+    res.render('pages/search', {
       title: 'Search Skis',
       query: searchQuery,
       searchType: searchType,
@@ -177,7 +177,7 @@ app.get('/search', async (req, res) => {
       resultCount: resultCount,
       hasResults: hasResults
     });
-    
+
   } catch (error) {
     console.error('Search error:', error);
     res.render('pages/search', {
@@ -193,11 +193,36 @@ app.get('/search', async (req, res) => {
   }
 });
 
+
+app.get('/welcome', (req, res) => {
+  res.json({ status: 'success', message: 'Welcome!' });
+});
+
+
+app.get('/register', (req, res) => {
+  res.render('pages/register');
+});
+
+app.post('/register', async (req, res) => {
+  try {
+    const username = req.body.username;
+    const hash = await bcrypt.hash(req.body.password, 10);
+
+    await db.none("INSERT INTO users (username, password_hash, email) VALUES ($1, $2, $3);", [username, hash]
+    );
+
+    res.redirect('/login');
+  } catch (error) {
+    console.error(error);
+    res.redirect('/register');
+  }
+});
+
 // *****************************************************
 // <!-- Section 5: Start Server -->
 // *****************************************************
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+module.exports = app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 });
