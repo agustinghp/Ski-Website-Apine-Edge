@@ -1,0 +1,10 @@
+11/07, 2:15 PM (15 minutes)
+First we talked about what we did this week.
+1. Made the database Functional
+2. Did a decent structure for all main html pages
+3. Made the search functionality working
+4. Make the register feature work, adding the user to the databse with password encrypted.
+Then, we talked about the objectives for next week.
+- Make the filters work
+- Doing tests on the login and register pages
+- Maybe setting up a profile page
