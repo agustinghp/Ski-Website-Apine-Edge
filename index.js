@@ -169,7 +169,6 @@ app.get('/search', async (req, res) => {
     
     // Render the search page with results
     res.render('pages/search', { 
-      title: 'Search Skis',
       query: searchQuery,
       searchType: searchType,
       products: products,
