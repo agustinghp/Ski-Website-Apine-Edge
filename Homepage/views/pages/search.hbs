@@ -51,14 +51,14 @@
                 <div class="card h-100 shadow-sm border-0">
                     <img src="https://placehold.co/600x400?text={{brand}}+{{model}}" 
                          class="card-img-top" 
-                         alt="{{productName}}">
+                         alt="{{productname}}">
                     <div class="card-body">
                         <h5 class="card-title">{{brand}} {{model}}</h5>
                         <h6 class="card-subtitle mb-2 text-muted">
-                            {{#if skiLength}}{{skiLength}}cm{{/if}}
-                            {{#if skiWidth}} | Width: {{skiWidth}}mm{{/if}}
+                            {{#if skilength}}{{skilength}}cm{{/if}}
+                            {{#if skiwidth}} | Width: {{skiwidth}}mm{{/if}}
                         </h6>
-                        <p class="card-text">{{productDescription}}</p>
+                        <p class="card-text">{{productdescription}}</p>
                         <p class="text-muted mb-0">
                             <small>
                                 <i class="bi bi-person"></i> {{seller_name}}
@@ -91,8 +91,8 @@
                         <div class="d-flex align-items-start mb-2">
                             <div class="badge bg-info text-dark me-2">Service</div>
                         </div>
-                        <h5 class="card-title">{{serviceName}}</h5>
-                        <p class="card-text">{{serviceDescription}}</p>
+                        <h5 class="card-title">{{servicename}}</h5>
+                        <p class="card-text">{{servicedescription}}</p>
                         <p class="text-muted mb-0">
                             <small>
                                 <i class="bi bi-person"></i> {{provider_name}}
