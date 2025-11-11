@@ -198,6 +198,10 @@ app.get('/welcome', (req, res) => {
   res.json({ status: 'success', message: 'Welcome!' });
 });
 
+app.get('/test', (req, res) => {
+  res.redirect('/login');
+});
+
 
 app.get('/register', (req, res) => {
   res.render('pages/register');
@@ -205,18 +209,52 @@ app.get('/register', (req, res) => {
 
 app.post('/register', async (req, res) => {
   try {
-    const username = req.body.username;
-    const hash = await bcrypt.hash(req.body.password, 10);
+    const { username, password, email } = req.body;
 
-    await db.none("INSERT INTO users (username, password_hash, email) VALUES ($1, $2, $3);", [username, hash]
+    // 🧩Validate input
+    if (!username || !password || !email) {
+      return res.status(400).render('pages/register', {
+        message: 'Please fill out all fields.',
+        error: true
+      });
+    }
+
+    // Hash password
+    const hash = await bcrypt.hash(password, 10);
+
+    // Attempt to insert new user
+    await db.none(
+      'INSERT INTO users (username, password_hash, email) VALUES ($1, $2, $3);',
+      [username, hash, email]
     );
 
-    res.redirect('/login');
+    // Success
+    res.status(200).render('pages/register', {
+      message: 'Registration successful! You can now log in.',
+      error: false
+    });
+
   } catch (error) {
-    console.error(error);
-    res.redirect('/register');
+    console.error('Registration error:', error);
+
+    let message = 'Something went wrong. Please try again.';
+    let status = 500;
+
+    // Detect duplicates
+    if (error.code === '23505') {
+      status = 409; // conflict
+      if (error.constraint === 'users_username_key') {
+        message = 'That username is already taken.';
+      } else if (error.constraint === 'users_email_key') {
+        message = 'That email is already registered.';
+      }
+    }
+
+    res.status(status).render('pages/register', { message, error: true });
   }
 });
+
+
 
 // *****************************************************
 // <!-- Section 5: Start Server -->
