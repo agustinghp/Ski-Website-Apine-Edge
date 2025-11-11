@@ -32,7 +32,7 @@ services:
       - '3000:3000'
     volumes:
       - ./:/home/node/app
-    command: 'npm run dev'
+    command: 'npm run testandrun'
 
 volumes:
   alpineedge_data:
