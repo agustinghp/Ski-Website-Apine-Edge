@@ -104,6 +104,7 @@ describe('Testing Redirect', () => {
     chai
       .request(server)
       .get('/test')
+      .redirects(0) // 👈 prevents Chai from following the redirect
       .end((err, res) => {
         expect(res).to.have.status(302); // redirect status
         expect(res).to.redirectTo(/^.*\/login$/); // ensure redirect target is /login
