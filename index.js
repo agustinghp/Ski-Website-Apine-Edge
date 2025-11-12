@@ -46,28 +46,29 @@ const hbs = handlebars.create({
             return str.substring(start, end).toUpperCase();
         }
     }
+  }
 });
 
 // database configuration
 const dbConfig = {
-    host: 'db', // the database server
-    port: 5432, // the database port
-    database: process.env.POSTGRES_DB, // the database name
-    user: process.env.POSTGRES_USER, // the user account to connect with
-    password: process.env.POSTGRES_PASSWORD, // the password of the user account
+  host: 'db', // the database server
+  port: 5432, // the database port
+  database: process.env.POSTGRES_DB, // the database name
+  user: process.env.POSTGRES_USER, // the user account to connect with
+  password: process.env.POSTGRES_PASSWORD, // the password of the user account
 };
 
 const db = pgp(dbConfig);
 
 // test your database
 db.connect()
-    .then(obj => {
-        console.log('Database connection successful'); // you can view this message in the docker compose logs
-        obj.done(); // success, release the connection;
-    })
-    .catch(error => {
-        console.log('ERROR:', error.message || error);
-    });
+  .then(obj => {
+    console.log('Database connection successful'); // you can view this message in the docker compose logs
+    obj.done(); // success, release the connection;
+  })
+  .catch(error => {
+    console.log('ERROR:', error.message || error);
+  });
 
 // *****************************************************
 // // *****************************************************
@@ -80,101 +81,101 @@ app.use(bodyParser.json()); // specify the usage of JSON for parsing request bod
 
 // initialize session variables
 const sessionMiddleware = session({ // <-- Define the middleware as a constant
-    secret: process.env.SESSION_SECRET,
-    saveUninitialized: false,
-    resave: false,
+  secret: process.env.SESSION_SECRET,
+  saveUninitialized: false,
+  resave: false,
 });
 
 app.use(sessionMiddleware); // <-- Use the constant here
 
 app.use(
-    bodyParser.urlencoded({
-        extended: true,
-    })
+  bodyParser.urlencoded({
+    extended: true,
+  })
 );
 
 // Authentication middleware
 // This ensures that only logged-in users can access certain pages.
 const auth = (req, res, next) => {
-    if (!req.session.userId) {
-        // Redirect to login if not authenticated
-        return res.redirect('/login');
-    }
-    next();
+  if (!req.session.userId) {
+    // Redirect to login if not authenticated
+    return res.redirect('/login');
+  }
+  next();
 };
 
 // *****************************************************
 // // *****************************************************
 
 app.get('/', (req, res) => {
-    res.render('pages/home', {
-        title: 'Welcome to Alpine Edge!',
-        userId: req.session.userId // Pass session data to navbar
-    });
+  res.render('pages/home', {
+    title: 'Welcome to Alpine Edge!',
+    userId: req.session.userId // Pass session data to navbar
+  });
 });
 
 // Render Login Page
 app.get('/login', (req, res) => {
-    res.render('pages/login', {
-        title: 'Login',
-        userId: req.session.userId
-    });
+  res.render('pages/login', {
+    title: 'Login',
+    userId: req.session.userId
+  });
 });
 
 // Render Register Page
 app.get('/register', (req, res) => {
-    res.render('pages/register', {
-        title: 'Register',
-        userId: req.session.userId
-    });
+  res.render('pages/register', {
+    title: 'Register',
+    userId: req.session.userId
+  });
 });
 
 // Handle Register Form Submission
 app.post('/register', async (req, res) => {
-    const { username, email, password } = req.body;
+  const { username, email, password } = req.body;
 
-    // Failure case 1: Missing fields
-    if (!username || !email || !password) {
-        return res.render('pages/register', {
-            title: 'Register',
-            userId: req.session.userId,
-            message: {
-                type: 'danger',
-                text: 'Username, email, and password are required.'
-            }
-        });
-    }
+  // Failure case 1: Missing fields
+  if (!username || !email || !password) {
+    return res.render('pages/register', {
+      title: 'Register',
+      userId: req.session.userId,
+      message: {
+        type: 'danger',
+        text: 'Username, email, and password are required.'
+      }
+    });
+  }
 
-    try {
-        const hash = await bcrypt.hash(password, 10);
-        await db.none(
-            'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3)',
-            [username, email, hash]
-        );
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    await db.none(
+      'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3)',
+      [username, email, hash]
+    );
 
-        // Success case!
-        // We render the register page again, but this time with a success message.
-        res.render('pages/register', {
-            title: 'Register',
-            userId: req.session.userId,
-            message: {
-                type: 'success',
-                text: 'Registration successful! You can now log in.'
-            }
-        });
+    // Success case!
+    // We render the register page again, but this time with a success message.
+    res.render('pages/register', {
+      title: 'Register',
+      userId: req.session.userId,
+      message: {
+        type: 'success',
+        text: 'Registration successful! You can now log in.'
+      }
+    });
 
-    } catch (error) {
-        // Failure case 2: Database error (e.g., duplicate user)
-        console.error('Registration error:', error);
-        res.render('pages/register', {
-            title: 'Register',
-            userId: req.session.userId,
-            message: {
-                type: 'danger',
-                text: 'Registration failed. Username or email may already be in use.'
-            }
-        });
-    }
+  } catch (error) {
+    // Failure case 2: Database error (e.g., duplicate user)
+    console.error('Registration error:', error);
+    res.render('pages/register', {
+      title: 'Register',
+      userId: req.session.userId,
+      message: {
+        type: 'danger',
+        text: 'Registration failed. Username or email may already be in use.'
+      }
+    });
+  }
 });
 
 /// Handle Login Form Submission
@@ -217,16 +218,16 @@ app.post('/login', async (req, res) => {
       // 1. Set the session
       req.session.userId = user.id;
       req.session.username = user.username;
-      
+
       // 2. Render the login page again with a success message.
       // The navbar will automatically update because we're passing the new session ID.
       return res.render('pages/login', {
-          title: 'Login',
-          userId: req.session.userId, // Pass the new ID
-          message: {
-              type: 'success',
-              text: 'Login successful! You can now visit your profile.'
-          }
+        title: 'Login',
+        userId: req.session.userId, // Pass the new ID
+        message: {
+          type: 'success',
+          text: 'Login successful! You can now visit your profile.'
+        }
       });
 
     } else {
@@ -257,26 +258,26 @@ app.post('/login', async (req, res) => {
 
 // Handle Logout
 app.get('/logout', (req, res) => {
-    req.session.destroy(err => {
-        if (err) {
-            console.log('Error destroying session:', err);
-        }
-        res.clearCookie('connect.sid');
-        res.redirect('/login');
-    });
+  req.session.destroy(err => {
+    if (err) {
+      console.log('Error destroying session:', err);
+    }
+    res.clearCookie('connect.sid');
+    res.redirect('/login');
+  });
 });
 
 
 // Render Profile Page
 app.get('/profile', auth, async (req, res) => {
-    try {
-        const currentUserId = req.session.userId;
+  try {
+    const currentUserId = req.session.userId;
 
-        // 1. Get User Info
-        const user = await db.one('SELECT id, username, email, location FROM users WHERE id = $1', [currentUserId]);
+    // 1. Get User Info
+    const user = await db.one('SELECT id, username, email, location FROM users WHERE id = $1', [currentUserId]);
 
-        // 2. Get Connections (Same query as chat page)
-        const connections = await db.any(`
+    // 2. Get Connections (Same query as chat page)
+    const connections = await db.any(`
             SELECT 
                 u.id AS user_id, 
                 u.username
@@ -292,47 +293,47 @@ app.get('/profile', auth, async (req, res) => {
                 AND u.id != $1;
         `, [currentUserId]);
 
-        // 3. Get User's Products
-        const products = await db.any('SELECT * FROM Products WHERE user_id = $1 ORDER BY id DESC', [currentUserId]);
+    // 3. Get User's Products
+    const products = await db.any('SELECT * FROM Products WHERE user_id = $1 ORDER BY id DESC', [currentUserId]);
 
-        // 4. Get User's Services
-        const services = await db.any('SELECT * FROM Services WHERE user_id = $1 ORDER BY id DESC', [currentUserId]);
+    // 4. Get User's Services
+    const services = await db.any('SELECT * FROM Services WHERE user_id = $1 ORDER BY id DESC', [currentUserId]);
 
-        // 5. Render the page
-        res.render('pages/profile', {
-            title: 'My Profile',
-            userId: currentUserId,
-            user: user,
-            connections: connections,
-            products: products,
-            services: services
-        });
+    // 5. Render the page
+    res.render('pages/profile', {
+      title: 'My Profile',
+      userId: currentUserId,
+      user: user,
+      connections: connections,
+      products: products,
+      services: services
+    });
 
-    } catch (error) {
-        console.error('Error fetching profile page:', error);
-        res.render('pages/home', {
-            title: 'Error',
-            error: 'Could not load your profile.',
-            userId: req.session.userId
-        });
-    }
+  } catch (error) {
+    console.error('Error fetching profile page:', error);
+    res.render('pages/home', {
+      title: 'Error',
+      error: 'Could not load your profile.',
+      userId: req.session.userId
+    });
+  }
 });
 
 
 // Render Search Page with Database Results
 app.get('/search', async (req, res) => {
-    try {
-        const searchQuery = req.query.query || '';
-        const searchType = req.query.type || 'all';
+  try {
+    const searchQuery = req.query.query || '';
+    const searchType = req.query.type || 'all';
 
-        let products = [];
-        let services = [];
+    let products = [];
+    let services = [];
 
-        if (searchQuery.trim()) {
-            const searchPattern = `%${searchQuery}%`;
+    if (searchQuery.trim()) {
+      const searchPattern = `%${searchQuery}%`;
 
-            if (searchType === 'all' || searchType === 'products') {
-                const productQuery = `
+      if (searchType === 'all' || searchType === 'products') {
+        const productQuery = `
                   SELECT 
                     p.id, p.productName, p.productDescription, p.brand, p.model, p.skiLength, p.skiWidth, p.price,
                     u.username as seller_name, u.location as seller_location
@@ -340,11 +341,11 @@ app.get('/search', async (req, res) => {
                   WHERE p.productName ILIKE $1 OR p.productDescription ILIKE $1 OR p.brand ILIKE $1 OR p.model ILIKE $1
                   ORDER BY p.id DESC
                 `;
-                products = await db.any(productQuery, [searchPattern]);
-            }
+        products = await db.any(productQuery, [searchPattern]);
+      }
 
-            if (searchType === 'all' || searchType === 'services') {
-                const serviceQuery = `
+      if (searchType === 'all' || searchType === 'services') {
+        const serviceQuery = `
                   SELECT 
                     s.id, s.serviceName, s.serviceDescription, s.price,
                     u.username as provider_name, u.location as provider_location
@@ -352,137 +353,157 @@ app.get('/search', async (req, res) => {
                   WHERE s.serviceName ILIKE $1 OR s.serviceDescription ILIKE $1
                   ORDER BY s.id DESC
                 `;
-                services = await db.any(serviceQuery, [searchPattern]);
-            }
-        }
-
-        // Calculate total results
-        const resultCount = products.length + services.length;
-        const hasResults = resultCount > 0;
-
-        // Render the search page with results
-        res.render('pages/search', {
-            title: 'Search Results', // Merged conflict
-            query: searchQuery,
-            searchType: searchType,
-            products: products,
-            services: services,
-            resultCount: resultCount,
-            hasResults: hasResults,
-            userId: req.session.userId // Pass session data
-        });
-
-    } catch (error) {
-        console.error('Search error:', error);
-        res.render('pages/search', {
-            title: 'Search Skis',
-            query: req.query.query || '',
-            searchType: req.query.type || 'all',
-            error: 'An error occurred while searching. Please try again.',
-            userId: req.session.userId // Pass session data
-        });
+        services = await db.any(serviceQuery, [searchPattern]);
+      }
     }
+
+    // Calculate total results
+    const resultCount = products.length + services.length;
+    const hasResults = resultCount > 0;
+
+    // Render the search page with results
+    res.render('pages/search', {
+      title: 'Search Results', // Merged conflict
+      query: searchQuery,
+      searchType: searchType,
+      products: products,
+      services: services,
+      resultCount: resultCount,
+      hasResults: hasResults,
+      userId: req.session.userId // Pass session data
+    });
+
+  } catch (error) {
+    console.error('Search error:', error);
+    res.render('pages/search', {
+      title: 'Search Skis',
+      query: req.query.query || '',
+      searchType: req.query.type || 'all',
+      error: 'An error occurred while searching. Please try again.',
+      userId: req.session.userId // Pass session data
+    });
+  }
 });
 // Render Create Listing Page
 app.get('/create-listing', auth, (req, res) => {
-    res.render('pages/create-listing', {
-        title: 'Create Listing',
-        userId: req.session.userId
-    });
+  res.render('pages/create-listing', {
+    title: 'Create Listing',
+    userId: req.session.userId
+  });
 });
 
 // Handle Product Listing Creation
 app.post('/create-listing/product', auth, async (req, res) => {
-    const { brand, model, productName, productDescription, skiLength, skiWidth, price } = req.body;
-    const userId = req.session.userId;
+  const { brand, model, productName, productDescription, skiLength, skiWidth, price } = req.body;
+  const userId = req.session.userId;
 
-    // Validation: Check required fields
-    if (!brand || !model || !productName || !price) {
-        return res.render('pages/create-listing', {
-            title: 'Create Listing',
-            userId: req.session.userId,
-            message: {
-                type: 'danger',
-                text: 'Please fill in all required fields (Brand, Model, Product Name, and Price).'
-            }
-        });
-    }
+  // Validation: Check required fields
+  if (!brand || !model || !productName || !price) {
+    return res.render('pages/create-listing', {
+      title: 'Create Listing',
+      userId,
+      listingType: 'product',      // ✅ Needed
+      formData: req.body,          // ✅ Needed
+      message: {
+        type: 'danger',
+        text: 'Please fill in all required fields (Brand, Model, Product Name, and Price).'
+      }
+    });
+  }
 
-    try {
-        // Insert product into database
-        await db.none(`
-            INSERT INTO Products (user_id, productName, productDescription, brand, model, skiLength, skiWidth, price)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        `, [userId, productName, productDescription, brand, model, skiLength || null, skiWidth || null, price]);
+  try {
+    await db.none(`
+      INSERT INTO Products (user_id, productName, productDescription, brand, model, skiLength, skiWidth, price)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `, [
+      userId,
+      productName,
+      productDescription,
+      brand,
+      model,
+      skiLength || null,
+      skiWidth || null,
+      price
+    ]);
 
-        // Success! Redirect to profile or show success message
-        res.render('pages/create-listing', {
-            title: 'Create Listing',
-            userId: req.session.userId,
-            message: {
-                type: 'success',
-                text: `Product listing "${productName}" created successfully! View it on your profile.`
-            }
-        });
+    res.render('pages/create-listing', {
+      title: 'Create Listing',
+      userId,
+      listingType: 'product',
+      message: {
+        type: 'success',
+        text: `Product listing "${productName}" created successfully!`
+      }
+    });
 
-    } catch (error) {
-        console.error('Error creating product listing:', error);
-        res.render('pages/create-listing', {
-            title: 'Create Listing',
-            userId: req.session.userId,
-            message: {
-                type: 'danger',
-                text: 'Failed to create product listing. Please try again.'
-            }
-        });
-    }
+  } catch (error) {
+    console.error('Error creating product listing:', error);
+    res.render('pages/create-listing', {
+      title: 'Create Listing',
+      userId,
+      listingType: 'product',
+      formData: req.body,
+      message: {
+        type: 'danger',
+        text: 'Failed to create product listing. Please try again.'
+      }
+    });
+  }
 });
 
 // Handle Service Listing Creation
 app.post('/create-listing/service', auth, async (req, res) => {
-    const { serviceName, serviceDescription, price } = req.body;
-    const userId = req.session.userId;
+  const { serviceName, serviceDescription, price } = req.body;
+  const userId = req.session.userId;
 
-    // Validation: Check required fields
-    if (!serviceName) {
-        return res.render('pages/create-listing', {
-            title: 'Create Listing',
-            userId: req.session.userId,
-            message: {
-                type: 'danger',
-                text: 'Please provide a service name.'
-            }
-        });
-    }
+  // Validation: Check required fields
+  if (!serviceName) {
+    return res.render('pages/create-listing', {
+      title: 'Create Listing',
+      userId,
+      listingType: 'service',    // ✅ Needed
+      formData: req.body,        // ✅ Needed
+      message: {
+        type: 'danger',
+        text: 'Please provide a service name.'
+      }
+    });
+  }
 
-    try {
-        // Insert service into database
-        await db.none(`
-            INSERT INTO Services (user_id, serviceName, serviceDescription, price)
-            VALUES ($1, $2, $3, $4)
-        `, [userId, serviceName, serviceDescription, price || null]);
+  try {
+    await db.none(`
+      INSERT INTO Services (user_id, serviceName, serviceDescription, price)
+      VALUES ($1, $2, $3, $4)
+    `, [
+      userId,
+      serviceName,
+      serviceDescription,
+      price || null
+    ]);
 
-        // Success!
-        res.render('pages/create-listing', {
-            title: 'Create Listing',
-            userId: req.session.userId,
-            message: {
-                type: 'success',
-                text: `Service listing "${serviceName}" created successfully! View it on your profile.`
-            }
-        });
+    res.render('pages/create-listing', {
+      title: 'Create Listing',
+      userId,
+      listingType: 'service',
+      message: {
+        type: 'success',
+        text: `Service listing "${serviceName}" created successfully!`
+      }
+    });
 
-    } catch (error) {
-        console.error('Error creating service listing:', error);
-        res.render('pages/create-listing', {
-            title: 'Create Listing',
-            userId: req.session.userId,
-            message: {
-                type: 'danger',
-                text: 'Failed to create service listing. Please try again.'
-            }
-        });
-    }
+  } catch (error) {
+    console.error('Error creating service listing:', error);
+    res.render('pages/create-listing', {
+      title: 'Create Listing',
+      userId,
+      listingType: 'service',
+      formData: req.body,
+      message: {
+        type: 'danger',
+        text: 'Failed to create service listing. Please try again.'
+      }
+    });
+  }
 });
 
 // Product Detail Page
@@ -603,10 +624,10 @@ app.get('/services/:id', async (req, res) => {
 
 // GET /chat - Renders the chat page
 app.get('/chat', auth, async (req, res) => {
-    try {
-        const currentUserId = req.session.userId;
+  try {
+    const currentUserId = req.session.userId;
 
-        const connections = await db.any(`
+    const connections = await db.any(`
             SELECT 
                 u.id AS user_id, 
                 u.username
@@ -622,34 +643,34 @@ app.get('/chat', auth, async (req, res) => {
                 AND u.id != $1;
         `, [currentUserId]);
 
-        res.render('pages/chat', {
-            title: 'Chat',
-            connections: connections,
-            currentUserId: currentUserId, // Pass this to the template!
-            userId: currentUserId // For navbar
-        });
+    res.render('pages/chat', {
+      title: 'Chat',
+      connections: connections,
+      currentUserId: currentUserId, // Pass this to the template!
+      userId: currentUserId // For navbar
+    });
 
-    } catch (error) {
-        console.error('Error fetching chat page:', error);
-        res.render('pages/home', {
-            title: 'Error',
-            error: 'Could not load chat.',
-            userId: req.session.userId // Pass session data
-        });
-    }
+  } catch (error) {
+    console.error('Error fetching chat page:', error);
+    res.render('pages/home', {
+      title: 'Error',
+      error: 'Could not load chat.',
+      userId: req.session.userId // Pass session data
+    });
+  }
 });
 
 // API route to get message history between two users
 app.get('/chat/history/:otherUserId', auth, async (req, res) => {
-    try {
-        const currentUserId = req.session.userId;
-        const otherUserId = parseInt(req.params.otherUserId, 10);
+  try {
+    const currentUserId = req.session.userId;
+    const otherUserId = parseInt(req.params.otherUserId, 10);
 
-        if (isNaN(otherUserId)) {
-            return res.status(400).json({ error: 'Invalid user ID.' });
-        }
+    if (isNaN(otherUserId)) {
+      return res.status(400).json({ error: 'Invalid user ID.' });
+    }
 
-        const history = await db.any(`
+    const history = await db.any(`
             SELECT * FROM messages
             WHERE 
                 (sender_id = $1 AND receiver_id = $2) 
@@ -657,12 +678,12 @@ app.get('/chat/history/:otherUserId', auth, async (req, res) => {
             ORDER BY created_at ASC;
         `, [currentUserId, otherUserId]);
 
-        res.json(history); // Send the history back as JSON
+    res.json(history); // Send the history back as JSON
 
-    } catch (error) {
-        console.error('Error fetching chat history:', error);
-        res.status(500).json({ error: 'Could not fetch history.' });
-    }
+  } catch (error) {
+    console.error('Error fetching chat history:', error);
+    res.status(500).json({ error: 'Could not fetch history.' });
+  }
 });
 
 
@@ -674,45 +695,45 @@ const wrap = middleware => (socket, next) => middleware(socket.request, {}, next
 io.use(wrap(sessionMiddleware));
 
 io.on('connection', (socket) => {
-    console.log(`Socket connected: ${socket.id}`);
+  console.log(`Socket connected: ${socket.id}`);
 
-    const currentUserId = socket.request.session.userId;
+  const currentUserId = socket.request.session.userId;
 
-    if (!currentUserId) {
-        console.log(`Socket ${socket.id} disconnected (no session).`);
-        return socket.disconnect(true);
-    }
+  if (!currentUserId) {
+    console.log(`Socket ${socket.id} disconnected (no session).`);
+    return socket.disconnect(true);
+  }
 
-    socket.join(currentUserId.toString());
+  socket.join(currentUserId.toString());
 
-    socket.on('joinRoom', ({ otherUserId }) => {
-        const roomName = [currentUserId, otherUserId].sort().join('-');
-        socket.join(roomName);
-        console.log(`User ${currentUserId} (socket ${socket.id}) joined room: ${roomName}`);
-    });
+  socket.on('joinRoom', ({ otherUserId }) => {
+    const roomName = [currentUserId, otherUserId].sort().join('-');
+    socket.join(roomName);
+    console.log(`User ${currentUserId} (socket ${socket.id}) joined room: ${roomName}`);
+  });
 
-    socket.on('sendMessage', async ({ message, toUserId }) => {
-        try {
-            await db.none(`
+  socket.on('sendMessage', async ({ message, toUserId }) => {
+    try {
+      await db.none(`
                 INSERT INTO messages (sender_id, receiver_id, message_text)
                 VALUES ($1, $2, $3)
             `, [currentUserId, toUserId, message]);
 
-            const roomName = [currentUserId, toUserId].sort().join('-');
+      const roomName = [currentUserId, toUserId].sort().join('-');
 
-            io.to(roomName).emit('receiveMessage', {
-                message: message,
-                fromUserId: currentUserId
-            });
+      io.to(roomName).emit('receiveMessage', {
+        message: message,
+        fromUserId: currentUserId
+      });
 
-        } catch (error) {
-            console.error('Error saving or sending message:', error);
-        }
-    });
+    } catch (error) {
+      console.error('Error saving or sending message:', error);
+    }
+  });
 
-    socket.on('disconnect', () => {
-        console.log(`Socket disconnected: ${socket.id} (User: ${currentUserId})`);
-    });
+  socket.on('disconnect', () => {
+    console.log(`Socket disconnected: ${socket.id} (User: ${currentUserId})`);
+  });
 });
 // *****************************************************
 // <!-- Section 6: Start Server -->
