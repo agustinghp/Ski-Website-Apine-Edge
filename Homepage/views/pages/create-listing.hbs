@@ -33,6 +33,7 @@
                     </div>
 
                     <!-- PRODUCT FORM -->
+                    <div id="clientMessageContainer"></div>
                     <form id="productForm" action="/create-listing/product" method="POST" class="listing-form">
                         <h5 class="text-primary mb-3"><i class="bi bi-box-seam"></i> Product Details</h5>
 
@@ -108,6 +109,7 @@
                     </form>
 
                     <!-- SERVICE FORM -->
+                    <div id="clientMessageContainer"></div>
                     <form id="serviceForm" action="/create-listing/service" method="POST" class="listing-form"
                         style="display: none;">
                         <h5 class="text-primary mb-3"><i class="bi bi-tools"></i> Service Details</h5>
@@ -173,53 +175,11 @@
 <!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
+<!-- Pass server listingType into JS -->
 <script>
-    // Toggle between Product and Service forms (your existing code)
-    const productRadio = document.getElementById('productRadio');
-    const serviceRadio = document.getElementById('serviceRadio');
-    const productForm = document.getElementById('productForm');
-    const serviceForm = document.getElementById('serviceForm');
-
-    // PRELOAD THE CORRECT FORM (Step 3) — NOW IT WORKS
-    const listingType = "{{listingType}}";
-
-    if (listingType === "service") {
-        serviceRadio.checked = true;
-        serviceForm.style.display = 'block';
-        productForm.style.display = 'none';
-    } else {
-        productRadio.checked = true;
-        productForm.style.display = 'block';
-        serviceForm.style.display = 'none';
-    }
-
-    productRadio.addEventListener('change', function () {
-        if (this.checked) {
-            productForm.style.display = 'block';
-            serviceForm.style.display = 'none';
-
-            serviceForm.querySelectorAll('[required]').forEach(field => {
-                field.removeAttribute('required');
-            });
-
-            productForm.querySelectorAll(
-                'input[name="brand"], input[name="model"], input[name="productName"], input[name="price"]'
-            ).forEach(field => {
-                field.setAttribute('required', 'required');
-            });
-        }
-    });
-
-    serviceRadio.addEventListener('change', function () {
-        if (this.checked) {
-            serviceForm.style.display = 'block';
-            productForm.style.display = 'none';
-
-            productForm.querySelectorAll('[required]').forEach(field => {
-                field.removeAttribute('required');
-            });
-
-            serviceForm.querySelector('input[name="serviceName"]').setAttribute('required', 'required');
-        }
-    });
+    window.listingTypeFromServer = "{{listingType}}";
 </script>
+
+<!-- Load all create-listing JavaScript -->
+<script src="/js/createListing.js"></script>
+
