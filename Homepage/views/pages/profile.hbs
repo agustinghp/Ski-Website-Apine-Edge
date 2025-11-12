@@ -1,0 +1,85 @@
+<div class="row g-4">
+    <!-- Column 1: Profile & Connections -->
+    <div class="col-lg-4">
+        <!-- Profile Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body text-center">
+                
+                <h3 class="card-title mt-3">{{user.username}}</h3>
+                <p class="text-muted">{{user.email}}</p>
+                <p class="text-muted">{{user.location}}</p>
+            </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-transparent border-0 pt-3">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body d-grid gap-2">
+                <!-- THIS IS THE LINK TO THE CHAT PAGE -->
+                <a href="/chat" class="btn btn-primary btn-lg">
+                    Go to My Chats
+                </a>
+                <a href="/products/new" class="btn btn-outline-secondary">List a New Product</a>
+                <a href="/services/new" class="btn btn-outline-secondary">List a New Service</a>
+            </div>
+        </div>
+
+        <!-- Connections Card -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-transparent border-0 pt-3">
+                <h5 class="mb-0">My Connections</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                {{#each connections}}
+                    <a href="/users/{{this.user_id}}" class="list-group-item list-group-item-action">{{this.username}}</a>
+                {{else}}
+                    <p class="p-3 text-muted">No connections yet. Find users via listings!</p>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+
+    <!-- Column 2: Listings -->
+    <div class="col-lg-8">
+        <!-- My Product Listings -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-transparent border-0 pt-3">
+                <h5 class="mb-0">My Product Listings</h5>
+            </div>
+            <div class="card-body">
+                {{#each products}}
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                        <div>
+                            <h6 class="mb-0">{{this.productName}}</h6>
+                            <p class="text-muted mb-0">{{this.brand}} - {{this.model}}</p>
+                        </div>
+                        <span class="text-primary fw-bold">${{this.price}}</span>
+                    </div>
+                {{else}}
+                    <p class="text-muted">You have not listed any products yet.</p>
+                {{/each}}
+            </div>
+        </div>
+
+        <!-- My Service Listings -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-transparent border-0 pt-3">
+                <h5 class="mb-0">My Service Listings</h5>
+            </div>
+            <div class="card-body">
+                {{#each services}}
+                     <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                        <div>
+                            <h6 class="mb-0">{{this.serviceName}}</h6>
+                        </div>
+                        <span class="text-primary fw-bold">${{this.price}}</span>
+                    </div>
+                {{else}}
+                    <p class="text-muted">You have not listed any services yet.</p>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+</div>

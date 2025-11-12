@@ -100,7 +100,11 @@ To run the program, start the containers with the following command:
 ```bash
 docker compose up --build
 ```
-
+"NOTE FROM CHARLIE"
+Ive had to use this- 
+docker compose run --rm -u root web sh -lc "npm install"
+before
+docker compose up 
 Then open your browser and visit:  
 👉 [http://localhost:3000](http://localhost:3000)
 

@@ -17,7 +17,7 @@ services:
   web:
     image: node:lts
     container_name: alpineedge_web
-    user: 'node'
+    user: 'root'
     working_dir: /home/node/app
     env_file: .env
     environment:
@@ -39,3 +39,4 @@ services:
 
 volumes:
   alpineedge_data:
+  app_node_modules: {}

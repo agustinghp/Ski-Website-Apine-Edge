@@ -3,31 +3,27 @@
         <div class="card shadow-sm border-0">
             <div class="card-body p-4">
 
-                {{> message}}
+                {{#if error}}
+                    <div class="alert alert-danger" role="alert">
+                        {{error}}
+                    </div>
+                {{/if}}
 
                 <form action="/register" method="POST">
+                    
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
                         <input type="text" class="form-control form-control-lg" id="username" name="username" required>
                     </div>
-
-<<<<<<< HEAD
+                    
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
                         <input type="email" class="form-control form-control-lg" id="email" name="email" required>
                     </div>
-=======
->>>>>>> 0c04d3244a7d16dde2adb6f8d50f2703943b9995
+                    
                     <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control form-control-lg" id="password" name="password"
-                            required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control form-control-lg" id="email" name="email"
-                            required>
+                        <label for="password" class.form-label">Password</label>
+                        <input type="password" class="form-control form-control-lg" id="password" name="password" required>
                     </div>
 
                     <div class="d-grid">

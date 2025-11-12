@@ -1,0 +1,222 @@
+<style>
+    /* Page-specific styles for the chat app */
+    .chat-container {
+        display: flex;
+        height: 75vh;
+        /* Use vh (viewport height) to make it fill the screen */
+    }
+
+    .chat-sidebar {
+        flex: 0 0 300px;
+        /* Fixed width sidebar */
+        background-color: #f8f9fa;
+        border-right: 1px solid #dee2e6;
+        padding: 0;
+    }
+
+    .chat-main {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-messages {
+        flex-grow: 1;
+        padding: 1.5rem;
+        overflow-y: auto;
+        /* Scrollable message area */
+        background-color: #ffffff;
+    }
+
+    .chat-form-container {
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+    }
+
+    /* Message bubbles */
+    .message-bubble {
+        padding: 0.75rem 1rem;
+        border-radius: 1rem;
+        margin-bottom: 0.5rem;
+        max-width: 70%;
+        word-wrap: break-word;
+    }
+
+    .message-bubble.sent {
+        background-color: var(--bs-primary);
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 0.25rem;
+    }
+
+    .message-bubble.received {
+        background-color: #e9ecef;
+        color: #333;
+        margin-right: auto;
+        border-bottom-left-radius: 0.25rem;
+    }
+
+    /* Connection list styling */
+    .list-group-item-action {
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .list-group-item-action.active {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+    }
+</style>
+
+<script>
+    const currentUserId = {{currentUserId}};
+</script>
+
+<div class="card shadow-sm border-0">
+    <div classs="card-body p-0">
+        <div class="chat-container">
+
+            <div class="chat-sidebar">
+                <div class="p-3 border-bottom">
+                    <h5 class="mb-0">Connections</h5>
+                </div>
+                <div id="connection-list" class="list-group list-group-flush">
+                    {{#if connections}}
+                        {{#each connections}}
+                            <a class="list-group-item list-group-item-action" data-user-id="{{this.user_id}}" data-username="{{this.username}}">
+                                {{this.username}}
+                            </a>
+                        {{/each}}
+                    {{else}}
+                        <p classclass="p-3 text-muted">No connections found. Add connections to chat.</p>
+                    {{/if}}
+                </div>
+            </div>
+
+            <div class="chat-main">
+                <div class="chat-messages" id="chat-messages">
+                    <div id="chat-window-placeholder" class="text-center text-muted" style="margin-top: 20%;">
+                        <p class="fs-4"></p>
+                        <p class="fs-4">Select a connection to start chatting</p>
+                    </div>
+                    </div>
+
+                <div class="chat-form-container">
+                    <form id="chat-form" class="d-flex gap-2">
+                        <input type="text" id="message-input" class="form-control form-control-lg" placeholder="Type a message..."
+                            disabled>
+                        <button type="submit" class="btn btn-primary btn-lg" disabled>Send</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- 1. Connect to Socket.io ---
+        const socket = io();
+
+        // --- 2. Get DOM elements ---
+        const connectionList = document.getElementById('connection-list');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = chatForm.querySelector('button');
+        const placeholder = document.getElementById('chat-window-placeholder');
+
+        let activeChatUserId = null; // Stores the ID of the user we are currently chatting with
+
+        // --- 3. Handle clicking on a connection ---
+        connectionList.addEventListener('click', async (e) => {
+            if (e.target && e.target.matches('.list-group-item-action')) {
+                // Remove placeholder
+                if (placeholder) {
+                    placeholder.style.display = 'none';
+                }
+
+                // A. Update UI
+                // Remove 'active' from all other items
+                document.querySelectorAll('.list-group-item-action').forEach(item => {
+                    item.classList.remove('active');
+                });
+                // Add 'active' to the clicked item
+                e.target.classList.add('active');
+
+                // B. Set active chat user
+                activeChatUserId = parseInt(e.target.getAttribute('data-user-id'), 10);
+                
+                // Clear old messages and enable form
+                chatMessages.innerHTML = '';
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+                messageInput.placeholder = `Message ${e.target.getAttribute('data-username')}`;
+
+                // C. Fetch message history from the server
+                try {
+                    const response = await fetch(`/chat/history/${activeChatUserId}`);
+                    if (!response.ok) throw new Error('Failed to fetch history');
+                    const history = await response.json();
+                    
+                    history.forEach(msg => {
+                        appendMessage(msg.message_text, msg.sender_id === currentUserId ? 'sent' : 'received');
+                    });
+                    
+                    // Scroll to bottom
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                } catch (err) {
+                    console.error('Error fetching history:', err);
+                    chatMessages.innerHTML = '<p class="text-danger">Could not load chat history.</p>';
+                }
+
+
+                // D. Join the correct "room" on the server
+                socket.emit('joinRoom', { otherUserId: activeChatUserId });
+            }
+        });
+
+        // --- 4. Handle sending a message ---
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Prevent page reload
+            const messageText = messageInput.value.trim();
+
+            if (messageText && activeChatUserId) {
+                // A. Emit the message to the server
+                socket.emit('sendMessage', {
+                    message: messageText,
+                    toUserId: activeChatUserId
+                });
+
+                // B. Append the *sent* message to our own UI
+                appendMessage(messageText, 'sent');
+                
+                // C. Clear input
+                messageInput.value = '';
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+            }
+        });
+
+        // --- 5. Handle *receiving* a message ---
+        socket.on('receiveMessage', (data) => {
+            // Only append if it's from the user we are actively chatting with
+            if (data.fromUserId === activeChatUserId) {
+                appendMessage(data.message, 'received');
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+            }
+        });
+
+        // --- Helper function to add message bubbles to the UI ---
+        function appendMessage(text, type) {
+            const bubble = document.createElement('div');
+            bubble.classList.add('message-bubble', type);
+            bubble.textContent = text;
+            chatMessages.appendChild(bubble);
+        }
+    });
+</script>

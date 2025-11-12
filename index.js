@@ -1,6 +1,5 @@
 // *****************************************************
-// <!-- Section 1 : Import Dependencies -->
-// *****************************************************
+// // *****************************************************
 
 const express = require('express'); // To build an application server or API
 const app = express();
@@ -23,46 +22,44 @@ const io = new Server(server); // Attach socket.io to the HTTP server
 app.use(express.static(path.join(__dirname, 'Homepage', 'public'))); // For Images
 
 // *****************************************************
-// <!-- Section 2 : Connect to DB -->
-// *****************************************************
+// // *****************************************************
 
 // create `ExpressHandlebars` instance and configure the layouts and partials dir.
 const hbs = handlebars.create({
-  extname: 'hbs',
-  layoutsDir: __dirname + '/Homepage/views/layouts',
-  partialsDir: __dirname + '/Homepage/views/partials',
-  helpers: {
-    // Helper to check equality (used in search.hbs for selected option)
-    eq: function (a, b) {
-      return a === b;
+    extname: 'hbs',
+    layoutsDir: __dirname + '/Homepage/views/layouts',
+    partialsDir: __dirname + '/Homepage/views/partials',
+    helpers: {
+        // Helper to check equality (used in search.hbs for selected option)
+        eq: function (a, b) {
+            return a === b;
+        }
     }
-  }
 });
 
 // database configuration
 const dbConfig = {
-  host: 'db', // the database server
-  port: 5432, // the database port
-  database: process.env.POSTGRES_DB, // the database name
-  user: process.env.POSTGRES_USER, // the user account to connect with
-  password: process.env.POSTGRES_PASSWORD, // the password of the user account
+    host: 'db', // the database server
+    port: 5432, // the database port
+    database: process.env.POSTGRES_DB, // the database name
+    user: process.env.POSTGRES_USER, // the user account to connect with
+    password: process.env.POSTGRES_PASSWORD, // the password of the user account
 };
 
 const db = pgp(dbConfig);
 
 // test your database
 db.connect()
-  .then(obj => {
-    console.log('Database connection successful'); // you can view this message in the docker compose logs
-    obj.done(); // success, release the connection;
-  })
-  .catch(error => {
-    console.log('ERROR:', error.message || error);
-  });
+    .then(obj => {
+        console.log('Database connection successful'); // you can view this message in the docker compose logs
+        obj.done(); // success, release the connection;
+    })
+    .catch(error => {
+        console.log('ERROR:', error.message || error);
+    });
 
 // *****************************************************
-// <!-- Section 3 : App Settings -->
-// *****************************************************
+// // *****************************************************
 
 // Register `hbs` as our view engine using its bound `engine()` function.
 app.engine('hbs', hbs.engine);
@@ -80,46 +77,45 @@ const sessionMiddleware = session({ // <-- Define the middleware as a constant
 app.use(sessionMiddleware); // <-- Use the constant here
 
 app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
+    bodyParser.urlencoded({
+        extended: true,
+    })
 );
 
 // Authentication middleware
 // This ensures that only logged-in users can access certain pages.
 const auth = (req, res, next) => {
-  if (!req.session.userId) {
-    // Redirect to login if not authenticated
-    return res.redirect('/login'); 
-  }
-  next();
+    if (!req.session.userId) {
+        // Redirect to login if not authenticated
+        return res.redirect('/login');
+    }
+    next();
 };
 
 // *****************************************************
-// <!-- Section 4: Routes -->
-// *****************************************************
+// // *****************************************************
 
 app.get('/', (req, res) => {
-  res.render('pages/home', { 
-    title: 'Welcome to Alpine Edge!',
-    userId: req.session.userId // Pass session data to navbar
-  });
+    res.render('pages/home', {
+        title: 'Welcome to Alpine Edge!',
+        userId: req.session.userId // Pass session data to navbar
+    });
 });
 
 // Render Login Page
 app.get('/login', (req, res) => {
-  res.render('pages/login', { 
-    title: 'Login',
-    userId: req.session.userId 
-  });
+    res.render('pages/login', {
+        title: 'Login',
+        userId: req.session.userId
+    });
 });
 
 // Render Register Page
 app.get('/register', (req, res) => {
-  res.render('pages/register', { 
-    title: 'Register',
-    userId: req.session.userId 
-  });
+    res.render('pages/register', {
+        title: 'Register',
+        userId: req.session.userId
+    });
 });
 
 // Handle Register Form Submission
@@ -127,9 +123,9 @@ app.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
 
     if (!username || !email || !password) {
-        return res.render('pages/register', { 
-            title: 'Register', 
-            error: 'Username, email, and password are required.' 
+        return res.render('pages/register', {
+            title: 'Register',
+            error: 'Username, email, and password are required.'
         });
     }
 
@@ -172,10 +168,7 @@ app.post('/login', async (req, res) => {
             req.session.userId = user.id;
             req.session.username = user.username;
             req.session.save(() => {
-                // *******************************************
-                // <!-- CHANGE 1: REDIRECT TO PROFILE -->
-                // *******************************************
-                res.redirect('/profile'); // <-- WAS '/'
+                res.redirect('/profile'); // Redirect to profile
             });
         } else {
             return res.render('pages/login', { title: 'Login', error: 'Incorrect username or password.' });
@@ -193,24 +186,21 @@ app.post('/login', async (req, res) => {
 
 // Handle Logout
 app.get('/logout', (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      console.log('Error destroying session:', err);
-    }
-    res.clearCookie('connect.sid'); 
-    res.redirect('/login');
-  });
+    req.session.destroy(err => {
+        if (err) {
+            console.log('Error destroying session:', err);
+        }
+        res.clearCookie('connect.sid');
+        res.redirect('/login');
+    });
 });
 
 
-// *******************************************
-// <!-- CHANGE 2: ADD NEW PROFILE ROUTE -->
-// *******************************************
 // Render Profile Page
 app.get('/profile', auth, async (req, res) => {
     try {
         const currentUserId = req.session.userId;
-        
+
         // 1. Get User Info
         const user = await db.one('SELECT id, username, email, location FROM users WHERE id = $1', [currentUserId]);
 
@@ -236,7 +226,7 @@ app.get('/profile', auth, async (req, res) => {
 
         // 4. Get User's Services
         const services = await db.any('SELECT * FROM Services WHERE user_id = $1 ORDER BY id DESC', [currentUserId]);
-        
+
         // 5. Render the page
         res.render('pages/profile', {
             title: 'My Profile',
@@ -249,9 +239,9 @@ app.get('/profile', auth, async (req, res) => {
 
     } catch (error) {
         console.error('Error fetching profile page:', error);
-        res.render('pages/home', { 
-            title: 'Error', 
-            error: 'Could not load your profile.', 
+        res.render('pages/home', {
+            title: 'Error',
+            error: 'Could not load your profile.',
             userId: req.session.userId
         });
     }
@@ -260,79 +250,75 @@ app.get('/profile', auth, async (req, res) => {
 
 // Render Search Page with Database Results
 app.get('/search', async (req, res) => {
-  try {
-    const searchQuery = req.query.query || '';
-    const searchType = req.query.type || 'all';
+    try {
+        const searchQuery = req.query.query || '';
+        const searchType = req.query.type || 'all';
 
-    let products = [];
-    let services = [];
-    
-    if (searchQuery.trim()) {
-      const searchPattern = `%${searchQuery}%`;
-      
-      if (searchType === 'all' || searchType === 'products') {
-        const productQuery = `
-          SELECT 
-            p.id, p.productName, p.productDescription, p.brand, p.model, p.skiLength, p.skiWidth, p.price,
-            u.username as seller_name, u.location as seller_location
-          FROM Products p JOIN users u ON p.user_id = u.id
-          WHERE p.productName ILIKE $1 OR p.productDescription ILIKE $1 OR p.brand ILIKE $1 OR p.model ILIKE $1
-          ORDER BY p.id DESC
-        `;
-        products = await db.any(productQuery, [searchPattern]);
-      }
-      
-      if (searchType === 'all' || searchType === 'services') {
-        const serviceQuery = `
-          SELECT 
-            s.id, s.serviceName, s.serviceDescription, s.price,
-            u.username as provider_name, u.location as provider_location
-          FROM Services s JOIN users u ON s.user_id = u.id
-          WHERE s.serviceName ILIKE $1 OR s.serviceDescription ILIKE $1
-          ORDER BY s.id DESC
-        `;
+        let products = [];
+        let services = [];
 
+        if (searchQuery.trim()) {
+            const searchPattern = `%${searchQuery}%`;
 
-        services = await db.any(serviceQuery, [searchPattern]);
-      }
+            if (searchType === 'all' || searchType === 'products') {
+                const productQuery = `
+                  SELECT 
+                    p.id, p.productName, p.productDescription, p.brand, p.model, p.skiLength, p.skiWidth, p.price,
+                    u.username as seller_name, u.location as seller_location
+                  FROM Products p JOIN users u ON p.user_id = u.id
+                  WHERE p.productName ILIKE $1 OR p.productDescription ILIKE $1 OR p.brand ILIKE $1 OR p.model ILIKE $1
+                  ORDER BY p.id DESC
+                `;
+                products = await db.any(productQuery, [searchPattern]);
+            }
+
+            if (searchType === 'all' || searchType === 'services') {
+                const serviceQuery = `
+                  SELECT 
+                    s.id, s.serviceName, s.serviceDescription, s.price,
+                    u.username as provider_name, u.location as provider_location
+                  FROM Services s JOIN users u ON s.user_id = u.id
+                  WHERE s.serviceName ILIKE $1 OR s.serviceDescription ILIKE $1
+                  ORDER BY s.id DESC
+                `;
+                services = await db.any(serviceQuery, [searchPattern]);
+            }
+        }
+
+        // Calculate total results
+        const resultCount = products.length + services.length;
+        const hasResults = resultCount > 0;
+
+        // Render the search page with results
+        res.render('pages/search', {
+            title: 'Search Results', // Merged conflict
+            query: searchQuery,
+            searchType: searchType,
+            products: products,
+            services: services,
+            resultCount: resultCount,
+            hasResults: hasResults,
+            userId: req.session.userId // Pass session data
+        });
+
+    } catch (error) {
+        console.error('Search error:', error);
+        res.render('pages/search', {
+            title: 'Search Skis',
+            query: req.query.query || '',
+            searchType: req.query.type || 'all',
+            error: 'An error occurred while searching. Please try again.',
+            userId: req.session.userId // Pass session data
+        });
     }
-
-    // Calculate total results
-    const resultCount = products.length + services.length;
-    const hasResults = resultCount > 0;
-
-    // Render the search page with results
-    res.render('pages/search', {
-      title: 'Search Skis',
->>>>>>> 0c04d3244a7d16dde2adb6f8d50f2703943b9995
-      query: searchQuery,
-      searchType: searchType,
-      products: products,
-      services: services,
-      resultCount: resultCount,
-      hasResults: hasResults,
-      userId: req.session.userId // Pass session data
-    });
-
-  } catch (error) {
-    console.error('Search error:', error);
-    res.render('pages/search', {
-      title: 'Search Skis',
-      query: req.query.query || '',
-      searchType: req.query.type || 'all',
-      error: 'An error occurred while searching. Please try again.',
-      userId: req.session.userId // Pass session data
-    });
-  }
 });
 
 
-<<<<<<< HEAD
 // GET /chat - Renders the chat page
 app.get('/chat', auth, async (req, res) => {
     try {
         const currentUserId = req.session.userId;
-        
+
         const connections = await db.any(`
             SELECT 
                 u.id AS user_id, 
@@ -358,9 +344,9 @@ app.get('/chat', auth, async (req, res) => {
 
     } catch (error) {
         console.error('Error fetching chat page:', error);
-        res.render('pages/home', { 
-            title: 'Error', 
-            error: 'Could not load chat.', 
+        res.render('pages/home', {
+            title: 'Error',
+            error: 'Could not load chat.',
             userId: req.session.userId // Pass session data
         });
     }
@@ -383,7 +369,7 @@ app.get('/chat/history/:otherUserId', auth, async (req, res) => {
                 OR (sender_id = $2 AND receiver_id = $1)
             ORDER BY created_at ASC;
         `, [currentUserId, otherUserId]);
-        
+
         res.json(history); // Send the history back as JSON
 
     } catch (error) {
@@ -394,8 +380,7 @@ app.get('/chat/history/:otherUserId', auth, async (req, res) => {
 
 
 // *****************************************************
-// <!-- Section 5: Socket.io Logic -->
-// *****************************************************
+// // *****************************************************
 
 // Allow socket.io to access Express sessions
 const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
@@ -410,9 +395,9 @@ io.on('connection', (socket) => {
         console.log(`Socket ${socket.id} disconnected (no session).`);
         return socket.disconnect(true);
     }
-    
+
     socket.join(currentUserId.toString());
-    
+
     socket.on('joinRoom', ({ otherUserId }) => {
         const roomName = [currentUserId, otherUserId].sort().join('-');
         socket.join(roomName);
@@ -427,7 +412,7 @@ io.on('connection', (socket) => {
             `, [currentUserId, toUserId, message]);
 
             const roomName = [currentUserId, toUserId].sort().join('-');
-            
+
             io.to(roomName).emit('receiveMessage', {
                 message: message,
                 fromUserId: currentUserId
@@ -443,11 +428,11 @@ io.on('connection', (socket) => {
     });
 });
 // *****************************************************
-// <!-- Section 6: Start Server -->
-// *****************************************************
+// // *****************************************************
 
 const PORT = process.env.PORT || 3000;
 
-module.exports = app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+// CRITICAL FIX: Use server.listen, not app.listen
+server.listen(PORT, () => {
+    console.log(`✅ Server running on http://localhost:${PORT}`);
 });
