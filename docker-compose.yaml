@@ -32,7 +32,10 @@ services:
       - '3000:3000'
     volumes:
       - ./:/home/node/app
-    command: 'npm run dev'
+    # The following is to run with the tests
+    command: 'npm run testandrun'
+    # The following is to run without the test
+    # command: 'npm start'
 
 volumes:
   alpineedge_data:

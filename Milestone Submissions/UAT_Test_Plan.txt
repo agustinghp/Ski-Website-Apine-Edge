@@ -1,0 +1,114 @@
+
+--------------------------------------------------
+Feature 1: User Account Creation and Login
+--------------------------------------------------
+Objective:
+Verify that a user can create a new account and successfully log in.
+
+Test Data:
+username = snowrider123
+email = snowrider123@example.com
+password = 12345678
+
+User Activity:
+1. Navigate to /register
+2. Fill out the registration form and click “Create Account”
+3. Navigate to /login
+4. Enter the same credentials and click “Login”
+
+Expected Result:
+- After registration, a message appears: “Registration successful! You can now log in.”
+- After login, the user is redirected to the homepage or dashboard.
+- The new user record exists in the "users" table.
+
+Environment:
+localhost (Docker Compose)
+
+Tester:
+Agustin G.
+
+Actual Result:
+(To be filled after testing)
+
+--------------------------------------------------
+Feature 2: Posting a Product (Skis)
+--------------------------------------------------
+Objective:
+Verify that a logged-in user can post a new ski product listing.
+
+Test Data:
+Product Name = “Atomic Bent Chetler 100”
+Description = “All-mountain skis in great condition.”
+Brand = “Atomic”
+Model = “Bent Chetler 100”
+Length = 178 cm
+Price = 400
+
+User Activity:
+1. Login to Alpine Edge.
+2. Navigate to “Post a Product”.
+3. Fill in all fields for the ski listing and click “Submit”.
+4. Return to the marketplace page.
+
+Expected Result:
+- The new ski listing appears on the marketplace page.
+- The product information is saved in the “products” table.
+- The listing displays the username of the poster.
+
+Environment:
+localhost (Docker Compose)
+
+Tester:
+Team Member
+
+Actual Result:
+(To be filled after testing)
+
+--------------------------------------------------
+Feature 3: User Chat Functionality
+--------------------------------------------------
+Objective:
+Verify that a user can chat with another user once they have connected.
+
+Test Data:
+User A = snowrider123
+User B = mountainlover
+Message Example = “Hey, is this still available?”
+
+User Activity:
+1. User A logs in and finds User B’s product post.
+2. User A clicks “Message Seller”.
+3. A chat window opens between both users.
+4. User A sends a message to User B.
+5. User B replies from their account.
+
+Expected Result:
+- Messages sent by User A appear instantly in the chat window.
+- User B can see the message and reply.
+- The chat history is stored in the database (e.g., “messages” table).
+- No connection or rendering errors occur.
+
+Environment:
+localhost (Docker Compose)
+
+Tester:
+Team Member
+
+Actual Result:
+(To be filled after testing)
+
+--------------------------------------------------
+Risks
+--------------------------------------------------
+Organizational Risks:
+- Limited time for coordinated testing.
+- Lack of available testers or incomplete documentation.
+
+Technical Risks:
+- Miscommunication between routes and front-end pages.
+- Chat feature may fail if WebSocket or message storage is not fully tested.
+- Limited sample data for realistic posting scenarios.
+
+Business Risks:
+- Potential delay in UAT execution.
+- External resource or budget limitations.

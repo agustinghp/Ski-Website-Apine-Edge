@@ -28,37 +28,37 @@ app.use(express.static(path.join(__dirname, 'Homepage', 'public'))); // For Imag
 
 // create `ExpressHandlebars` instance and configure the layouts and partials dir.
 const hbs = handlebars.create({
-    extname: 'hbs',
-    layoutsDir: __dirname + '/Homepage/views/layouts',
-    partialsDir: __dirname + '/Homepage/views/partials',
-    helpers: {
-        // Helper to check equality (used in search.hbs for selected option)
-        eq: function(a, b) {
-            return a === b;
-        }
+  extname: 'hbs',
+  layoutsDir: __dirname + '/Homepage/views/layouts',
+  partialsDir: __dirname + '/Homepage/views/partials',
+  helpers: {
+    // Helper to check equality (used in search.hbs for selected option)
+    eq: function (a, b) {
+      return a === b;
     }
+  }
 });
 
 // database configuration
 const dbConfig = {
-    host: 'db', // the database server
-    port: 5432, // the database port
-    database: process.env.POSTGRES_DB, // the database name
-    user: process.env.POSTGRES_USER, // the user account to connect with
-    password: process.env.POSTGRES_PASSWORD, // the password of the user account
+  host: 'db', // the database server
+  port: 5432, // the database port
+  database: process.env.POSTGRES_DB, // the database name
+  user: process.env.POSTGRES_USER, // the user account to connect with
+  password: process.env.POSTGRES_PASSWORD, // the password of the user account
 };
 
 const db = pgp(dbConfig);
 
 // test your database
 db.connect()
-    .then(obj => {
-        console.log('Database connection successful'); // you can view this message in the docker compose logs
-        obj.done(); // success, release the connection;
-    })
-    .catch(error => {
-        console.log('ERROR:', error.message || error);
-    });
+  .then(obj => {
+    console.log('Database connection successful'); // you can view this message in the docker compose logs
+    obj.done(); // success, release the connection;
+  })
+  .catch(error => {
+    console.log('ERROR:', error.message || error);
+  });
 
 // *****************************************************
 // <!-- Section 3 : App Settings -->
@@ -71,6 +71,7 @@ app.set('views', path.join(__dirname, 'Homepage', 'views'));
 app.use(bodyParser.json()); // specify the usage of JSON for parsing request body.
 
 // initialize session variables
+<<<<<<< HEAD
 const sessionMiddleware = session({ // <-- Define the middleware as a constant
     secret: process.env.SESSION_SECRET,
     saveUninitialized: false,
@@ -78,11 +79,20 @@ const sessionMiddleware = session({ // <-- Define the middleware as a constant
 });
 
 app.use(sessionMiddleware); // <-- Use the constant here
+=======
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    saveUninitialized: false,
+    resave: false,
+  })
+);
+>>>>>>> 0c04d3244a7d16dde2adb6f8d50f2703943b9995
 
 app.use(
-    bodyParser.urlencoded({
-        extended: true,
-    })
+  bodyParser.urlencoded({
+    extended: true,
+  })
 );
 
 // Authentication middleware
@@ -263,13 +273,23 @@ app.get('/search', async (req, res) => {
   try {
     const searchQuery = req.query.query || '';
     const searchType = req.query.type || 'all';
-    
+
     let products = [];
     let services = [];
+<<<<<<< HEAD
     
+=======
+
+    // Only search if there's a query
+>>>>>>> 0c04d3244a7d16dde2adb6f8d50f2703943b9995
     if (searchQuery.trim()) {
       const searchPattern = `%${searchQuery}%`;
+<<<<<<< HEAD
       
+=======
+
+      // Search Products if type is 'all' or 'products'
+>>>>>>> 0c04d3244a7d16dde2adb6f8d50f2703943b9995
       if (searchType === 'all' || searchType === 'products') {
         const productQuery = `
           SELECT 
@@ -279,9 +299,17 @@ app.get('/search', async (req, res) => {
           WHERE p.productName ILIKE $1 OR p.productDescription ILIKE $1 OR p.brand ILIKE $1 OR p.model ILIKE $1
           ORDER BY p.id DESC
         `;
+<<<<<<< HEAD
         products = await db.any(productQuery, [searchPattern]);
       }
       
+=======
+
+        products = await db.any(productQuery, [searchPattern]);
+      }
+
+      // Search Services if type is 'all' or 'services'
+>>>>>>> 0c04d3244a7d16dde2adb6f8d50f2703943b9995
       if (searchType === 'all' || searchType === 'services') {
         const serviceQuery = `
           SELECT 
@@ -291,6 +319,7 @@ app.get('/search', async (req, res) => {
           WHERE s.serviceName ILIKE $1 OR s.serviceDescription ILIKE $1
           ORDER BY s.id DESC
         `;
+<<<<<<< HEAD
         services = await db.any(serviceQuery, [searchPattern]);
       }
     }
@@ -300,6 +329,20 @@ app.get('/search', async (req, res) => {
     
     res.render('pages/search', { 
       title: 'Search Results',
+=======
+
+        services = await db.any(serviceQuery, [searchPattern]);
+      }
+    }
+
+    // Calculate total results
+    const resultCount = products.length + services.length;
+    const hasResults = resultCount > 0;
+
+    // Render the search page with results
+    res.render('pages/search', {
+      title: 'Search Skis',
+>>>>>>> 0c04d3244a7d16dde2adb6f8d50f2703943b9995
       query: searchQuery,
       searchType: searchType,
       products: products,
@@ -308,7 +351,7 @@ app.get('/search', async (req, res) => {
       hasResults: hasResults,
       userId: req.session.userId // Pass session data
     });
-    
+
   } catch (error) {
     console.error('Search error:', error);
     res.render('pages/search', {
@@ -322,6 +365,7 @@ app.get('/search', async (req, res) => {
 });
 
 
+<<<<<<< HEAD
 // GET /chat - Renders the chat page
 app.get('/chat', auth, async (req, res) => {
     try {
@@ -386,6 +430,70 @@ app.get('/chat/history/:otherUserId', auth, async (req, res) => {
     }
 });
 
+=======
+app.get('/welcome', (req, res) => {
+  res.json({ status: 'success', message: 'Welcome!' });
+});
+
+app.get('/test', (req, res) => {
+  res.redirect('/login');
+});
+
+
+app.get('/register', (req, res) => {
+  res.render('pages/register');
+});
+
+app.post('/register', async (req, res) => {
+  try {
+    const { username, password, email } = req.body;
+
+    // 🧩Validate input
+    if (!username || !password || !email) {
+      return res.status(400).render('pages/register', {
+        message: 'Please fill out all fields.',
+        error: true
+      });
+    }
+
+    // Hash password
+    const hash = await bcrypt.hash(password, 10);
+
+    // Attempt to insert new user
+    await db.none(
+      'INSERT INTO users (username, password_hash, email) VALUES ($1, $2, $3);',
+      [username, hash, email]
+    );
+
+    // Success
+    res.status(200).render('pages/register', {
+      message: 'Registration successful! You can now log in.',
+      error: false
+    });
+
+  } catch (error) {
+    console.error('Registration error:', error);
+
+    let message = 'Something went wrong. Please try again.';
+    let status = 500;
+
+    // Detect duplicates
+    if (error.code === '23505') {
+      status = 409; // conflict
+      if (error.constraint === 'users_username_key') {
+        message = 'That username is already taken.';
+      } else if (error.constraint === 'users_email_key') {
+        message = 'That email is already registered.';
+      }
+    }
+
+    res.status(status).render('pages/register', { message, error: true });
+  }
+});
+
+
+
+>>>>>>> 0c04d3244a7d16dde2adb6f8d50f2703943b9995
 // *****************************************************
 // <!-- Section 5: Socket.io Logic -->
 // *****************************************************
@@ -440,7 +548,11 @@ io.on('connection', (socket) => {
 // *****************************************************
 
 const PORT = process.env.PORT || 3000;
+<<<<<<< HEAD
 // CRITICAL FIX: Use server.listen, not app.listen
 server.listen(PORT, () => {
+=======
+module.exports = app.listen(PORT, () => {
+>>>>>>> 0c04d3244a7d16dde2adb6f8d50f2703943b9995
   console.log(`✅ Server running on http://localhost:${PORT}`);
 });

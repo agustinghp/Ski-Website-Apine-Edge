@@ -203,3 +203,7 @@ docker compose down -v
 - The database initializes from any `.sql` files placed inside the `init_data/` directory.  
 - You can modify your `.env` safely without rebuilding Docker images (just restart with `docker compose restart`).  
 - Keep your `.env` file **out of version control** by adding it to `.gitignore`.
+
+
+Connect to DB:
+docker exec -it alpineedge_db psql -U postgres -d alpineedge
