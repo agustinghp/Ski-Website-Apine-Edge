@@ -1,0 +1,198 @@
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            {{#if message}}
+            <div class="alert alert-{{message.type}} alert-dismissible fade show" role="alert">
+                {{message.text}}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {{/if}}
+
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="bi bi-plus-circle"></i> Create New Listing</h3>
+                </div>
+                <div class="card-body p-4">
+                    
+                    <!-- Listing Type Selection -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">What would you like to list?</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="listingType" id="productRadio" value="product" checked>
+                            <label class="btn btn-outline-primary" for="productRadio">
+                                <i class="bi bi-box-seam"></i> Product (Skis/Gear)
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="listingType" id="serviceRadio" value="service">
+                            <label class="btn btn-outline-primary" for="serviceRadio">
+                                <i class="bi bi-tools"></i> Service (Tuning/Lessons)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- PRODUCT FORM -->
+                    <form id="productForm" action="/create-listing/product" method="POST" class="listing-form">
+                        <h5 class="text-primary mb-3"><i class="bi bi-box-seam"></i> Product Details</h5>
+                        
+                        <div class="row">
+                            <!-- Brand -->
+                            <div class="col-md-6 mb-3">
+                                <label for="product_brand" class="form-label">Brand *</label>
+                                <input type="text" class="form-control" id="product_brand" name="brand" required 
+                                       placeholder="e.g., Rossignol, K2, Atomic">
+                            </div>
+
+                            <!-- Model -->
+                            <div class="col-md-6 mb-3">
+                                <label for="product_model" class="form-label">Model *</label>
+                                <input type="text" class="form-control" id="product_model" name="model" required 
+                                       placeholder="e.g., Experience 88">
+                            </div>
+                        </div>
+
+                        <!-- Product Name -->
+                        <div class="mb-3">
+                            <label for="product_name" class="form-label">Product Name *</label>
+                            <input type="text" class="form-control" id="product_name" name="productName" required 
+                                   placeholder="e.g., All-Mountain Carver Skis">
+                            <div class="form-text">Give your listing a catchy, descriptive name</div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="product_description" class="form-label">Description</label>
+                            <textarea class="form-control" id="product_description" name="productDescription" rows="4"
+                                      placeholder="Describe the condition, features, usage history, and what makes this product great..."></textarea>
+                        </div>
+
+                        <!-- Ski Dimensions -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="product_length" class="form-label">Ski Length (cm)</label>
+                                <input type="number" step="0.1" class="form-control" id="product_length" name="skiLength" 
+                                       placeholder="e.g., 177.0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="product_width" class="form-label">Ski Width (mm)</label>
+                                <input type="number" step="0.1" class="form-control" id="product_width" name="skiWidth" 
+                                       placeholder="e.g., 88.0">
+                            </div>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="mb-4">
+                            <label for="product_price" class="form-label">Price (USD) *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="product_price" name="price" required 
+                                       placeholder="425.00">
+                            </div>
+                            <div class="form-text">Set a fair price based on condition and market value</div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Create Product Listing
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- SERVICE FORM -->
+                    <form id="serviceForm" action="/create-listing/service" method="POST" class="listing-form" style="display: none;">
+                        <h5 class="text-primary mb-3"><i class="bi bi-tools"></i> Service Details</h5>
+                        
+                        <!-- Service Name -->
+                        <div class="mb-3">
+                            <label for="service_name" class="form-label">Service Name *</label>
+                            <input type="text" class="form-control" id="service_name" name="serviceName" required 
+                                   placeholder="e.g., Professional Ski Tuning & Waxing">
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="service_description" class="form-label">Service Description</label>
+                            <textarea class="form-control" id="service_description" name="serviceDescription" rows="5"
+                                      placeholder="Describe what your service includes, your experience level, turnaround time, and what customers can expect..."></textarea>
+                            <div class="form-text">Be detailed to help customers understand what you offer</div>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="mb-4">
+                            <label for="service_price" class="form-label">Price (USD)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="service_price" name="price" 
+                                       placeholder="75.00">
+                            </div>
+                            <div class="form-text">Leave blank if pricing varies or is by quote</div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Create Service Listing
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+            <!-- Tips Card -->
+            <div class="card mt-4 border-info">
+                <div class="card-body">
+                    <h6 class="card-title text-info"><i class="bi bi-lightbulb"></i> Tips for Great Listings</h6>
+                    <ul class="mb-0 small">
+                        <li>Be honest about condition and usage</li>
+                        <li>Include specific details (brand, model, size)</li>
+                        <li>Price competitively by checking similar listings</li>
+                        <li>Respond promptly to inquiries</li>
+                        <li>Consider offering local pickup or meet-ups</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+<script>
+    // Toggle between Product and Service forms
+    const productRadio = document.getElementById('productRadio');
+    const serviceRadio = document.getElementById('serviceRadio');
+    const productForm = document.getElementById('productForm');
+    const serviceForm = document.getElementById('serviceForm');
+
+    productRadio.addEventListener('change', function() {
+        if (this.checked) {
+            productForm.style.display = 'block';
+            serviceForm.style.display = 'none';
+            // Clear service form required fields
+            serviceForm.querySelectorAll('[required]').forEach(field => {
+                field.removeAttribute('required');
+            });
+            // Add required to product form fields
+            productForm.querySelectorAll('input[name="brand"], input[name="model"], input[name="productName"], input[name="price"]').forEach(field => {
+                field.setAttribute('required', 'required');
+            });
+        }
+    });
+
+    serviceRadio.addEventListener('change', function() {
+        if (this.checked) {
+            serviceForm.style.display = 'block';
+            productForm.style.display = 'none';
+            // Clear product form required fields
+            productForm.querySelectorAll('[required]').forEach(field => {
+                field.removeAttribute('required');
+            });
+            // Add required to service form fields
+            serviceForm.querySelector('input[name="serviceName"]').setAttribute('required', 'required');
+        }
+    });
+</script>
