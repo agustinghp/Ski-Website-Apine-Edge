@@ -31,6 +31,14 @@
                     <a class="nav-link" href="/chat">Chat</a>
                 </li>
                 {{/if}}
+                {{#if userId}}
+                    <!-- Show when user is logged in -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/create-listing">
+                            <i class="bi bi-plus-circle"></i> Create Listing
+                        </a>
+                    </li>
+                {{/if}}
             </ul>
 
             <!-- Conditional buttons -->
