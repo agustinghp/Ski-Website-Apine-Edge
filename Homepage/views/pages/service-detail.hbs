@@ -1,0 +1,135 @@
+<div class="container mt-4">
+    <!-- Back Button -->
+    <div class="mb-3">
+        <a href="/search" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Search
+        </a>
+    </div>
+
+    {{#if error}}
+    <div class="alert alert-danger" role="alert">
+        {{error}}
+    </div>
+    {{else}}
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg">
+                <!-- Service Header -->
+                <div class="card-header bg-info text-white py-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="badge bg-white text-info mb-2">Service</span>
+                            <h2 class="mb-0">{{service.servicename}}</h2>
+                        </div>
+                        <div class="text-end">
+                            {{#if service.price}}
+                                <h3 class="mb-0">${{service.price}}</h3>
+                            {{else}}
+                                <h5 class="mb-0">Contact for Pricing</h5>
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Description -->
+                    {{#if service.servicedescription}}
+                    <div class="mb-4">
+                        <h5 class="mb-3"><i class="bi bi-card-text"></i> About This Service</h5>
+                        <p class="lead text-muted">{{service.servicedescription}}</p>
+                    </div>
+                    <hr>
+                    {{/if}}
+
+                    <!-- Service Provider Information -->
+                    <div class="mb-4">
+                        <h5 class="mb-3"><i class="bi bi-person"></i> Service Provider</h5>
+                        <div class="d-flex align-items-center p-3 bg-light rounded">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center" 
+                                     style="width: 70px; height: 70px; font-size: 28px;">
+                                    {{substring provider.username 0 1}}
+                                </div>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">{{provider.username}}</h5>
+                                {{#if provider.location}}
+                                <p class="text-muted mb-1">
+                                    <i class="bi bi-geo-alt-fill"></i> {{provider.location}}
+                                </p>
+                                {{/if}}
+                                <p class="text-muted mb-0 small">Member since {{formatDate provider.created_at}}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pricing Information -->
+                    <div class="mb-4">
+                        <h5 class="mb-3"><i class="bi bi-cash-coin"></i> Pricing</h5>
+                        <div class="card border-primary">
+                            <div class="card-body text-center">
+                                {{#if service.price}}
+                                    <h2 class="text-primary mb-2">${{service.price}}</h2>
+                                    <p class="text-muted mb-0">Starting Price</p>
+                                {{else}}
+                                    <h4 class="text-primary mb-2">Custom Pricing</h4>
+                                    <p class="text-muted mb-0">Contact provider for a personalized quote</p>
+                                {{/if}}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2">
+                        {{#if userId}}
+                            {{#if isOwner}}
+                                <a href="/profile" class="btn btn-secondary btn-lg">
+                                    <i class="bi bi-pencil"></i> Edit Service
+                                </a>
+                            {{else}}
+                                <a href="/chat?user={{provider.id}}" class="btn btn-info btn-lg text-white">
+                                    <i class="bi bi-chat-dots-fill"></i> Contact Service Provider
+                                </a>
+                                <button class="btn btn-outline-info btn-lg" onclick="alert('Booking feature coming soon!')">
+                                    <i class="bi bi-calendar-check"></i> Request Booking
+                                </button>
+                            {{/if}}
+                        {{else}}
+                            <a href="/login" class="btn btn-info btn-lg text-white">
+                                <i class="bi bi-box-arrow-in-right"></i> Login to Contact Provider
+                            </a>
+                        {{/if}}
+                    </div>
+
+                    <!-- Listing Info -->
+                    <div class="mt-4 text-muted small text-center">
+                        <i class="bi bi-clock"></i> Listed on {{formatDate service.created_at}}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tips for Customers -->
+            <div class="card mt-4 border-info">
+                <div class="card-body">
+                    <h6 class="card-title text-info">
+                        <i class="bi bi-info-circle-fill"></i> Tips for Using Services
+                    </h6>
+                    <ul class="mb-0 small">
+                        <li>Ask questions before booking to ensure the service meets your needs</li>
+                        <li>Discuss pricing and timeline upfront</li>
+                        <li>Check the provider's location for convenience</li>
+                        <li>Leave a review after service completion to help others</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{/if}}
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
