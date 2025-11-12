@@ -33,9 +33,9 @@ services:
     volumes:
       - ./:/home/node/app
     # The following is to run with the tests
-    command: 'npm run testandrun'
+    # command: 'npm run testandrun'
     # The following is to run without the test
-    # command: 'npm start'
+    command: 'npm start'
 
 volumes:
   alpineedge_data:

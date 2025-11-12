@@ -122,10 +122,15 @@ app.get('/register', (req, res) => {
 app.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
 
+    // Failure case 1: Missing fields
     if (!username || !email || !password) {
         return res.render('pages/register', {
             title: 'Register',
-            error: 'Username, email, and password are required.'
+            userId: req.session.userId,
+            message: {
+                type: 'danger',
+                text: 'Username, email, and password are required.'
+            }
         });
     }
 
@@ -135,53 +140,108 @@ app.post('/register', async (req, res) => {
             'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3)',
             [username, email, hash]
         );
-        res.redirect('/login');
+
+        // Success case!
+        // We render the register page again, but this time with a success message.
+        res.render('pages/register', {
+            title: 'Register',
+            userId: req.session.userId,
+            message: {
+                type: 'success',
+                text: 'Registration successful! You can now log in.'
+            }
+        });
 
     } catch (error) {
+        // Failure case 2: Database error (e.g., duplicate user)
         console.error('Registration error:', error);
         res.render('pages/register', {
             title: 'Register',
-            error: 'Registration failed. Username or email may already be in use.',
-            userId: req.session.userId
+            userId: req.session.userId,
+            message: {
+                type: 'danger',
+                text: 'Registration failed. Username or email may already be in use.'
+            }
         });
     }
 });
 
-// Handle Login Form Submission
+/// Handle Login Form Submission
 app.post('/login', async (req, res) => {
-    const { username, password } = req.body;
+  const { username, password } = req.body;
 
-    if (!username || !password) {
-        return res.render('pages/login', { title: 'Login', error: 'Username and password are required.' });
+  // Failure case 1: Missing fields
+  if (!username || !password) {
+    return res.render('pages/login', {
+      title: 'Login',
+      userId: req.session.userId,
+      message: {
+        type: 'danger',
+        text: 'Username and password are required.'
+      }
+    });
+  }
+
+  try {
+    const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
+
+    // Failure case 2: User not found
+    if (!user) {
+      return res.render('pages/login', {
+        title: 'Login',
+        userId: req.session.userId,
+        message: {
+          type: 'danger',
+          text: 'Incorrect username or password.'
+        }
+      });
     }
 
-    try {
-        const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
+    const match = await bcrypt.compare(password, user.password_hash);
 
-        if (!user) {
-            return res.render('pages/login', { title: 'Login', error: 'Incorrect username or password.' });
+    if (match) {
+      // **********************************
+      // // **********************************
+
+      // 1. Set the session
+      req.session.userId = user.id;
+      req.session.username = user.username;
+      
+      // 2. Render the login page again with a success message.
+      // The navbar will automatically update because we're passing the new session ID.
+      return res.render('pages/login', {
+          title: 'Login',
+          userId: req.session.userId, // Pass the new ID
+          message: {
+              type: 'success',
+              text: 'Login successful! You can now visit your profile.'
+          }
+      });
+
+    } else {
+      // Failure case 3: Wrong password
+      return res.render('pages/login', {
+        title: 'Login',
+        userId: req.session.userId,
+        message: {
+          type: 'danger',
+          text: 'Incorrect username or password.'
         }
-
-        const match = await bcrypt.compare(password, user.password_hash);
-
-        if (match) {
-            req.session.userId = user.id;
-            req.session.username = user.username;
-            req.session.save(() => {
-                res.redirect('/profile'); // Redirect to profile
-            });
-        } else {
-            return res.render('pages/login', { title: 'Login', error: 'Incorrect username or password.' });
-        }
-
-    } catch (error) {
-        console.error('Login error:', error);
-        res.render('pages/login', {
-            title: 'Login',
-            error: 'An error occurred. Please try again.',
-            userId: req.session.userId
-        });
+      });
     }
+
+  } catch (error) {
+    // Failure case 4: Server error
+    console.error('Login error:', error);
+    res.render('pages/login', {
+      title: 'Login',
+      userId: req.session.userId,
+      message: {
+        type: 'danger',
+        text: 'An error occurred. Please try again.'
+      }
+    });
+  }
 });
 
 // Handle Logout
@@ -428,11 +488,17 @@ io.on('connection', (socket) => {
     });
 });
 // *****************************************************
-// // *****************************************************
+// <!-- Section 6: Start Server -->
+// *****************************************************
 
 const PORT = process.env.PORT || 3000;
 
-// CRITICAL FIX: Use server.listen, not app.listen
-server.listen(PORT, () => {
+// Start the server only if this file is run directly (not required by a test)
+if (require.main === module) {
+  server.listen(PORT, () => {
     console.log(`✅ Server running on http://localhost:${PORT}`);
-});
+  });
+}
+
+// Export the server for testing
+module.exports = server;

@@ -17,8 +17,9 @@
   "scripts": {
     "prestart": "npm install",
     "start": "nodemon index.js",
+    "dev": "nodemon index.js",
     "test": "mocha",
-    "testandrun": "npm start"
+    "testandrun": "npm run test && npm run dev"
   },
   "dependencies": {
     "axios": "^1.13.1",
