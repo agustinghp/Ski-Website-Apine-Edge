@@ -7,28 +7,29 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-
-CREATE TABLE Services (
+-- Renamed from 'Services' to 'services'
+-- Renamed columns from camelCase to snake_case
+CREATE TABLE services (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    serviceName VARCHAR(50) NOT NULL,
-    serviceDescription TEXT,
+    service_name VARCHAR(50) NOT NULL,
+    service_description TEXT,
     price DECIMAL(7,2)
 );
 
-
-CREATE TABLE Products (
+-- Renamed from 'Products' to 'products'
+-- Renamed columns from camelCase to snake_case
+CREATE TABLE products (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    productName VARCHAR(50) NOT NULL,
-    productDescription TEXT,
+    product_name VARCHAR(50) NOT NULL,
+    product_description TEXT,
     brand VARCHAR(50) NOT NULL,
     model VARCHAR(50) NOT NULL,
-    skiLength DECIMAL(4,1),
-    skiWidth DECIMAL(4,1),
+    ski_length DECIMAL(4,1),
+    ski_width DECIMAL(4,1),
     price DECIMAL(7,2)
 );
-
 
 CREATE TABLE connections (
     id SERIAL PRIMARY KEY,
@@ -39,9 +40,9 @@ CREATE TABLE connections (
     UNIQUE (requester_id, receiver_id)
 );
 
-
-
-CREATE TABLE reviewsServices (
+-- Renamed from 'reviewsServices' to 'reviews_services'
+-- Now references 'services(id)' correctly
+CREATE TABLE reviews_services (
     id SERIAL PRIMARY KEY,
     reviewer_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     service_id INT NOT NULL REFERENCES services(id) ON DELETE CASCADE,
@@ -51,8 +52,8 @@ CREATE TABLE reviewsServices (
     UNIQUE (reviewer_id, service_id)
 );
 
-
-CREATE TABLE reviewsSellers (
+-- Renamed from 'reviewsSellers' to 'reviews_sellers'
+CREATE TABLE reviews_sellers (
     id SERIAL PRIMARY KEY,
     reviewer_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     reviewee_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -60,4 +61,13 @@ CREATE TABLE reviewsSellers (
     comment TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (reviewer_id, reviewee_id)
+);
+
+-- Renamed column 'message_text'
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    sender_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    receiver_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    message_text TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

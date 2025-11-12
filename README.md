@@ -1,8 +1,17 @@
 ## 🏔️ **Alpine Edge**
 
+
 **Alpine Edge** is a community-driven web platform where skiers and snowboarders can buy, sell, or offer ski-related equipment and services.  
 It connects people passionate about skiing — allowing users to post listings for gear or offer services like waxing, tuning, or lessons — all without handling payments directly.
 
+
+
+!!New step!! run 
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+npm install socket.io 
+then 
+docker compose run --rm -u root web sh -lc "npm install"
+for chat feature!
 ---
 
 ### 🧭 **Project Overview**
@@ -55,6 +64,14 @@ Visit this link and download:
 echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
 eval "$(/opt/homebrew/bin/brew shellenv)"
 ```
+-------------
+** Also, you must install socket.io for the chat feature!
+
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+npm install socket.io
+then 
+docker compose run --rm -u root web sh -lc "npm install"
+
 
 ---
 

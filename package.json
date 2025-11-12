@@ -27,7 +27,8 @@
     "express-handlebars": "^8.0.3",
     "express-session": "^1.18.2",
     "handlebars": "^4.7.8",
-    "pg-promise": "^12.2.0"
+    "pg-promise": "^12.2.0",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

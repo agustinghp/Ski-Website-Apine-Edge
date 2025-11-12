@@ -1,14 +1,18 @@
+<!-- Fully responsive Bootstrap Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
     <div class="container">
+        <!-- Brand -->
         <a class="navbar-brand text-primary fw-bold" href="/">
           
           Alpine Edge
         </a>
         
+        <!-- Mobile Toggle Button -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav" aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
+        <!-- Nav Links -->
         <div class="collapse navbar-collapse" id="main-nav">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 <li class="nav-item">
@@ -17,9 +21,27 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/search">Search</a>
                 </li>
+                
+                <!-- Show Profile & Chat links only if logged in -->
+                {{#if userId}}
+                <li class="nav-item">
+                    <a class="nav-link" href="/profile">My Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/chat">Chat</a>
+                </li>
+                {{/if}}
             </ul>
-            <a href="/login" class="btn btn-outline-primary ms-lg-2 me-lg-1 mb-2 mb-lg-0">Login</a>
-            <a href="/register" class="btn btn-primary ms-lg-1 mb-2 mb-lg-0">Register</a>
+
+            <!-- Conditional buttons -->
+            {{#if userId}}
+                <!-- User is Logged In -->
+                <a href="/logout" class="btn btn-outline-secondary ms-lg-2">Logout</a>
+            {{else}}
+                <!-- User is Logged Out -->
+                <a href="/login" class="btn btn-outline-primary ms-lg-2 me-lg-1 mb-2 mb-lg-0">Login</a>
+                <a href="/register" class="btn btn-primary ms-lg-1 mb-2 mb-lg-0">Register</a>
+            {{/if}}
         </div>
     </div>
 </nav>
