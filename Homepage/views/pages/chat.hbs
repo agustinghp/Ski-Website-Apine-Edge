@@ -70,7 +70,7 @@
 </style>
 
 <script>
-    const currentUserId = {{currentUserId}};
+    const currentUserId = {{ currentUserId }};
 </script>
 
 <div class="card shadow-sm border-0">
@@ -83,13 +83,14 @@
                 </div>
                 <div id="connection-list" class="list-group list-group-flush">
                     {{#if connections}}
-                        {{#each connections}}
-                            <a class="list-group-item list-group-item-action" data-user-id="{{this.user_id}}" data-username="{{this.username}}">
-                                {{this.username}}
-                            </a>
-                        {{/each}}
+                    {{#each connections}}
+                    <a class="list-group-item list-group-item-action" data-user-id="{{this.user_id}}"
+                        data-username="{{this.username}}">
+                        {{this.username}}
+                    </a>
+                    {{/each}}
                     {{else}}
-                        <p classclass="p-3 text-muted">No connections found. Add connections to chat.</p>
+                    <p classclass="p-3 text-muted">No connections found. Add connections to chat.</p>
                     {{/if}}
                 </div>
             </div>
@@ -100,12 +101,12 @@
                         <p class="fs-4"></p>
                         <p class="fs-4">Select a connection to start chatting</p>
                     </div>
-                    </div>
+                </div>
 
                 <div class="chat-form-container">
                     <form id="chat-form" class="d-flex gap-2">
-                        <input type="text" id="message-input" class="form-control form-control-lg" placeholder="Type a message..."
-                            disabled>
+                        <input type="text" id="message-input" class="form-control form-control-lg"
+                            placeholder="Type a message..." disabled>
                         <button type="submit" class="btn btn-primary btn-lg" disabled>Send</button>
                     </form>
                 </div>
@@ -132,6 +133,29 @@
 
         let activeChatUserId = null; // Stores the ID of the user we are currently chatting with
 
+        // --- AUTO-SELECT USER BASED ON ?user=ID ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const autoUserId = urlParams.get('user');
+
+        if (autoUserId) {
+            // Try to find the connection in the sidebar
+            const autoUserItem = document.querySelector(
+                `.list-group-item-action[data-user-id="${autoUserId}"]`
+            );
+
+            if (autoUserItem) {
+                // Simulate a click as if the user clicked it
+                autoUserItem.click();
+
+                // Ensure the item is visually selected
+                autoUserItem.classList.add('active');
+
+                // Auto-focus the text input
+                messageInput.focus();
+            }
+        }
+
+
         // --- 3. Handle clicking on a connection ---
         connectionList.addEventListener('click', async (e) => {
             if (e.target && e.target.matches('.list-group-item-action')) {
@@ -150,7 +174,7 @@
 
                 // B. Set active chat user
                 activeChatUserId = parseInt(e.target.getAttribute('data-user-id'), 10);
-                
+
                 // Clear old messages and enable form
                 chatMessages.innerHTML = '';
                 messageInput.disabled = false;
@@ -162,11 +186,11 @@
                     const response = await fetch(`/chat/history/${activeChatUserId}`);
                     if (!response.ok) throw new Error('Failed to fetch history');
                     const history = await response.json();
-                    
+
                     history.forEach(msg => {
                         appendMessage(msg.message_text, msg.sender_id === currentUserId ? 'sent' : 'received');
                     });
-                    
+
                     // Scroll to bottom
                     chatMessages.scrollTop = chatMessages.scrollHeight;
 
@@ -195,7 +219,7 @@
 
                 // B. Append the *sent* message to our own UI
                 appendMessage(messageText, 'sent');
-                
+
                 // C. Clear input
                 messageInput.value = '';
                 chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
