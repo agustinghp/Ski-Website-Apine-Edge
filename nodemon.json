@@ -1,0 +1,13 @@
+{
+  "watch": [
+    "index.js",
+    "routes",
+    "Homepage/views",
+    "Homepage/public"
+  ],
+  "ext": "js,hbs,css",
+  "ignore": [
+    "node_modules"
+  ],
+  "exec": "node index.js"
+}

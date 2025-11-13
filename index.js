@@ -26,32 +26,48 @@ app.use(express.static(path.join(__dirname, 'Homepage', 'public'))); // For Imag
 
 // create `ExpressHandlebars` instance and configure the layouts and partials dir.
 const hbs = handlebars.create({
-    extname: 'hbs',
-    layoutsDir: __dirname + '/Homepage/views/layouts',
-    partialsDir: __dirname + '/Homepage/views/partials',
-    helpers: {
-        // Helper to check equality
-        eq: function (a, b) {
-            return a === b;
-        },
+  extname: 'hbs',
+  layoutsDir: __dirname + '/Homepage/views/layouts',
+  partialsDir: __dirname + '/Homepage/views/partials',
+  helpers: {
+    // Equality
+    eq: function (a, b) {
+      return a === b;
+    },
 
-        // Helper to format dates
-        formatDate: function (date) {
-            if (!date) return '';
-            const d = new Date(date);
-            return d.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        },
+    // Logical AND
+    and: function (a, b) {
+      return a && b;
+    },
 
-        // Helper to get substring (for initials)
-        substring: function (str, start, end) {
-            if (!str) return '';
-            return str.substring(start, end).toUpperCase();
-        }
+    // Logical OR
+    or: function (a, b) {
+      return a || b;
+    },
+
+    // Logical NOT
+    not: function (value) {
+      return !value;
+    },
+
+    // Format date
+    formatDate: function (date) {
+      if (!date) return '';
+      const d = new Date(date);
+      return d.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    },
+
+    // Substring helper
+    substring: function (str, start, end) {
+      if (!str) return '';
+      return str.substring(start, end).toUpperCase();
     }
+  }
+
 });
 
 
@@ -110,6 +126,11 @@ const auth = (req, res, next) => {
   }
   next();
 };
+
+// Load User Routes
+const userRoutes = require('./routes/userRoutes')(db, auth);
+app.use('/users', userRoutes);
+
 
 // *****************************************************
 // // *****************************************************
@@ -274,8 +295,6 @@ app.get('/logout', (req, res) => {
   });
 });
 
-
-// Render Profile Page
 app.get('/profile', auth, async (req, res) => {
   try {
     const currentUserId = req.session.userId;
@@ -325,7 +344,6 @@ app.get('/profile', auth, async (req, res) => {
     });
   }
 });
-
 
 // Render Search Page with Database Results
 app.get('/search', async (req, res) => {
@@ -515,118 +533,118 @@ app.post('/create-listing/service', auth, async (req, res) => {
 
 // Product Detail Page
 app.get('/products/:id', async (req, res) => {
-    try {
-        const productId = parseInt(req.params.id, 10);
-        
-        if (isNaN(productId)) {
-            return res.render('pages/product-detail', {
-                title: 'Product Not Found',
-                userId: req.session.userId,
-                error: 'Invalid product ID.'
-            });
-        }
+  try {
+    const productId = parseInt(req.params.id, 10);
 
-        // Get product with seller information
-        const product = await db.oneOrNone(`
+    if (isNaN(productId)) {
+      return res.render('pages/product-detail', {
+        title: 'Product Not Found',
+        userId: req.session.userId,
+        error: 'Invalid product ID.'
+      });
+    }
+
+    // Get product with seller information
+    const product = await db.oneOrNone(`
             SELECT p.*, u.username, u.location, u.created_at as seller_created_at, u.id as seller_id
             FROM Products p
             JOIN users u ON p.user_id = u.id
             WHERE p.id = $1
         `, [productId]);
 
-        if (!product) {
-            return res.render('pages/product-detail', {
-                title: 'Product Not Found',
-                userId: req.session.userId,
-                error: 'Product not found.'
-            });
-        }
-
-        // Create seller object
-        const seller = {
-            id: product.seller_id,
-            username: product.username,
-            location: product.location,
-            created_at: product.seller_created_at
-        };
-
-        // Check if current user is the owner
-        const isOwner = req.session.userId === product.user_id;
-
-        res.render('pages/product-detail', {
-            title: product.productname,
-            userId: req.session.userId,
-            product: product,
-            seller: seller,
-            isOwner: isOwner
-        });
-
-    } catch (error) {
-        console.error('Error fetching product details:', error);
-        res.render('pages/product-detail', {
-            title: 'Error',
-            userId: req.session.userId,
-            error: 'An error occurred while loading the product.'
-        });
+    if (!product) {
+      return res.render('pages/product-detail', {
+        title: 'Product Not Found',
+        userId: req.session.userId,
+        error: 'Product not found.'
+      });
     }
+
+    // Create seller object
+    const seller = {
+      id: product.seller_id,
+      username: product.username,
+      location: product.location,
+      created_at: product.seller_created_at
+    };
+
+    // Check if current user is the owner
+    const isOwner = req.session.userId === product.user_id;
+
+    res.render('pages/product-detail', {
+      title: product.productname,
+      userId: req.session.userId,
+      product: product,
+      seller: seller,
+      isOwner: isOwner
+    });
+
+  } catch (error) {
+    console.error('Error fetching product details:', error);
+    res.render('pages/product-detail', {
+      title: 'Error',
+      userId: req.session.userId,
+      error: 'An error occurred while loading the product.'
+    });
+  }
 });
 
 // Service Detail Page
 app.get('/services/:id', async (req, res) => {
-    try {
-        const serviceId = parseInt(req.params.id, 10);
-        
-        if (isNaN(serviceId)) {
-            return res.render('pages/service-detail', {
-                title: 'Service Not Found',
-                userId: req.session.userId,
-                error: 'Invalid service ID.'
-            });
-        }
+  try {
+    const serviceId = parseInt(req.params.id, 10);
 
-        // Get service with provider information
-        const service = await db.oneOrNone(`
+    if (isNaN(serviceId)) {
+      return res.render('pages/service-detail', {
+        title: 'Service Not Found',
+        userId: req.session.userId,
+        error: 'Invalid service ID.'
+      });
+    }
+
+    // Get service with provider information
+    const service = await db.oneOrNone(`
             SELECT s.*, u.username, u.location, u.created_at as provider_created_at, u.id as provider_id
             FROM Services s
             JOIN users u ON s.user_id = u.id
             WHERE s.id = $1
         `, [serviceId]);
 
-        if (!service) {
-            return res.render('pages/service-detail', {
-                title: 'Service Not Found',
-                userId: req.session.userId,
-                error: 'Service not found.'
-            });
-        }
-
-        // Create provider object
-        const provider = {
-            id: service.provider_id,
-            username: service.username,
-            location: service.location,
-            created_at: service.provider_created_at
-        };
-
-        // Check if current user is the owner
-        const isOwner = req.session.userId === service.user_id;
-
-        res.render('pages/service-detail', {
-            title: service.servicename,
-            userId: req.session.userId,
-            service: service,
-            provider: provider,
-            isOwner: isOwner
-        });
-
-    } catch (error) {
-        console.error('Error fetching service details:', error);
-        res.render('pages/service-detail', {
-            title: 'Error',
-            userId: req.session.userId,
-            error: 'An error occurred while loading the service.'
-        });
+    if (!service) {
+      return res.render('pages/service-detail', {
+        title: 'Service Not Found',
+        userId: req.session.userId,
+        error: 'Service not found.'
+      });
     }
+
+    // Create provider object
+    const provider = {
+      id: service.provider_id,
+      username: service.username,
+      location: service.location,
+      created_at: service.provider_created_at
+    };
+
+    // Check if current user is the owner
+    const isOwner = req.session.userId === service.user_id;
+
+    res.render('pages/service-detail', {
+      title: service.servicename,
+      userId: req.session.userId,
+      service: service,
+      provider: provider,
+      isOwner: isOwner
+    });
+
+  } catch (error) {
+    console.error('Error fetching service details:', error);
+    res.render('pages/service-detail', {
+      title: 'Error',
+      userId: req.session.userId,
+      error: 'An error occurred while loading the service.'
+    });
+  }
 });
 
 // GET /chat - Renders the chat page
