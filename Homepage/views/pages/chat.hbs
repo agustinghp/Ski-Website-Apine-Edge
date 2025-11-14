@@ -67,6 +67,65 @@
         background-color: var(--bs-primary);
         border-color: var(--bs-primary);
     }
+
+    /* Default timestamp style (received messages) */
+    .message-time {
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        text-align: right;
+        color: #6c757d;
+        /* gray for received */
+    }
+
+    /* Sent message timestamps (white text) */
+    .message-bubble.sent .message-time {
+        color: rgba(255, 255, 255, 0.85);
+        /* soft white */
+    }
+
+    /* Base bubble styling */
+    .message-bubble {
+        display: flex;
+        /* Let the content size itself */
+        flex-direction: column;
+        align-self: flex-start;
+        /* Default: received on the left */
+        max-width: 70%;
+        width: fit-content;
+        /* <-- THIS is the magic piece */
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 1rem;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        /* Break long words */
+        word-break: break-word;
+        /* Force break if needed */
+        white-space: pre-wrap;
+        /* Keeps spacing but wraps normally */
+    }
+
+    /* Sent bubbles (right side) */
+    .message-bubble.sent {
+        background-color: var(--bs-primary);
+        color: white;
+        margin-left: auto;
+        align-self: flex-end;
+        border-bottom-right-radius: 0.25rem;
+    }
+
+    /* Received bubbles (left side) */
+    .message-bubble.received {
+        background-color: #e9ecef;
+        color: #333;
+        margin-right: auto;
+        align-self: flex-start;
+        border-bottom-left-radius: 0.25rem;
+    }
+
+    #typing-indicator {
+        margin-left: 0.5rem;
+    }
 </style>
 
 <script>
@@ -83,38 +142,34 @@
                 </div>
                 <div id="connection-list" class="list-group list-group-flush">
                     {{#if connections}}
-                        {{#each connections}}
-                            <a class="list-group-item list-group-item-action"
-                               data-user-id="{{this.user_id}}"
-                               data-username="{{this.username}}">
-                                {{this.username}}
-                            </a>
-                        {{/each}}
+                    {{#each connections}}
+                    <a class="list-group-item list-group-item-action" data-user-id="{{this.user_id}}"
+                        data-username="{{this.username}}">
+                        {{this.username}}
+                    </a>
+                    {{/each}}
                     {{else}}
-                        <p class="p-3 text-muted">No connections found. Add connections to chat.</p>
+                    <p class="p-3 text-muted">No connections found. Add connections to chat.</p>
                     {{/if}}
                 </div>
             </div>
 
             <div class="chat-main">
+
                 <div class="chat-messages" id="chat-messages">
-                    <div id="chat-window-placeholder"
-                         class="text-center text-muted"
-                         style="margin-top: 20%;">
+                    <div id="chat-window-placeholder" class="text-center text-muted" style="margin-top: 20%;">
                         <p class="fs-4">Select a connection to start chatting</p>
                     </div>
+                </div>
+                <div id="typing-indicator" class="text-muted px-3 pb-1" style="display: none; font-size: 0.9rem;">
+                    <em>Typing...</em>
                 </div>
 
                 <div class="chat-form-container">
                     <form id="chat-form" class="d-flex gap-2">
-                        <input type="text"
-                               id="message-input"
-                               class="form-control form-control-lg"
-                               placeholder="Type a message..."
-                               disabled>
-                        <button type="submit"
-                                class="btn btn-primary btn-lg"
-                                disabled>Send</button>
+                        <input type="text" id="message-input" class="form-control form-control-lg"
+                            placeholder="Type a message..." disabled>
+                        <button type="submit" class="btn btn-primary btn-lg" disabled>Send</button>
                     </form>
                 </div>
             </div>
