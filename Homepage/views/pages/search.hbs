@@ -28,6 +28,11 @@
         <h5>Search results for: <span class="text-primary">"{{query}}"</span></h5>
         <p class="text-muted">Found {{resultCount}} result(s)</p>
     </div>
+    {{else}}
+    <div class="mb-3">
+        <h5>Showing all available items</h5>
+        <p class="text-muted">{{resultCount}} item(s) available</p>
+    </div>
     {{/if}}
 
     {{#unless hasResults}}
@@ -35,7 +40,7 @@
         {{#if query}}
             No results found for "{{query}}". Try adjusting your search terms.
         {{else}}
-            Enter a search term to find products and services.
+            No items available at the moment.
         {{/if}}
     </div>
     {{/unless}}
