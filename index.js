@@ -184,14 +184,16 @@ app.post('/register', async (req, res) => {
     );
 
     // Success case!
-    // We render the register page again, but this time with a success message.
-    res.render('pages/register', {
-      title: 'Register',
-      userId: req.session.userId,
-      message: {
-        type: 'success',
-        text: 'Registration successful! You can now log in.'
+    // Set the session and redirect to homepage
+    req.session.userId = newUser.id;
+    req.session.username = newUser.username;
+    
+    // Save session before redirect to ensure it's persisted
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
       }
+      return res.redirect('/');
     });
 
   } catch (error) {
@@ -249,15 +251,12 @@ app.post('/login', async (req, res) => {
       req.session.userId = user.id;
       req.session.username = user.username;
 
-      // 2. Render the login page again with a success message.
-      // The navbar will automatically update because we're passing the new session ID.
-      return res.render('pages/login', {
-        title: 'Login',
-        userId: req.session.userId, // Pass the new ID
-        message: {
-          type: 'success',
-          text: 'Login successful! You can now visit your profile.'
+      // 2. Redirect to homepage after successful login
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
         }
+        return res.redirect('/');
       });
 
     } else {
@@ -356,13 +355,41 @@ app.get('/search', async (req, res) => {
     let products = [];
     let services = [];
 
-    if (searchQuery.trim()) {
+    // If search query is empty or just whitespace, show all items
+    if (searchQuery.trim() === '') {
+      // Show all products
+      if (searchType === 'all' || searchType === 'products') {
+        const productQuery = `
+                  SELECT 
+                    p.id, p.productName as productname, p.productDescription as productdescription, 
+                    p.brand, p.model, p.skiLength as skilength, p.skiWidth as skiwidth, p.price,
+                    u.username as seller_name, u.location as seller_location
+                  FROM Products p JOIN users u ON p.user_id = u.id
+                  ORDER BY p.id DESC
+                `;
+        products = await db.any(productQuery);
+      }
+
+      // Show all services
+      if (searchType === 'all' || searchType === 'services') {
+        const serviceQuery = `
+                  SELECT 
+                    s.id, s.serviceName as servicename, s.serviceDescription as servicedescription, s.price,
+                    u.username as provider_name, u.location as provider_location
+                  FROM Services s JOIN users u ON s.user_id = u.id
+                  ORDER BY s.id DESC
+                `;
+        services = await db.any(serviceQuery);
+      }
+    } else {
+      // Search with query pattern
       const searchPattern = `%${searchQuery}%`;
 
       if (searchType === 'all' || searchType === 'products') {
         const productQuery = `
                   SELECT 
-                    p.id, p.productName, p.productDescription, p.brand, p.model, p.skiLength, p.skiWidth, p.price,
+                    p.id, p.productName as productname, p.productDescription as productdescription, 
+                    p.brand, p.model, p.skiLength as skilength, p.skiWidth as skiwidth, p.price,
                     u.username as seller_name, u.location as seller_location
                   FROM Products p JOIN users u ON p.user_id = u.id
                   WHERE p.productName ILIKE $1 OR p.productDescription ILIKE $1 OR p.brand ILIKE $1 OR p.model ILIKE $1
@@ -374,7 +401,7 @@ app.get('/search', async (req, res) => {
       if (searchType === 'all' || searchType === 'services') {
         const serviceQuery = `
                   SELECT 
-                    s.id, s.serviceName, s.serviceDescription, s.price,
+                    s.id, s.serviceName as servicename, s.serviceDescription as servicedescription, s.price,
                     u.username as provider_name, u.location as provider_location
                   FROM Services s JOIN users u ON s.user_id = u.id
                   WHERE s.serviceName ILIKE $1 OR s.serviceDescription ILIKE $1
@@ -390,7 +417,7 @@ app.get('/search', async (req, res) => {
 
     // Render the search page with results
     res.render('pages/search', {
-      title: 'Search Results', // Merged conflict
+      title: 'Search Results',
       query: searchQuery,
       searchType: searchType,
       products: products,
@@ -406,11 +433,17 @@ app.get('/search', async (req, res) => {
       title: 'Search Skis',
       query: req.query.query || '',
       searchType: req.query.type || 'all',
-      error: 'An error occurred while searching. Please try again.',
-      userId: req.session.userId // Pass session data
+      products: [],
+      services: [],
+      resultCount: 0,
+      hasResults: false,
+      userId: req.session.userId,
+      error: 'An error occurred while searching. Please try again.'
     });
   }
 });
+
+
 // Render Create Listing Page
 app.get('/create-listing', auth, (req, res) => {
   res.render('pages/create-listing', {
