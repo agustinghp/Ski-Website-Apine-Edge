@@ -11,16 +11,17 @@
         {{error}}
     </div>
     {{else}}
-    
+
     <div class="row">
         <!-- Product Image Section -->
         <div class="col-lg-5 mb-4">
             <div class="card border-0 shadow-sm">
                 {{#if product.imageUrl}}
-                    <img src="{{product.imageUrl}}" class="card-img-top" alt="{{product.productname}}" style="height: 400px; object-fit: cover;">
+                <img src="{{product.imageUrl}}" class="card-img-top" alt="{{product.productname}}"
+                    style="height: 400px; object-fit: cover;">
                 {{else}}
-                    <img src="https://placehold.co/800x600/e8f4f8/0066cc?text={{product.brand}}+{{product.model}}" 
-                         class="card-img-top" alt="{{product.productname}}" style="height: 400px; object-fit: cover;">
+                <img src="https://placehold.co/800x600/e8f4f8/0066cc?text={{product.brand}}+{{product.model}}"
+                    class="card-img-top" alt="{{product.productname}}" style="height: 400px; object-fit: cover;">
                 {{/if}}
             </div>
         </div>
@@ -81,13 +82,18 @@
                         <h5 class="mb-3"><i class="bi bi-person"></i> Seller Information</h5>
                         <div class="d-flex align-items-center">
                             <div class="me-3">
-                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
-                                     style="width: 60px; height: 60px; font-size: 24px;">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                                    style="width: 60px; height: 60px; font-size: 24px;">
                                     {{substring seller.username 0 1}}
                                 </div>
                             </div>
                             <div>
-                                <h6 class="mb-1">{{seller.username}}</h6>
+                                <h6 class="mb-1">
+                                    <a href="/users/{{seller.id}}" class="text-decoration-none">
+                                        {{seller.username}}
+                                    </a>
+                                </h6>
+
                                 {{#if seller.location}}
                                 <p class="text-muted mb-1">
                                     <i class="bi bi-geo-alt"></i> {{seller.location}}
@@ -101,19 +107,19 @@
                     <!-- Action Buttons -->
                     <div class="d-grid gap-2">
                         {{#if userId}}
-                            {{#if isOwner}}
-                                <a href="/profile" class="btn btn-secondary btn-lg">
-                                    <i class="bi bi-pencil"></i> Edit Listing
-                                </a>
-                            {{else}}
-                                <a href="/chat?user={{seller.id}}" class="btn btn-primary btn-lg">
-                                    <i class="bi bi-chat-dots"></i> Contact Seller
-                                </a>
-                            {{/if}}
+                        {{#if isOwner}}
+                        <a href="/profile" class="btn btn-secondary btn-lg">
+                            <i class="bi bi-pencil"></i> Edit Listing
+                        </a>
                         {{else}}
-                            <a href="/login" class="btn btn-primary btn-lg">
-                                <i class="bi bi-box-arrow-in-right"></i> Login to Contact Seller
-                            </a>
+                        <a href="/chat?user={{seller.id}}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-chat-dots"></i> Contact Seller
+                        </a>
+                        {{/if}}
+                        {{else}}
+                        <a href="/login" class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right"></i> Login to Contact Seller
+                        </a>
                         {{/if}}
                     </div>
 
