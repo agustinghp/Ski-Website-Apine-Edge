@@ -1,0 +1,13 @@
+11/14, 2:15 PM (15 minutes)
+First we talked about what we did this week.
+1. Completed the user profile page
+2. Made functional tests for login and register
+3. Added user verification, with middleware.
+4. Implemented the chat feature
+5. Implemented connections functionality
+6. Added Profile pages for other users.
+Then, we talked about the objectives for next week.
+- Make the filters work
+- Make more tests for other features
+- Improve the chat feature
+- Adding image handling
