@@ -194,13 +194,26 @@ io.on('connection', (socket) => {
 
       io.to(roomName).emit('receiveMessage', {
         message: message,
-        fromUserId: currentUserId
+        fromUserId: currentUserId,
+        created_at: new Date().toISOString()
       });
+
 
     } catch (error) {
       console.error('Error saving or sending message:', error);
     }
   });
+
+  socket.on('typing', ({ toUserId }) => {
+    const roomName = [currentUserId, toUserId].sort().join('-');
+    socket.to(roomName).emit('typing', { fromUserId: currentUserId });
+  });
+
+  socket.on('stopTyping', ({ toUserId }) => {
+    const roomName = [currentUserId, toUserId].sort().join('-');
+    socket.to(roomName).emit('stopTyping', { fromUserId: currentUserId });
+  });
+
 
   socket.on('disconnect', () => {
     console.log(`Socket disconnected: ${socket.id} (User: ${currentUserId})`);

@@ -1,74 +1,6 @@
-<style>
-    /* Page-specific styles for the chat app */
-    .chat-container {
-        display: flex;
-        height: 75vh;
-        /* Use vh (viewport height) to make it fill the screen */
-    }
+<link rel="stylesheet" href="/css/chat.css">
 
-    .chat-sidebar {
-        flex: 0 0 300px;
-        /* Fixed width sidebar */
-        background-color: #f8f9fa;
-        border-right: 1px solid #dee2e6;
-        padding: 0;
-    }
-
-    .chat-main {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .chat-messages {
-        flex-grow: 1;
-        padding: 1.5rem;
-        overflow-y: auto;
-        /* Scrollable message area */
-        background-color: #ffffff;
-    }
-
-    .chat-form-container {
-        padding: 1rem;
-        background-color: #f8f9fa;
-        border-top: 1px solid #dee2e6;
-    }
-
-    /* Message bubbles */
-    .message-bubble {
-        padding: 0.75rem 1rem;
-        border-radius: 1rem;
-        margin-bottom: 0.5rem;
-        max-width: 70%;
-        word-wrap: break-word;
-    }
-
-    .message-bubble.sent {
-        background-color: var(--bs-primary);
-        color: white;
-        margin-left: auto;
-        border-bottom-right-radius: 0.25rem;
-    }
-
-    .message-bubble.received {
-        background-color: #e9ecef;
-        color: #333;
-        margin-right: auto;
-        border-bottom-left-radius: 0.25rem;
-    }
-
-    /* Connection list styling */
-    .list-group-item-action {
-        cursor: pointer;
-        font-weight: 500;
-    }
-
-    .list-group-item-action.active {
-        background-color: var(--bs-primary);
-        border-color: var(--bs-primary);
-    }
-</style>
-
+{{!-- Make currentUserId available to JS --}}
 <script>
     const currentUserId = {{ currentUserId }};
 </script>
@@ -83,38 +15,37 @@
                 </div>
                 <div id="connection-list" class="list-group list-group-flush">
                     {{#if connections}}
-                        {{#each connections}}
-                            <a class="list-group-item list-group-item-action"
-                               data-user-id="{{this.user_id}}"
-                               data-username="{{this.username}}">
-                                {{this.username}}
-                            </a>
-                        {{/each}}
+                    {{#each connections}}
+                    <a class="list-group-item list-group-item-action" data-user-id="{{this.user_id}}"
+                        data-username="{{this.username}}">
+                        {{this.username}}
+                    </a>
+                    {{/each}}
                     {{else}}
-                        <p class="p-3 text-muted">No connections found. Add connections to chat.</p>
+                    <p class="p-3 text-muted">No connections found. Add connections to chat.</p>
                     {{/if}}
                 </div>
             </div>
 
             <div class="chat-main">
+                <button id="toggle-sidebar-btn" class="btn btn-light shadow-sm">
+                    ☰
+                </button>
+
                 <div class="chat-messages" id="chat-messages">
-                    <div id="chat-window-placeholder"
-                         class="text-center text-muted"
-                         style="margin-top: 20%;">
+                    <div id="chat-window-placeholder" class="text-center text-muted" style="margin-top: 20%;">
                         <p class="fs-4">Select a connection to start chatting</p>
                     </div>
+                </div>
+                <div id="typing-indicator" class="text-muted px-3 pb-1" style="display: none; font-size: 0.9rem;">
+                    <em>Typing...</em>
                 </div>
 
                 <div class="chat-form-container">
                     <form id="chat-form" class="d-flex gap-2">
-                        <input type="text"
-                               id="message-input"
-                               class="form-control form-control-lg"
-                               placeholder="Type a message..."
-                               disabled>
-                        <button type="submit"
-                                class="btn btn-primary btn-lg"
-                                disabled>Send</button>
+                        <input type="text" id="message-input" class="form-control form-control-lg"
+                            placeholder="Type a message..." disabled>
+                        <button type="submit" class="btn btn-primary btn-lg" disabled>Send</button>
                     </form>
                 </div>
             </div>
@@ -123,10 +54,6 @@
     </div>
 </div>
 
-{{!-- Make currentUserId available to JS --}}
-<script>
-    const currentUserId = {{ currentUserId }};
-</script>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/chat.js"></script>
