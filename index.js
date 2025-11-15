@@ -9,6 +9,7 @@ const path = require('path');
 const pgp = require('pg-promise')(); // To connect to the Postgres DB from the node server
 const bodyParser = require('body-parser');
 const session = require('express-session'); // To set the session object. To store or access session data, use the `req.session`, which is (generally) serialized as JSON by the store.
+const pgSession = require('connect-pg-simple')(session);
 const bcrypt = require('bcryptjs'); //  To hash passwords
 const axios = require('axios'); // To make HTTP requests from our server.
 require('dotenv').config();
@@ -103,11 +104,20 @@ app.set('views', path.join(__dirname, 'Homepage', 'views'));
 app.use(bodyParser.json()); // specify the usage of JSON for parsing request body.
 
 // initialize session variables
-const sessionMiddleware = session({ // <-- Define the middleware as a constant
+const sessionMiddleware = session({
+  store: new pgSession({
+    conObject: dbConfig,           // reuse your existing DB config
+    createTableIfMissing: true,    // auto-create "session" table in dev
+  }),
   secret: process.env.SESSION_SECRET,
-  saveUninitialized: false,
   resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    sameSite: 'lax',
+  },
 });
+
 
 app.use(sessionMiddleware); // <-- Use the constant here
 
