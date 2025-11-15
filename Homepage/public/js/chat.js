@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const placeholder = document.getElementById('chat-window-placeholder');
     const typingIndicator = document.getElementById('typing-indicator');
     let typingTimeout;
+    const sidebar = document.querySelector('.chat-sidebar');
+    const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
+
 
     let activeChatUserId = null;
     let activeChatUsername = null;
@@ -19,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Chat elements not found in DOM.');
         return;
     }
+
 
     // --- AUTO-SELECT USER BASED ON ?user=ID ---
     const urlParams = new URLSearchParams(window.location.search);
@@ -36,7 +40,36 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target && e.target.matches('.list-group-item-action')) {
             loadChatForUser(e.target.getAttribute('data-user-id'));
         }
+        sidebar.classList.remove('open');
+        toggleSidebarBtn.style.display = 'block';
     });
+
+    // Sidebar toggle for mobile
+    toggleSidebarBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        // Hide the button when sidebar is open
+        if (sidebar.classList.contains('open')) {
+            toggleSidebarBtn.style.display = 'none';
+        }
+    });
+
+    // Close the sidebar when clicking anywhere in the chat area (mobile)
+    chatMessages.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        toggleSidebarBtn.style.display = 'block';
+    });
+
+    typingIndicator.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        toggleSidebarBtn.style.display = 'block';
+    });
+
+    chatForm.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        toggleSidebarBtn.style.display = 'block';
+    });
+
+
 
     // --- Detect typing ---
     messageInput.addEventListener('input', () => {

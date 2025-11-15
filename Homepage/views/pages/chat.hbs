@@ -1,133 +1,6 @@
-<style>
-    /* Page-specific styles for the chat app */
-    .chat-container {
-        display: flex;
-        height: 75vh;
-        /* Use vh (viewport height) to make it fill the screen */
-    }
+<link rel="stylesheet" href="/css/chat.css">
 
-    .chat-sidebar {
-        flex: 0 0 300px;
-        /* Fixed width sidebar */
-        background-color: #f8f9fa;
-        border-right: 1px solid #dee2e6;
-        padding: 0;
-    }
-
-    .chat-main {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .chat-messages {
-        flex-grow: 1;
-        padding: 1.5rem;
-        overflow-y: auto;
-        /* Scrollable message area */
-        background-color: #ffffff;
-    }
-
-    .chat-form-container {
-        padding: 1rem;
-        background-color: #f8f9fa;
-        border-top: 1px solid #dee2e6;
-    }
-
-    /* Message bubbles */
-    .message-bubble {
-        padding: 0.75rem 1rem;
-        border-radius: 1rem;
-        margin-bottom: 0.5rem;
-        max-width: 70%;
-        word-wrap: break-word;
-    }
-
-    .message-bubble.sent {
-        background-color: var(--bs-primary);
-        color: white;
-        margin-left: auto;
-        border-bottom-right-radius: 0.25rem;
-    }
-
-    .message-bubble.received {
-        background-color: #e9ecef;
-        color: #333;
-        margin-right: auto;
-        border-bottom-left-radius: 0.25rem;
-    }
-
-    /* Connection list styling */
-    .list-group-item-action {
-        cursor: pointer;
-        font-weight: 500;
-    }
-
-    .list-group-item-action.active {
-        background-color: var(--bs-primary);
-        border-color: var(--bs-primary);
-    }
-
-    /* Default timestamp style (received messages) */
-    .message-time {
-        font-size: 0.75rem;
-        margin-top: 0.25rem;
-        text-align: right;
-        color: #6c757d;
-        /* gray for received */
-    }
-
-    /* Sent message timestamps (white text) */
-    .message-bubble.sent .message-time {
-        color: rgba(255, 255, 255, 0.85);
-        /* soft white */
-    }
-
-    /* Base bubble styling */
-    .message-bubble {
-        display: flex;
-        /* Let the content size itself */
-        flex-direction: column;
-        align-self: flex-start;
-        /* Default: received on the left */
-        max-width: 70%;
-        width: fit-content;
-        /* <-- THIS is the magic piece */
-        padding: 0.75rem 1rem;
-        margin-bottom: 0.5rem;
-        border-radius: 1rem;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        /* Break long words */
-        word-break: break-word;
-        /* Force break if needed */
-        white-space: pre-wrap;
-        /* Keeps spacing but wraps normally */
-    }
-
-    /* Sent bubbles (right side) */
-    .message-bubble.sent {
-        background-color: var(--bs-primary);
-        color: white;
-        margin-left: auto;
-        align-self: flex-end;
-        border-bottom-right-radius: 0.25rem;
-    }
-
-    /* Received bubbles (left side) */
-    .message-bubble.received {
-        background-color: #e9ecef;
-        color: #333;
-        margin-right: auto;
-        align-self: flex-start;
-        border-bottom-left-radius: 0.25rem;
-    }
-
-    #typing-indicator {
-        margin-left: 0.5rem;
-    }
-</style>
-
+{{!-- Make currentUserId available to JS --}}
 <script>
     const currentUserId = {{ currentUserId }};
 </script>
@@ -155,6 +28,9 @@
             </div>
 
             <div class="chat-main">
+                <button id="toggle-sidebar-btn" class="btn btn-light shadow-sm">
+                    ☰
+                </button>
 
                 <div class="chat-messages" id="chat-messages">
                     <div id="chat-window-placeholder" class="text-center text-muted" style="margin-top: 20%;">
@@ -178,10 +54,6 @@
     </div>
 </div>
 
-{{!-- Make currentUserId available to JS --}}
-<script>
-    const currentUserId = {{ currentUserId }};
-</script>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/chat.js"></script>

@@ -1,0 +1,139 @@
+/* ==== Layout ==== */
+
+.chat-container {
+    display: flex;
+    height: 75vh; /* fills most of the screen height */
+}
+
+.chat-sidebar {
+    flex: 0 0 300px; /* fixed width */
+    background-color: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    padding: 0;
+}
+
+.chat-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative; /* for toggle button positioning */
+}
+
+.chat-messages {
+    flex-grow: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    overflow-x: hidden; /* prevent sideways scrolling */
+    background-color: #ffffff;
+}
+
+.chat-form-container {
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+/* ==== Message bubbles ==== */
+
+.message-bubble {
+    display: flex;
+    flex-direction: column;
+    align-self: flex-start; /* default left-aligned (received) */
+    max-width: 70%;
+    width: fit-content;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 1rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;  /* break long words */
+    word-break: break-word;     /* force break if needed */
+    white-space: pre-wrap;      /* keep spacing but wrap normally */
+}
+
+.message-bubble.sent {
+    background-color: var(--bs-primary);
+    color: white;
+    margin-left: auto;
+    align-self: flex-end;
+    border-bottom-right-radius: 0.25rem;
+}
+
+.message-bubble.received {
+    background-color: #e9ecef;
+    color: #333;
+    margin-right: auto;
+    align-self: flex-start;
+    border-bottom-left-radius: 0.25rem;
+}
+
+/* Timestamp text under bubbles */
+
+.message-time {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    text-align: right;
+    color: #6c757d; /* gray for received */
+}
+
+.message-bubble.sent .message-time {
+    color: rgba(255, 255, 255, 0.85); /* soft white on blue bubble */
+}
+
+/* ==== Connections list ==== */
+
+.list-group-item-action {
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.list-group-item-action.active {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+/* ==== Typing indicator ==== */
+
+#typing-indicator {
+    margin-left: 0.5rem;
+}
+
+/* ==== Sidebar toggle button (mobile) ==== */
+
+#toggle-sidebar-btn {
+    display: none; /* shown only on small screens */
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 50;
+    padding: 6px 10px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    cursor: pointer;
+}
+
+/* ==== Responsive behavior ==== */
+
+@media (max-width: 900px) {
+    .chat-sidebar {
+        position: absolute;
+        left: -300px;       /* hidden by default */
+        top: 0;
+        height: 100%;
+        z-index: 40;
+        transition: left 0.3s ease;
+    }
+
+    .chat-sidebar.open {
+        left: 0;            /* slide in when open */
+    }
+
+    .chat-main {
+        flex-grow: 1;
+        width: 100%;
+    }
+
+    #toggle-sidebar-btn {
+        display: block;     /* show toggle on small screens */
+    }
+}
