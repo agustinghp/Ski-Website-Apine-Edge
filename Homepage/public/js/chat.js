@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("🔍 CHAT URL:", window.location.href);
     // -----------------------------------
     // 1. Socket.io connection
     // -----------------------------------
@@ -7,18 +8,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // -----------------------------------
     // 2. DOM Elements
     // -----------------------------------
-    const connectionList   = document.getElementById('connection-list');
-    const chatMessages     = document.getElementById('chat-messages');
-    const chatForm         = document.getElementById('chat-form');
-    const messageInput     = document.getElementById('message-input');
-    const sendButton       = chatForm ? chatForm.querySelector('button') : null;
-    const placeholder      = document.getElementById('chat-window-placeholder');
-    const typingIndicator  = document.getElementById('typing-indicator');
-    const sidebar          = document.querySelector('.chat-sidebar');
+    const connectionList = document.getElementById('connection-list');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = chatForm ? chatForm.querySelector('button') : null;
+    const placeholder = document.getElementById('chat-window-placeholder');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const sidebar = document.querySelector('.chat-sidebar');
     const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
 
     let typingTimeout;
-    let activeChatUserId   = null;
+    let activeChatUserId = null;
     let activeChatUsername = null;
 
     // Guard: if core elements are missing, exit early
@@ -35,9 +36,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeSidebarOnMobile() {
         if (!isMobile()) return;
+
         sidebar.classList.remove('open');
-        toggleSidebarBtn.style.display = 'block';
+
+        // Add a slight delay before showing the button again
+        setTimeout(() => {
+            toggleSidebarBtn.style.display = 'block';
+        }, 200);
     }
+
 
     function openSidebarOnMobile() {
         if (!isMobile()) return;
@@ -53,19 +60,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function appendMessage(text, type, timestamp) {
+    function appendMessage(text, type, timestamp, status = 'sent') {
         const bubble = document.createElement('div');
         bubble.classList.add('message-bubble', type);
 
         const time = timestamp ? formatTimestamp(timestamp) : '';
 
+        // Choose the correct checkmark based on status
+        let checkmarkHtml = '';
+        if (type === 'sent') {
+            if (status === 'sent') {
+                checkmarkHtml = `<span class="msg-status">✓</span>`;
+            } else {
+                checkmarkHtml = `<span class="msg-status">✓✓</span>`;
+            }
+        }
+
         bubble.innerHTML = `
-            <div>${text}</div>
-            <div class="message-time">${time}</div>
-        `;
+        <div>${text}</div>
+        <div class="message-time">${time} ${checkmarkHtml}</div>
+    `;
 
         chatMessages.appendChild(bubble);
     }
+
 
     async function loadChatForUser(userId) {
         // Find corresponding sidebar item
@@ -87,14 +105,14 @@ document.addEventListener('DOMContentLoaded', () => {
         userItem.classList.add('active');
 
         // Set active chat state
-        activeChatUserId   = parseInt(userId, 10);
+        activeChatUserId = parseInt(userId, 10);
         activeChatUsername = userItem.getAttribute('data-username');
 
         // Reset chat UI
-        chatMessages.innerHTML      = '';
-        messageInput.disabled       = false;
-        sendButton.disabled         = false;
-        messageInput.placeholder    = `Message ${activeChatUsername}`;
+        chatMessages.innerHTML = '';
+        messageInput.disabled = false;
+        sendButton.disabled = false;
+        messageInput.placeholder = `Message ${activeChatUsername}`;
 
         // Fetch existing message history
         try {
@@ -104,12 +122,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const history = await response.json();
 
             history.forEach(msg => {
+                const type = msg.sender_id === currentUserId ? 'sent' : 'received';
+
                 appendMessage(
                     msg.message_text,
-                    msg.sender_id === currentUserId ? 'sent' : 'received',
-                    msg.created_at
+                    type,
+                    msg.created_at,
+                    msg.status   // ← NEW: pass message status to UI
                 );
             });
+
 
             chatMessages.scrollTop = chatMessages.scrollHeight;
         } catch (err) {
@@ -118,19 +140,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 '<p class="text-danger">Could not load chat history.</p>';
         }
 
-        // Join socket room for this conversation
-        socket.emit('joinRoom', { otherUserId: activeChatUserId });
+        socket.emit('joinRoom', { otherUserId: activeChatUserId }, async () => {
+            // Only call mark-read AFTER server confirms room join
+            await fetch(`/chat/mark-read/${activeChatUserId}`, {
+                method: 'POST'
+            });
+        });
+
     }
 
     // -----------------------------------
     // 4. Auto-select chat via ?user=ID
     // -----------------------------------
-    const urlParams   = new URLSearchParams(window.location.search);
-    const autoUserId  = urlParams.get('user');
+    const urlParams = new URLSearchParams(window.location.search);
+    const autoUserId = urlParams.get('user');
 
-    if (autoUserId) {
-        loadChatForUser(autoUserId);
+    if (autoUserId && !isNaN(parseInt(autoUserId, 10))) {
+        loadChatForUser(parseInt(autoUserId, 10));
     }
+
 
     // -----------------------------------
     // 5. Sidebar interactions
@@ -138,9 +166,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Click on a user in the connections list
     connectionList.addEventListener('click', (e) => {
-        if (!e.target || !e.target.matches('.list-group-item-action')) return;
+        const item = e.target.closest('.list-group-item-action');
+        if (!item) return;
 
-        const clickedUserId = parseInt(e.target.getAttribute('data-user-id'), 10);
+        const clickedUserId = parseInt(item.getAttribute('data-user-id'), 10);
 
         // If clicking the already active chat user → do nothing
         if (clickedUserId === activeChatUserId) {
@@ -154,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         closeSidebarOnMobile();
     });
 
+
     // Sidebar toggle button (mobile)
     toggleSidebarBtn.addEventListener('click', () => {
         if (!isMobile()) return;
@@ -166,13 +196,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Close sidebar when interacting with chat area (mobile)
-    chatMessages.addEventListener('click', () => {
-        closeSidebarOnMobile();
-    });
+    if (chatMessages) {
+        chatMessages.addEventListener('click', () => {
+            closeSidebarOnMobile();
+        });
+    }
 
-    typingIndicator.addEventListener('click', () => {
-        closeSidebarOnMobile();
-    });
+
+    if (typingIndicator) {
+        typingIndicator.addEventListener('click', () => {
+            closeSidebarOnMobile();
+        });
+    }
+
 
     chatForm.addEventListener('click', () => {
         closeSidebarOnMobile();
@@ -214,7 +250,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Optimistically render my own message
-        appendMessage(messageText, 'sent', nowIso);
+        appendMessage(messageText, 'sent', nowIso, 'sent');
+
 
         messageInput.value = '';
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -223,12 +260,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // -----------------------------------
     // 8. Receiving socket events
     // -----------------------------------
-    socket.on('receiveMessage', (data) => {
+    socket.on('receiveMessage', async (data) => {
         if (data.fromUserId === activeChatUserId) {
             appendMessage(data.message, 'received', data.created_at);
             chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // 🔥 NEW — immediately mark messages as read
+            await fetch(`/chat/mark-read/${activeChatUserId}`, {
+                method: 'POST'
+            });
         }
     });
+
 
     socket.on('typing', (data) => {
         if (data.fromUserId === activeChatUserId) {
@@ -242,4 +285,15 @@ document.addEventListener('DOMContentLoaded', () => {
             typingIndicator.style.display = 'none';
         }
     });
+
+    socket.on('messagesRead', (data) => {
+        if (data.readerId === activeChatUserId) {
+            document.querySelectorAll('.message-bubble.sent .msg-status').forEach(el => {
+                el.textContent = '✓✓';
+            });
+        }
+    });
+
+
+
 });
