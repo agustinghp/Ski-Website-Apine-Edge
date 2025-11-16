@@ -20,6 +20,8 @@ const server = http.createServer(app); // Create an HTTP server from the Express
 const { Server } = require("socket.io");
 const io = new Server(server); // Attach socket.io to the HTTP server
 
+app.set('io', io);
+
 app.use(express.static(path.join(__dirname, 'Homepage', 'public'))); // For Images
 
 // *****************************************************
@@ -187,11 +189,14 @@ io.on('connection', (socket) => {
 
   socket.join(currentUserId.toString());
 
-  socket.on('joinRoom', ({ otherUserId }) => {
+  socket.on('joinRoom', ({ otherUserId }, callback) => {
     const roomName = [currentUserId, otherUserId].sort().join('-');
     socket.join(roomName);
-    console.log(`User ${currentUserId} (socket ${socket.id}) joined room: ${roomName}`);
+    console.log(`User ${currentUserId} joined room: ${roomName}`);
+
+    if (callback) callback(); // <-- ACK confirming join completed
   });
+
 
   socket.on('sendMessage', async ({ message, toUserId }) => {
     try {

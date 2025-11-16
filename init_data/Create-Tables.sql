@@ -51,7 +51,8 @@ CREATE TABLE messages (
     sender_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     receiver_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     message_text TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(10) NOT NULL DEFAULT 'sent' CHECK (status IN ('sent', 'read'))
 );
 
 -- 6. Seller Reviews Table (Depends on users)

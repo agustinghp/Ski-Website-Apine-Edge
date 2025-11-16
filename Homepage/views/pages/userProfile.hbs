@@ -15,7 +15,10 @@
 
         {{!-- Accepted --}}
         {{#if (eq connectionStatus "accepted")}}
+        {{#if (not (eq user.id ../userId))}}
         <a href="/chat?user={{user.id}}" class="btn btn-primary">Message</a>
+        {{/if}}
+
 
         {{!-- Pending (you sent) --}}
         {{else if (and (eq connectionStatus "pending") isRequester)}}

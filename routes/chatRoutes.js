@@ -66,6 +66,47 @@ module.exports = (db, auth) => {
             res.status(500).json({ error: 'Could not fetch history.' });
         }
     });
+
+    router.post('/mark-read/:otherUserId', auth, async (req, res) => {
+        const currentUserId = req.session.userId;      // the reader
+        const otherUserId = parseInt(req.params.otherUserId, 10); // the sender
+
+        console.log('📩 /chat/mark-read HIT', { readerId: currentUserId, otherUserId });
+
+        try {
+            await db.none(`
+            UPDATE messages
+            SET status = 'read'
+            WHERE sender_id = $1
+              AND receiver_id = $2
+              AND status = 'sent'
+        `, [otherUserId, currentUserId]);
+
+            console.log('✅ Messages updated to read in DB');
+
+            const io = req.app.get('io');
+            console.log('🔍 io from req.app.get("io") is:', !!io);
+
+            const roomName = [currentUserId, otherUserId].sort().join('-');
+            console.log('📡 Emitting messagesRead to room:', roomName);
+
+            if (!io) {
+                console.error('❌ io is undefined in /mark-read route');
+            } else {
+                io.to(roomName).emit('messagesRead', {
+                    readerId: currentUserId
+                });
+            }
+
+            res.sendStatus(200);
+        } catch (err) {
+            console.error('Error in mark-read:', err);
+            res.sendStatus(500);
+        }
+    });
+
+
+
     return router;
 };
 
