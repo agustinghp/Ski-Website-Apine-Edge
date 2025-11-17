@@ -100,18 +100,40 @@ module.exports = (db, auth) => {
         const profileId = parseInt(req.params.id, 10);
 
         try {
-            await db.none(`
-      INSERT INTO connections (requester_id, receiver_id, status)
-      VALUES ($1, $2, 'pending')
-      ON CONFLICT DO NOTHING
-    `, [viewerId, profileId]);
+            // 1️⃣ Check if ANY connection already exists between the two users
+            const existing = await db.oneOrNone(
+                `
+            SELECT *
+            FROM connections
+            WHERE (requester_id = $1 AND receiver_id = $2)
+               OR (requester_id = $2 AND receiver_id = $1)
+            `,
+                [viewerId, profileId]
+            );
+
+            // 2️⃣ If anything exists → do NOT create a duplicate
+            if (existing) {
+                console.log("Connection already exists, skipping insert.");
+                return res.redirect(`/users/${profileId}`);
+            }
+
+            // 3️⃣ Insert the new request ONLY if none exists
+            await db.none(
+                `
+            INSERT INTO connections (requester_id, receiver_id, status)
+            VALUES ($1, $2, 'pending')
+            `,
+                [viewerId, profileId]
+            );
 
             res.redirect(`/users/${profileId}`);
+
         } catch (err) {
             console.error("Error sending request:", err);
             res.redirect(`/users/${profileId}`);
         }
     });
+
 
     // Accept connection
     router.post('/:id/accept', auth, async (req, res) => {
