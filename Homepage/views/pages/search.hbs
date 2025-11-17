@@ -4,15 +4,15 @@
         <div class="card-body">
             <form action="/search" method="GET" class="row g-3">
                 <div class="col-md-8">
-                    <input type="text" name="query" class="form-control form-control-lg" 
-                           placeholder="Search by brand, model, size, or service..." 
-                           value="{{query}}">
+                    <input type="text" name="query" class="form-control form-control-lg"
+                        placeholder="Search gear, services, or people..." value="{{query}}">
                 </div>
                 <div class="col-md-2">
                     <select name="type" class="form-select form-select-lg">
-                        <option value="all" {{#if (eq searchType 'all')}}selected{{/if}}>All</option>
-                        <option value="products" {{#if (eq searchType 'products')}}selected{{/if}}>Products</option>
-                        <option value="services" {{#if (eq searchType 'services')}}selected{{/if}}>Services</option>
+                        <option value="all" {{#if (eq searchType 'all' )}}selected{{/if}}>All</option>
+                        <option value="products" {{#if (eq searchType 'products' )}}selected{{/if}}>Products</option>
+                        <option value="services" {{#if (eq searchType 'services' )}}selected{{/if}}>Services</option>
+                        <option value="users" {{#if (eq searchType 'users' )}}selected{{/if}}>Users</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -33,9 +33,9 @@
     {{#unless hasResults}}
     <div class="alert alert-info" role="alert">
         {{#if query}}
-            No results found for "{{query}}". Try adjusting your search terms.
+        No results found for "{{query}}". Try adjusting your search terms.
         {{else}}
-            Enter a search term to find products and services.
+        Enter a search term to find products, services, and people.
         {{/if}}
     </div>
     {{/unless}}
@@ -49,9 +49,8 @@
             {{#each products}}
             <div class="col-md-6 col-lg-4">
                 <div class="card h-100 shadow-sm border-0">
-                    <img src="https://placehold.co/600x400?text={{brand}}+{{model}}" 
-                         class="card-img-top" 
-                         alt="{{productname}}">
+                    <img src="https://placehold.co/600x400?text={{brand}}+{{model}}" class="card-img-top"
+                        alt="{{productname}}">
                     <div class="card-body">
                         <h5 class="card-title">{{brand}} {{model}}</h5>
                         <h6 class="card-subtitle mb-2 text-muted">
@@ -96,7 +95,7 @@
                         <p class="text-muted mb-0">
                             <small>
                                 <i class="bi bi-person"></i> {{provider_name}}
-                                {{#if provider_location}} | <i class="bi bi-geo-alt"></i> {{provider_location}}{{/if}}
+                                {{#if provider_location}} | <i class="bi-geo-alt bi"></i> {{provider_location}}{{/if}}
                             </small>
                         </p>
                     </div>
@@ -107,6 +106,49 @@
                         <span class="text-muted">Contact for pricing</span>
                         {{/if}}
                         <a href="/services/{{id}}" class="btn btn-secondary float-end">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+    {{/if}}
+    {{/if}}
+
+    <!-- Users Section -->
+    {{#if users}}
+    {{#if users.length}}
+    <div class="mb-5">
+        <h4 class="mb-3">People</h4>
+        <div class="row g-3">
+            {{#each users}}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="badge bg-primary me-2">User</div>
+                            <h5 class="card-title mb-0">{{username}}</h5>
+                        </div>
+                        <p class="text-muted mb-1">
+                            {{#if location}}
+                            <i class="bi bi-geo-alt"></i> {{location}}
+                            {{else}}
+                            <span class="text-muted">Location not specified</span>
+                            {{/if}}
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pb-3 d-flex justify-content-between">
+                        <a href="/users/{{id}}" class="btn btn-outline-secondary btn-sm">
+                            View Profile
+                        </a>
+                        {{#if ../userId}}
+                        {{#if (eq connectionStatus 'accepted')}}
+                        <a href="/chat?user={{id}}" class="btn btn-primary btn-sm">Message</a>
+                        {{else}}
+                        <button class="btn btn-secondary btn-sm" disabled>Connect to message</button>
+                        {{/if}}
+
+                        {{/if}}
                     </div>
                 </div>
             </div>
