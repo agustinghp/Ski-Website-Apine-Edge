@@ -3,16 +3,16 @@ const router = express.Router();
 
 module.exports = (db) => {
 
-
     // Service Detail Page
     router.get('/:id', async (req, res) => {
         try {
             const serviceId = parseInt(req.params.id, 10);
+            const viewerId = req.session.userId; // logged-in user (may be undefined)
 
             if (isNaN(serviceId)) {
                 return res.render('pages/service-detail', {
                     title: 'Service Not Found',
-                    userId: req.session.userId,
+                    userId: viewerId,
                     error: 'Invalid service ID.'
                 });
             }
@@ -28,7 +28,7 @@ module.exports = (db) => {
             if (!service) {
                 return res.render('pages/service-detail', {
                     title: 'Service Not Found',
-                    userId: req.session.userId,
+                    userId: viewerId,
                     error: 'Service not found.'
                 });
             }
@@ -42,14 +42,32 @@ module.exports = (db) => {
             };
 
             // Check if current user is the owner
-            const isOwner = req.session.userId === service.user_id;
+            const isOwner = viewerId === service.user_id;
+
+            // --- NEW: Connection status between viewer and provider ---
+            let connectionStatus = 'none'; // 'none', 'pending', 'accepted', 'declined'
+
+            if (viewerId && !isOwner) {
+                const connection = await db.oneOrNone(`
+                    SELECT requester_id, receiver_id, status
+                    FROM connections
+                    WHERE (requester_id = $1 AND receiver_id = $2)
+                       OR (requester_id = $2 AND receiver_id = $1)
+                `, [viewerId, provider.id]);
+
+                if (connection) {
+                    connectionStatus = connection.status; // pending / accepted / declined
+                }
+            }
+            // --- END NEW ---
 
             res.render('pages/service-detail', {
                 title: service.servicename,
-                userId: req.session.userId,
-                service: service,
-                provider: provider,
-                isOwner: isOwner
+                userId: viewerId,
+                service,
+                provider,
+                isOwner,
+                connectionStatus   // <-- now available to the template
             });
 
         } catch (error) {

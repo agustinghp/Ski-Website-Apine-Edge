@@ -7,11 +7,12 @@ module.exports = (db) => {
     router.get('/:id', async (req, res) => {
         try {
             const productId = parseInt(req.params.id, 10);
+            const viewerId = req.session.userId; // logged-in user (may be undefined)
 
             if (isNaN(productId)) {
                 return res.render('pages/product-detail', {
                     title: 'Product Not Found',
-                    userId: req.session.userId,
+                    userId: viewerId,
                     error: 'Invalid product ID.'
                 });
             }
@@ -27,7 +28,7 @@ module.exports = (db) => {
             if (!product) {
                 return res.render('pages/product-detail', {
                     title: 'Product Not Found',
-                    userId: req.session.userId,
+                    userId: viewerId,
                     error: 'Product not found.'
                 });
             }
@@ -41,14 +42,32 @@ module.exports = (db) => {
             };
 
             // Check if current user is the owner
-            const isOwner = req.session.userId === product.user_id;
+            const isOwner = viewerId === product.user_id;
+
+            // --- NEW: Connection status between viewer and seller ---
+            let connectionStatus = 'none'; // 'none', 'pending', 'accepted', 'declined'
+
+            if (viewerId && !isOwner) {
+                const connection = await db.oneOrNone(`
+                    SELECT requester_id, receiver_id, status
+                    FROM connections
+                    WHERE (requester_id = $1 AND receiver_id = $2)
+                       OR (requester_id = $2 AND receiver_id = $1)
+                `, [viewerId, seller.id]);
+
+                if (connection) {
+                    connectionStatus = connection.status; // pending / accepted / declined
+                }
+            }
+            // --- END NEW ---
 
             res.render('pages/product-detail', {
                 title: product.productname,
-                userId: req.session.userId,
-                product: product,
-                seller: seller,
-                isOwner: isOwner
+                userId: viewerId,
+                product,
+                seller,
+                isOwner,
+                connectionStatus     // <-- now available in the template
             });
 
         } catch (error) {
@@ -60,5 +79,6 @@ module.exports = (db) => {
             });
         }
     });
+
     return router;
 };

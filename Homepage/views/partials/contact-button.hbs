@@ -1,0 +1,57 @@
+{{!-- 
+    contact-button.hbs
+    Params expected:
+        userId            = logged-in userId (or null)
+        isOwner           = true/false
+        otherUserId       = ID of seller/provider
+        connectionStatus  = "none" | "pending" | "accepted" | "declined"
+--}}
+
+{{!-- Not logged in --}}
+{{#unless userId}}
+<a href="/login" class="btn btn-primary btn-lg">
+    <i class="bi bi-box-arrow-in-right"></i> Login to Contact User
+</a>
+{{/unless}}
+
+{{!-- Logged in --}}
+{{#if userId}}
+
+    {{!-- Owner --}}
+    {{#if isOwner}}
+    <a href="/profile" class="btn btn-secondary btn-lg">
+        <i class="bi bi-pencil"></i> Edit Listing
+    </a>
+    {{else}}
+
+        {{!-- Accepted connection → Go to Chat --}}
+        {{#if (eq connectionStatus "accepted")}}
+        <a href="/chat?user={{otherUserId}}" class="btn btn-primary btn-lg">
+            <i class="bi bi-chat-dots"></i> Message User
+        </a>
+        {{/if}}
+
+        {{!-- Pending connection --}}
+        {{#if (eq connectionStatus "pending")}}
+        <a href="/users/{{otherUserId}}" class="btn btn-warning btn-lg text-white">
+            <i class="bi bi-hourglass-split"></i> Request Pending (View Profile)
+        </a>
+        {{/if}}
+
+        {{!-- Declined connection --}}
+        {{#if (eq connectionStatus "declined")}}
+        <a href="/users/{{otherUserId}}" class="btn btn-danger btn-lg">
+            <i class="bi bi-x-circle"></i> Connection Declined (View Profile)
+        </a>
+        {{/if}}
+
+        {{!-- No connection --}}
+        {{#if (eq connectionStatus "none")}}
+        <a href="/users/{{otherUserId}}" class="btn btn-primary btn-lg">
+            <i class="bi bi-person-plus"></i> Contact User
+        </a>
+        {{/if}}
+
+    {{/if}}
+
+{{/if}}

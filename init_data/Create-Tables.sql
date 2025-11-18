@@ -20,7 +20,8 @@ CREATE TABLE Products (
     model VARCHAR(50) NOT NULL,
     skiLength DECIMAL(4,1),
     skiWidth DECIMAL(4,1),
-    price DECIMAL(7,2)
+    price DECIMAL(7,2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 3. Services Table (Depends on users)
@@ -30,7 +31,8 @@ CREATE TABLE Services (
     user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     serviceName VARCHAR(50) NOT NULL,
     serviceDescription TEXT,
-    price DECIMAL(7,2)
+    price DECIMAL(7,2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 4. Connections Table (Depends on users)
