@@ -174,33 +174,77 @@ module.exports = (db, auth) => {
     });
     // Re-send connection request after you declined theirs
     router.post('/:id/request-again', auth, async (req, res) => {
-        const viewerId = req.session.userId;   // You
-        const otherUserId = parseInt(req.params.id, 10);
+        const viewerId = req.session.userId;              // You (logged-in user)
+        const otherUserId = parseInt(req.params.id, 10);  // Profile you are viewing
 
         try {
-            // 1. Remove the declined request THEY sent to you
+            // 1. Delete ANY existing connection between the two users
             await db.none(`
             DELETE FROM connections
-            WHERE requester_id = $1
-            AND receiver_id = $2
-            AND status = 'declined'
-            `, [otherUserId, viewerId]);
+            WHERE (requester_id = $1 AND receiver_id = $2)
+               OR (requester_id = $2 AND receiver_id = $1)
+        `, [viewerId, otherUserId]);
 
-            // 2. Create a new pending request YOU send to them
+            // 2. Create a fresh pending request (YOU → THEM)
             await db.none(`
             INSERT INTO connections (requester_id, receiver_id, status)
             VALUES ($1, $2, 'pending')
-            ON CONFLICT (requester_id, receiver_id) DO NOTHING
-            `, [viewerId, otherUserId]);
+        `, [viewerId, otherUserId]);
 
-            // Redirect back to their profile
+            // 3. Redirect to the user's profile
             res.redirect(`/users/${otherUserId}`);
 
         } catch (err) {
-            console.error('Error sending request again:', err);
+            // Fail gracefully by redirecting back anyway
             res.redirect(`/users/${otherUserId}`);
         }
     });
+
+
+    // Request Again
+    router.post('/:id/request-again', auth, async (req, res) => {
+        const requesterId = req.session.userId;
+        const receiverId = parseInt(req.params.id, 10);
+
+        try {
+            // Delete any old declined/pending connection
+            await db.none(`
+            DELETE FROM connections
+            WHERE (requester_id = $1 AND receiver_id = $2)
+               OR (requester_id = $2 AND receiver_id = $1)
+        `, [requesterId, receiverId]);
+
+            // Create new pending request
+            await db.none(`
+            INSERT INTO connections (requester_id, receiver_id, status)
+            VALUES ($1, $2, 'pending')
+        `, [requesterId, receiverId]);
+
+            return res.redirect(`/users/${receiverId}`);
+        } catch (err) {
+            console.error('Error requesting again:', err);
+            return res.redirect(`/users/${receiverId}`);
+        }
+    });
+
+    router.post('/:id/delete-connection', auth, async (req, res) => {
+        const viewerId = req.session.userId;
+        const otherUserId = parseInt(req.params.id, 10);
+
+        try {
+            await db.none(`
+            DELETE FROM connections
+            WHERE (requester_id = $1 AND receiver_id = $2)
+               OR (requester_id = $2 AND receiver_id = $1)
+        `, [viewerId, otherUserId]);
+
+            res.redirect(`/users/${otherUserId}`);
+        } catch (err) {
+            res.redirect(`/users/${otherUserId}`);
+        }
+    });
+
+
 
 
     return router;
