@@ -1,119 +1,187 @@
 <div class="container my-4">
-    <p class="text-muted">Joined: {{formatDate user.created_at}}</p>
-    <p><strong>Location:</strong> {{user.location}}</p>
+    <div class="row">
+        <!-- User Info Sidebar -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <!-- Profile Picture -->
+                    {{#if user.profile_image}}
+                        <img src="{{user.profile_image}}" alt="{{user.username}}" 
+                             class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {{else}}
+                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto mb-3" 
+                             style="width: 150px; height: 150px;">
+                            <span class="display-4">{{substring user.username 0 1}}</span>
+                        </div>
+                    {{/if}}
+                    
+                    <h4>{{user.username}}</h4>
+                    <p class="text-muted">
+                        <i class="bi bi-geo-alt"></i> {{user.location}}
+                    </p>
+                    <p class="text-muted small">
+                        <i class="bi bi-clock"></i> Joined: {{formatDate user.created_at}}
+                    </p>
 
-    {{!-- Email logic --}}
-    {{#if showEmail}}
-    <p><strong>Email:</strong> {{user.email}}</p>
-    {{/if}}
-
-
-    <hr>
-
-    {{!-- Connection Buttons --}}
-    <div class="mt-3">
-
-        {{!-- 1. ACCEPTED CONNECTION --}}
-        {{#if (eq connectionStatus "accepted")}}
-
-        {{!-- Only show buttons if viewing someone else --}}
-        {{#unless (eq user.id ../userId)}}
-        <div class="d-flex gap-2 mt-2">
-
-            <a href="/chat?user={{user.id}}" class="btn btn-primary">
-                Message
-            </a>
-
-            <form method="POST" action="/users/{{user.id}}/delete-connection">
-                <button class="btn btn-danger" type="submit">
-                    Delete Connection
-                </button>
-            </form>
-
+                    {{#if showEmail}}
+                        <p class="text-muted"><i class="bi bi-envelope"></i> {{user.email}}</p>
+                    {{/if}}
+                </div>
+            </div>
         </div>
-        {{/unless}}
 
-        {{!-- 2. PENDING (you sent) --}}
-        {{else}}
-        {{#if (and (eq connectionStatus "pending") isRequester)}}
-        <button class="btn btn-secondary" disabled>Request Sent</button>
+        <!-- Main Content -->
+        <div class="col-md-8">
+            <!-- Connection Buttons -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    {{#if (eq connectionStatus "accepted")}}
+                        {{#unless (eq user.id ../userId)}}
+                        <div class="d-flex gap-2">
+                            <a href="/chat?user={{user.id}}" class="btn btn-primary">
+                                <i class="bi bi-chat-dots"></i> Message
+                            </a>
+                            <form method="POST" action="/users/{{user.id}}/delete-connection">
+                                <button class="btn btn-outline-danger" type="submit">
+                                    <i class="bi bi-trash"></i> Remove Connection
+                                </button>
+                            </form>
+                        </div>
+                        {{/unless}}
 
-        {{!-- 3. PENDING (they sent) --}}
-        {{else}}
-        {{#if (and (eq connectionStatus "pending") (not isRequester))}}
-        <form method="POST" action="/users/{{user.id}}/accept" style="display:inline;">
-            <button class="btn btn-success">Accept</button>
-        </form>
+                    {{else}}
+                        {{#if (and (eq connectionStatus "pending") isRequester)}}
+                            <button class="btn btn-secondary" disabled>
+                                <i class="bi bi-clock"></i> Request Sent
+                            </button>
 
-        <form method="POST" action="/users/{{user.id}}/decline" style="display:inline;">
-            <button class="btn btn-outline-danger">Decline</button>
-        </form>
+                        {{else}}
+                            {{#if (and (eq connectionStatus "pending") (not isRequester))}}
+                                <div class="d-flex gap-2">
+                                    <form method="POST" action="/users/{{user.id}}/accept">
+                                        <button class="btn btn-success">
+                                            <i class="bi bi-check-circle"></i> Accept Request
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="/users/{{user.id}}/decline">
+                                        <button class="btn btn-outline-danger">
+                                            <i class="bi bi-x-circle"></i> Decline
+                                        </button>
+                                    </form>
+                                </div>
 
-        {{!-- 4. DECLINED --}}
-        {{else}}
-        {{#if (eq connectionStatus "declined")}}
+                            {{else}}
+                                {{#if (eq connectionStatus "declined")}}
+                                    {{#if isRequester}}
+                                        <div class="alert alert-danger">
+                                            <i class="bi bi-x-circle"></i> This user declined your request.
+                                        </div>
+                                    {{else}}
+                                        <div class="alert alert-warning">
+                                            <i class="bi bi-info-circle"></i> You declined this user's request.
+                                        </div>
+                                        <form method="POST" action="/users/{{user.id}}/request-again">
+                                            <button class="btn btn-primary">
+                                                <i class="bi bi-person-plus"></i> Send Request Again
+                                            </button>
+                                        </form>
+                                    {{/if}}
 
-        {{!-- If YOU were the requester → they declined you --}}
-        {{#if isRequester}}
-        <p class="text-danger fw-semibold">This user declined your request.</p>
+                                {{else}}
+                                    {{#unless (eq user.id ../userId)}}
+                                        <form method="POST" action="/users/{{user.id}}/request">
+                                            <button class="btn btn-primary">
+                                                <i class="bi bi-person-plus"></i> Connect
+                                            </button>
+                                        </form>
+                                    {{/unless}}
+                                {{/if}}
+                            {{/if}}
+                        {{/if}}
+                    {{/if}}
+                </div>
+            </div>
 
-        {{!-- If THEY were the requester → you declined them --}}
-        {{else}}
-        <p class="text-warning fw-semibold">You declined this user.</p>
+            <!-- Products Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Products ({{products.length}})</h5>
+                </div>
+                <div class="card-body">
+                    {{#if products.length}}
+                        <div class="row g-3">
+                            {{#each products}}
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        {{#if primary_image}}
+                                            <img src="{{primary_image}}" class="card-img-top" 
+                                                 style="height: 180px; object-fit: cover;" alt="{{productname}}">
+                                        {{else}}
+                                            <div class="bg-light d-flex align-items-center justify-content-center" 
+                                                 style="height: 180px;">
+                                                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                            </div>
+                                        {{/if}}
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{productname}}</h6>
+                                            <p class="card-text text-success fw-bold">${{price}}</p>
+                                            <a href="/products/{{id}}" class="btn btn-sm btn-outline-primary w-100">
+                                                View Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {{/each}}
+                        </div>
+                    {{else}}
+                        <p class="text-muted text-center mb-0">No products listed.</p>
+                    {{/if}}
+                </div>
+            </div>
 
-        <form method="POST" action="/users/{{user.id}}/request-again">
-            <button class="btn btn-primary mt-2">Send Request Again</button>
-        </form>
-        {{/if}}
-
-        {{!-- 5. NO CONNECTION --}}
-        {{else}}
-        {{#unless (eq user.id ../userId)}}
-        <form method="POST" action="/users/{{user.id}}/request">
-            <button class="btn btn-primary">Connect</button>
-        </form>
-        {{/unless}}
-        {{/if}}
-
-        {{/if}}
-        {{/if}}
-        {{/if}}
-
+            <!-- Services Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Services ({{services.length}})</h5>
+                </div>
+                <div class="card-body">
+                    {{#if services.length}}
+                        <div class="row g-3">
+                            {{#each services}}
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        {{#if primary_image}}
+                                            <img src="{{primary_image}}" class="card-img-top" 
+                                                 style="height: 180px; object-fit: cover;" alt="{{servicename}}">
+                                        {{else}}
+                                            <div class="bg-light d-flex align-items-center justify-content-center" 
+                                                 style="height: 180px;">
+                                                <i class="bi bi-briefcase text-muted" style="font-size: 3rem;"></i>
+                                            </div>
+                                        {{/if}}
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{servicename}}</h6>
+                                            {{#if price}}
+                                                <p class="card-text text-success fw-bold">${{price}}</p>
+                                            {{else}}
+                                                <p class="card-text text-muted">Contact for pricing</p>
+                                            {{/if}}
+                                            <a href="/services/{{id}}" class="btn btn-sm btn-outline-primary w-100">
+                                                View Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {{/each}}
+                        </div>
+                    {{else}}
+                        <p class="text-muted text-center mb-0">No services listed.</p>
+                    {{/if}}
+                </div>
+            </div>
+        </div>
     </div>
-
-
-    <hr class="my-4">
-
-    <h3>Listings</h3>
-
-    <h4 class="mt-3">Products</h4>
-
-    {{#if products.length}}
-    <div class="list-group mb-4">
-        {{#each products}}
-        <a href="/products/{{id}}" class="list-group-item list-group-item-action">
-            <strong>{{productname}}</strong> — ${{price}}
-        </a>
-        {{/each}}
-    </div>
-    {{else}}
-    <p class="text-muted">No products listed.</p>
-    {{/if}}
-
-    <h4 class="mt-3">Services</h4>
-
-    {{#if services.length}}
-    <div class="list-group">
-        {{#each services}}
-        <a href="/services/{{id}}" class="list-group-item list-group-item-action">
-            <strong>{{servicename}}</strong> — ${{price}}
-        </a>
-        {{/each}}
-    </div>
-    {{else}}
-    <p class="text-muted">No services listed.</p>
-    {{/if}}
-
-
-
 </div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">

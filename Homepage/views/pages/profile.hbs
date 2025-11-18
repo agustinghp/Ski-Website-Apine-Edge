@@ -1,140 +1,155 @@
-<div class="row g-4">
-    <!-- Column 1: Profile & Connections -->
-    <div class="col-lg-4">
-        <!-- Profile Card -->
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body text-center">
+<!-- Updated profile.hbs with profile picture upload -->
+<div class="container mt-5">
+    <div class="row">
+        <!-- Profile Sidebar -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <!-- Profile Picture -->
+                    {{#if user.profile_image}}
+                        <img src="{{user.profile_image}}" alt="{{user.username}}" 
+                             class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {{else}}
+                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto mb-3" 
+                             style="width: 150px; height: 150px;">
+                            <span class="display-4">{{substring user.username 0 1}}</span>
+                        </div>
+                    {{/if}}
 
-                <h3 class="card-title mt-3">{{user.username}}</h3>
-                <p class="text-muted">{{user.email}}</p>
-                <p class="text-muted">{{user.location}}</p>
+                    <h4>{{user.username}}</h4>
+                    <p class="text-muted">
+                        <i class="bi bi-geo-alt"></i> {{user.location}}
+                    </p>
+
+                    <!-- Upload Profile Picture Form -->
+                    <form action="/profile/upload-picture" method="POST" enctype="multipart/form-data" id="profilePictureForm">
+                        <div class="mb-3">
+                            <label for="profileImage" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="bi bi-camera"></i> Change Profile Picture
+                            </label>
+                            <input type="file" class="d-none" id="profileImage" name="profileImage" 
+                                   accept="image/*" onchange="document.getElementById('profilePictureForm').submit();">
+                        </div>
+                    </form>
+
+                    <hr>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="/profile/requests" class="btn btn-outline-secondary">
+                            <i class="bi bi-person-plus"></i> Connection Requests
+                        </a>
+                        <a href="/create-listing" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Create Listing
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Connections Card -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Connections ({{connections.length}})</h5>
+                </div>
+                <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                    {{#if connections}}
+                        <div class="list-group list-group-flush">
+                            {{#each connections}}
+                                <a href="/users/{{user_id}}" class="list-group-item list-group-item-action d-flex align-items-center">
+                                    {{#if profile_image}}
+                                        <img src="{{profile_image}}" alt="{{username}}" 
+                                             class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                    {{else}}
+                                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" 
+                                             style="width: 40px; height: 40px;">
+                                            <span>{{substring username 0 1}}</span>
+                                        </div>
+                                    {{/if}}
+                                    <span>{{username}}</span>
+                                </a>
+                            {{/each}}
+                        </div>
+                    {{else}}
+                        <p class="text-muted text-center">No connections yet</p>
+                    {{/if}}
+                </div>
             </div>
         </div>
 
-        <!-- Quick Actions Card -->
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header bg-transparent border-0 pt-3">
-                <h5 class="mb-0">Quick Actions</h5>
-            </div>
-            <div class="card-body d-grid gap-2">
-                <!-- THIS IS THE LINK TO THE CHAT PAGE -->
-                <a href="/chat" class="btn btn-primary btn-lg">
-                    Go to My Chats
-                </a>
-                <a href="/profile/requests" class="btn btn-outline-primary">
-                    <i class="bi bi-people"></i> Connection Requests
-                </a>
-
-                <a href="/create-listing" class="btn btn-outline-secondary">
-                    <i class="bi bi-plus-circle"></i> Create New Listing
-                </a>
-            </div>
-        </div>
-
-        <!-- Connections Card -->
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-transparent border-0 pt-3">
-                <h5 class="mb-0">My Connections</h5>
-            </div>
-            <div class="list-group list-group-flush">
-                {{#each connections}}
-                <a href="/users/{{this.user_id}}" class="list-group-item list-group-item-action">{{this.username}}</a>
-                {{else}}
-                <p class="p-3 text-muted">No connections yet. Find users via listings!</p>
-                {{/each}}
-            </div>
-        </div>
-    </div>
-
-    <!-- Column 2: Listings -->
-    <div class="col-lg-8">
-        <!-- My Product Listings -->
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header bg-transparent border-0 pt-3">
-                <h5 class="mb-0">My Product Listings</h5>
-            </div>
-            <div class="card-body">
-                {{#each products}}
-                <div class="card mb-3 border-0 shadow-sm">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">{{this.productname}}</h6>
-                                <p class="text-muted mb-2 small">{{this.brand}} {{this.model}}</p>
-                                {{#if this.productdescription}}
-                                <p class="mb-2 small">{{this.productdescription}}</p>
-                                {{/if}}
-                                <div class="text-muted small">
-                                    {{#if this.skilength}}<span class="me-3"><i class="bi bi-rulers"></i>
-                                        {{this.skilength}}cm</span>{{/if}}
-                                    {{#if this.skiwidth}}<span><i class="bi bi-arrows-expand"></i>
-                                        {{this.skiwidth}}mm</span>{{/if}}
+        <!-- Main Content -->
+        <div class="col-md-8">
+            <!-- Products Section -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">My Products ({{products.length}})</h5>
+                    <a href="/create-listing" class="btn btn-sm btn-primary">Add Product</a>
+                </div>
+                <div class="card-body">
+                    {{#if products}}
+                        <div class="row">
+                            {{#each products}}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        {{#if primary_image}}
+                                            <img src="{{primary_image}}" class="card-img-top" 
+                                                 style="height: 200px; object-fit: cover;" alt="{{productname}}">
+                                        {{else}}
+                                            <div class="bg-light d-flex align-items-center justify-content-center" 
+                                                 style="height: 200px;">
+                                                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                            </div>
+                                        {{/if}}
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{productname}}</h6>
+                                            <p class="card-text text-success fw-bold">${{price}}</p>
+                                            <a href="/products/{{id}}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="text-end ms-3">
-                                <h5 class="text-primary mb-2">${{this.price}}</h5>
-                                <a href="/products/{{this.id}}" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-eye"></i> View
-                                </a>
-                            </div>
+                            {{/each}}
                         </div>
-                    </div>
+                    {{else}}
+                        <p class="text-muted text-center">You haven't created any product listings yet.</p>
+                    {{/if}}
                 </div>
-                {{else}}
-                <div class="text-center py-5">
-                    <i class="bi bi-box-seam text-muted" style="font-size: 48px;"></i>
-                    <p class="text-muted mt-3">You have not listed any products yet.</p>
-                    <a href="/create-listing" class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i> Create Your First Product
-                    </a>
-                </div>
-                {{/each}}
             </div>
-        </div>
 
-        <!-- My Service Listings -->
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-transparent border-0 pt-3">
-                <h5 class="mb-0">My Service Listings</h5>
-            </div>
-            <div class="card-body">
-                {{#each services}}
-                <div class="card mb-3 border-0 shadow-sm bg-light">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <span class="badge bg-info text-dark mb-2">Service</span>
-                                <h6 class="mb-1">{{this.servicename}}</h6>
-                                {{#if this.servicedescription}}
-                                <p class="mb-2 small text-muted">{{this.servicedescription}}</p>
-                                {{/if}}
-                            </div>
-                            <div class="text-end ms-3">
-                                {{#if this.price}}
-                                <h5 class="text-primary mb-2">${{this.price}}</h5>
-                                {{else}}
-                                <p class="text-muted small mb-2">Custom Pricing</p>
-                                {{/if}}
-                                <a href="/services/{{this.id}}" class="btn btn-sm btn-outline-info">
-                                    <i class="bi bi-eye"></i> View
-                                </a>
-                            </div>
+            <!-- Services Section -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">My Services ({{services.length}})</h5>
+                    <a href="/create-listing" class="btn btn-sm btn-primary">Add Service</a>
+                </div>
+                <div class="card-body">
+                    {{#if services}}
+                        <div class="row">
+                            {{#each services}}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        {{#if primary_image}}
+                                            <img src="{{primary_image}}" class="card-img-top" 
+                                                 style="height: 200px; object-fit: cover;" alt="{{servicename}}">
+                                        {{else}}
+                                            <div class="bg-light d-flex align-items-center justify-content-center" 
+                                                 style="height: 200px;">
+                                                <i class="bi bi-briefcase text-muted" style="font-size: 3rem;"></i>
+                                            </div>
+                                        {{/if}}
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{servicename}}</h6>
+                                            {{#if price}}
+                                                <p class="card-text text-success fw-bold">${{price}}</p>
+                                            {{/if}}
+                                            <a href="/services/{{id}}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {{/each}}
                         </div>
-                    </div>
+                    {{else}}
+                        <p class="text-muted text-center">You haven't created any service listings yet.</p>
+                    {{/if}}
                 </div>
-                {{else}}
-                <div class="text-center py-5">
-                    <i class="bi bi-tools text-muted" style="font-size: 48px;"></i>
-                    <p class="text-muted mt-3">You have not listed any services yet.</p>
-                    <a href="/create-listing" class="btn btn-info text-white">
-                        <i class="bi bi-plus-circle"></i> Create Your First Service
-                    </a>
-                </div>
-                {{/each}}
             </div>
         </div>
     </div>
 </div>
-
-<!-- Bootstrap Icons -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">

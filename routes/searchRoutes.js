@@ -15,38 +15,42 @@ module.exports = (db) => {
 
       // If search query is empty or just whitespace, show all items
       if (searchQuery.trim() === '') {
-        // Show all products
+        // Show all products with images
         if (searchType === 'all' || searchType === 'products') {
           const productQuery = `
             SELECT 
               p.id, p.productName as productname, p.productDescription as productdescription, 
               p.brand, p.model, p.skiLength as skilength, p.skiWidth as skiwidth, p.price,
-              u.username as seller_name, u.location as seller_location
+              u.username as seller_name, u.location as seller_location,
+              pi.image_path as primary_image
             FROM Products p 
             JOIN users u ON p.user_id = u.id
+            LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = true
             ORDER BY p.id DESC
           `;
           products = await db.any(productQuery);
         }
 
-        // Show all services
+        // Show all services with images
         if (searchType === 'all' || searchType === 'services') {
           const serviceQuery = `
             SELECT 
               s.id, s.serviceName as servicename, s.serviceDescription as servicedescription, s.price,
-              u.username as provider_name, u.location as provider_location
+              u.username as provider_name, u.location as provider_location,
+              si.image_path as primary_image
             FROM Services s 
             JOIN users u ON s.user_id = u.id
+            LEFT JOIN service_images si ON s.id = si.service_id AND si.is_primary = true
             ORDER BY s.id DESC
           `;
           services = await db.any(serviceQuery);
         }
 
-        // Show all users
+        // Show all users with profile pictures
         if (searchType === 'all' || searchType === 'users') {
           const userQuery = `
             SELECT 
-              id, username, email, location
+              id, username, email, location, profile_image
             FROM users
             ORDER BY id DESC
           `;
@@ -62,9 +66,11 @@ module.exports = (db) => {
             SELECT 
               p.id, p.productName as productname, p.productDescription as productdescription, 
               p.brand, p.model, p.skiLength as skilength, p.skiWidth as skiwidth, p.price,
-              u.username as seller_name, u.location as seller_location
+              u.username as seller_name, u.location as seller_location,
+              pi.image_path as primary_image
             FROM Products p 
             JOIN users u ON p.user_id = u.id
+            LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = true
             WHERE 
               p.productName ILIKE $1 
               OR p.productDescription ILIKE $1 
@@ -79,9 +85,11 @@ module.exports = (db) => {
           const serviceQuery = `
             SELECT 
               s.id, s.serviceName as servicename, s.serviceDescription as servicedescription, s.price,
-              u.username as provider_name, u.location as provider_location
+              u.username as provider_name, u.location as provider_location,
+              si.image_path as primary_image
             FROM Services s 
             JOIN users u ON s.user_id = u.id
+            LEFT JOIN service_images si ON s.id = si.service_id AND si.is_primary = true
             WHERE 
               s.serviceName ILIKE $1 
               OR s.serviceDescription ILIKE $1
@@ -93,7 +101,7 @@ module.exports = (db) => {
         if (searchType === 'all' || searchType === 'users') {
           const userQuery = `
           SELECT 
-          id, username, location
+          id, username, location, profile_image
           FROM users
           WHERE 
           username ILIKE $1
@@ -124,11 +132,8 @@ module.exports = (db) => {
         u.connectionStatus = connection ? connection.status : 'none';
       }
 
-
       const resultCount = products.length + services.length + users.length;
       const hasResults = resultCount > 0;
-
-
 
       // Render the search page with results
       res.render('pages/search', {
@@ -140,7 +145,7 @@ module.exports = (db) => {
         users: users,
         resultCount: resultCount,
         hasResults: hasResults,
-        userId: req.session.userId // Pass session data (for nav + buttons)
+        userId: req.session.userId
       });
 
     } catch (error) {

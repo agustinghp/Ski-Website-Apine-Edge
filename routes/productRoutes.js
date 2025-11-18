@@ -19,7 +19,7 @@ module.exports = (db) => {
 
             // Get product with seller information
             const product = await db.oneOrNone(`
-                SELECT p.*, u.username, u.location, u.created_at as seller_created_at, u.id as seller_id
+                SELECT p.*, u.username, u.location, u.created_at as seller_created_at, u.id as seller_id, u.profile_image
                 FROM Products p
                 JOIN users u ON p.user_id = u.id
                 WHERE p.id = $1
@@ -33,19 +33,28 @@ module.exports = (db) => {
                 });
             }
 
+            // Get all images for this product
+            const images = await db.any(`
+                SELECT image_path, is_primary
+                FROM product_images
+                WHERE product_id = $1
+                ORDER BY is_primary DESC, id ASC
+            `, [productId]);
+
             // Create seller object
             const seller = {
                 id: product.seller_id,
                 username: product.username,
                 location: product.location,
-                created_at: product.seller_created_at
+                created_at: product.seller_created_at,
+                profile_image: product.profile_image
             };
 
             // Check if current user is the owner
             const isOwner = viewerId === product.user_id;
 
-            // --- NEW: Connection status between viewer and seller ---
-            let connectionStatus = 'none'; // 'none', 'pending', 'accepted', 'declined'
+            // Connection status between viewer and seller
+            let connectionStatus = 'none';
 
             if (viewerId && !isOwner) {
                 const connection = await db.oneOrNone(`
@@ -56,18 +65,18 @@ module.exports = (db) => {
                 `, [viewerId, seller.id]);
 
                 if (connection) {
-                    connectionStatus = connection.status; // pending / accepted / declined
+                    connectionStatus = connection.status;
                 }
             }
-            // --- END NEW ---
 
             res.render('pages/product-detail', {
                 title: product.productname,
                 userId: viewerId,
                 product,
+                images,
                 seller,
                 isOwner,
-                connectionStatus     // <-- now available in the template
+                connectionStatus
             });
 
         } catch (error) {
