@@ -108,6 +108,18 @@ document.addEventListener('DOMContentLoaded', () => {
         activeChatUserId = parseInt(userId, 10);
         activeChatUsername = userItem.getAttribute('data-username');
 
+        // 🔥 Update chat header (name + profile button)
+        const chatHeader = document.getElementById("chat-header");
+        const chatHeaderName = document.getElementById("chat-username");
+        const chatHeaderBtn = document.getElementById("chat-profile-btn");
+
+        if (chatHeader && chatHeaderName && chatHeaderBtn) {
+            chatHeader.style.display = "flex";
+            chatHeaderName.textContent = activeChatUsername;
+            chatHeaderBtn.href = `/users/${activeChatUserId}`;
+        }
+
+
         // Reset chat UI
         chatMessages.innerHTML = '';
         messageInput.disabled = false;

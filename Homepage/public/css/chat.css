@@ -115,18 +115,25 @@
 ===================================== */
 
 #toggle-sidebar-btn {
-    display: none; /* visible only on mobile */
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 50;
-
+    display: none; /* hidden on large screens */
     padding: 6px 10px;
     background: #fff;
     border: 1px solid #dee2e6;
     border-radius: 6px;
     cursor: pointer;
+
+    /* IMPORTANT: NO ABSOLUTE POSITIONING */
+    position: static;
 }
+
+/* Show it on smaller screens, but keep it inline (no overlap) */
+@media (max-width: 900px) {
+    #toggle-sidebar-btn {
+        display: inline-block;
+    }
+}
+
+
 
 
 /* =====================================

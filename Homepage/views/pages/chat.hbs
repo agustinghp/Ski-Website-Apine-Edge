@@ -1,18 +1,20 @@
 <link rel="stylesheet" href="/css/chat.css">
 
-{{!-- Make currentUserId available to JS --}}
 <script>
     const currentUserId = {{ currentUserId }};
 </script>
 
 <div class="card shadow-sm border-0">
+
     <div class="card-body p-0">
         <div class="chat-container">
 
+            <!-- SIDEBAR -->
             <div class="chat-sidebar">
                 <div class="p-3 border-bottom">
                     <h5 class="mb-0">Connections</h5>
                 </div>
+
                 <div id="connection-list" class="list-group list-group-flush">
                     {{#if connections}}
                     {{#each connections}}
@@ -27,33 +29,56 @@
                 </div>
             </div>
 
+            <!-- MAIN CHAT -->
             <div class="chat-main">
-                <button id="toggle-sidebar-btn" class="btn btn-light shadow-sm">
-                    ☰
-                </button>
 
+                <!-- HEADER with button on the LEFT -->
+                <div id="chat-header" class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom"
+                    style="display: none;">
+
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Button should be here -->
+                        <button id="toggle-sidebar-btn" class="btn btn-light btn-sm shadow-sm">
+                            ☰
+                        </button>
+
+                        <h5 id="chat-username" class="mb-0"></h5>
+                    </div>
+
+                    <a id="chat-profile-btn" href="#" class="btn btn-outline-primary btn-sm">
+                        View Profile
+                    </a>
+                </div>
+
+
+                <!-- Messages -->
                 <div class="chat-messages" id="chat-messages">
                     <div id="chat-window-placeholder" class="text-center text-muted" style="margin-top: 20%;">
                         <p class="fs-4">Select a connection to start chatting</p>
                     </div>
                 </div>
+
                 <div id="typing-indicator" class="text-muted px-3 pb-1" style="display: none; font-size: 0.9rem;">
                     <em>Typing...</em>
                 </div>
 
+                <!-- Form -->
                 <div class="chat-form-container">
                     <form id="chat-form" class="d-flex gap-2">
                         <input type="text" id="message-input" class="form-control form-control-lg"
                             placeholder="Type a message..." disabled>
-                        <button type="submit" class="btn btn-primary btn-lg" disabled>Send</button>
+
+                        <button type="submit" class="btn btn-primary btn-lg" disabled>
+                            Send
+                        </button>
                     </form>
                 </div>
-            </div>
 
+            </div>
         </div>
     </div>
-</div>
 
+</div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/chat.js"></script>
