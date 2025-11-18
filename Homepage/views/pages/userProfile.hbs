@@ -13,19 +13,34 @@
     {{!-- Connection Buttons --}}
     <div class="mt-3">
 
-        {{!-- Accepted --}}
+        {{!-- 1. ACCEPTED CONNECTION --}}
         {{#if (eq connectionStatus "accepted")}}
-        {{#if (not (eq user.id ../userId))}}
-        <a href="/chat?user={{user.id}}" class="btn btn-primary">Message</a>
-        {{/if}}
 
+        {{!-- Only show buttons if viewing someone else --}}
+        {{#unless (eq user.id ../userId)}}
+        <div class="d-flex gap-2 mt-2">
 
-        {{!-- Pending (you sent) --}}
-        {{else if (and (eq connectionStatus "pending") isRequester)}}
+            <a href="/chat?user={{user.id}}" class="btn btn-primary">
+                Message
+            </a>
+
+            <form method="POST" action="/users/{{user.id}}/delete-connection">
+                <button class="btn btn-danger" type="submit">
+                    Delete Connection
+                </button>
+            </form>
+
+        </div>
+        {{/unless}}
+
+        {{!-- 2. PENDING (you sent) --}}
+        {{else}}
+        {{#if (and (eq connectionStatus "pending") isRequester)}}
         <button class="btn btn-secondary" disabled>Request Sent</button>
 
-        {{!-- Pending (they sent) --}}
-        {{else if (and (eq connectionStatus "pending") (not isRequester))}}
+        {{!-- 3. PENDING (they sent) --}}
+        {{else}}
+        {{#if (and (eq connectionStatus "pending") (not isRequester))}}
         <form method="POST" action="/users/{{user.id}}/accept" style="display:inline;">
             <button class="btn btn-success">Accept</button>
         </form>
@@ -34,26 +49,38 @@
             <button class="btn btn-outline-danger">Decline</button>
         </form>
 
-        {{!-- Declined --}}
-        {{else if (eq connectionStatus "declined")}}
-        <p class="text-danger fw-semibold">Connection request was declined.</p>
+        {{!-- 4. DECLINED --}}
+        {{else}}
+        {{#if (eq connectionStatus "declined")}}
 
-        {{!-- Show "Connect Again" if YOU were the receiver --}}
-        {{#if (not isRequester)}}
+        {{!-- If YOU were the requester → they declined you --}}
+        {{#if isRequester}}
+        <p class="text-danger fw-semibold">This user declined your request.</p>
+
+        {{!-- If THEY were the requester → you declined them --}}
+        {{else}}
+        <p class="text-warning fw-semibold">You declined this user.</p>
+
         <form method="POST" action="/users/{{user.id}}/request-again">
-            <button class="btn btn-primary mt-2">Connect Again</button>
+            <button class="btn btn-primary mt-2">Send Request Again</button>
         </form>
         {{/if}}
 
-
-        {{!-- No connection --}}
+        {{!-- 5. NO CONNECTION --}}
         {{else}}
+        {{#unless (eq user.id ../userId)}}
         <form method="POST" action="/users/{{user.id}}/request">
             <button class="btn btn-primary">Connect</button>
         </form>
+        {{/unless}}
+        {{/if}}
+
+        {{/if}}
+        {{/if}}
         {{/if}}
 
     </div>
+
 
     <hr class="my-4">
 
