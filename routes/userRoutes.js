@@ -147,10 +147,14 @@ module.exports = (db, auth) => {
       WHERE requester_id = $1 AND receiver_id = $2
     `, [requesterId, viewerId]);
 
-            res.redirect(`/users/${requesterId}`);
+            const redirectTo = req.body.redirectTo || `/users/${requesterId}`;
+            res.redirect(redirectTo);
+
         } catch (err) {
             console.error("Error accepting request:", err);
-            res.redirect(`/users/${requesterId}`);
+            const redirectTo = req.body.redirectTo || `/users/${requesterId}`;
+            res.redirect(redirectTo);
+
         }
     });
 
@@ -166,10 +170,14 @@ module.exports = (db, auth) => {
       WHERE requester_id = $1 AND receiver_id = $2
     `, [requesterId, viewerId]);
 
-            res.redirect(`/users/${requesterId}`);
+            const redirectTo = req.body.redirectTo || `/users/${requesterId}`;
+            res.redirect(redirectTo);
+
         } catch (err) {
             console.error("Error declining request:", err);
-            res.redirect(`/users/${requesterId}`);
+            const redirectTo = req.body.redirectTo || `/users/${requesterId}`;
+            res.redirect(redirectTo);
+
         }
     });
     // Re-send connection request after you declined theirs
