@@ -61,3 +61,15 @@ body {
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
+
+.connection-tag {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #333;
+    background: #f8f9fa;
+    display: inline-block;
+}
+
