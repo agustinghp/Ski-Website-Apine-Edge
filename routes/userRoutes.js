@@ -13,9 +13,9 @@ module.exports = (db, auth) => {
         }
 
         try {
-            // 1. Get profile user's info
+            // 1. Get profile user's info with profile picture
             const user = await db.oneOrNone(
-                `SELECT id, username, email, location, created_at
+                `SELECT id, username, email, location, created_at, profile_image
                 FROM users
                 WHERE id = $1`,
                 [profileId]
@@ -50,24 +50,33 @@ module.exports = (db, auth) => {
             // 3. Email visibility
             const showEmail = connectionStatus === 'accepted';
 
-            // 4. Get user's products
+            // 4. Get user's products with images
             const products = await db.any(
-                `SELECT id, productname, price 
-                FROM Products 
-                WHERE user_id = $1 
-                ORDER BY id DESC`,
+                `SELECT 
+                    p.id, 
+                    p.productname, 
+                    p.price,
+                    pi.image_path as primary_image
+                FROM Products p
+                LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = true
+                WHERE p.user_id = $1 
+                ORDER BY p.id DESC`,
                 [profileId]
             );
 
-            // 5. Get user's services
+            // 5. Get user's services with images
             const services = await db.any(
-                `SELECT id, servicename, price 
-                FROM Services 
-                WHERE user_id = $1 
-                ORDER BY id DESC`,
+                `SELECT 
+                    s.id, 
+                    s.servicename, 
+                    s.price,
+                    si.image_path as primary_image
+                FROM Services s
+                LEFT JOIN service_images si ON s.id = si.service_id AND si.is_primary = true
+                WHERE s.user_id = $1 
+                ORDER BY s.id DESC`,
                 [profileId]
             );
-
 
             // 6. Render the profile
             res.render('pages/userProfile', {
@@ -81,8 +90,6 @@ module.exports = (db, auth) => {
                 products,
                 services
             });
-
-
 
         } catch (err) {
             console.error('Error loading user profile:', err);
@@ -100,7 +107,6 @@ module.exports = (db, auth) => {
         const profileId = parseInt(req.params.id, 10);
 
         try {
-            // 1️⃣ Check if ANY connection already exists between the two users
             const existing = await db.oneOrNone(
                 `
             SELECT *
@@ -111,13 +117,11 @@ module.exports = (db, auth) => {
                 [viewerId, profileId]
             );
 
-            // 2️⃣ If anything exists → do NOT create a duplicate
             if (existing) {
                 console.log("Connection already exists, skipping insert.");
                 return res.redirect(`/users/${profileId}`);
             }
 
-            // 3️⃣ Insert the new request ONLY if none exists
             await db.none(
                 `
             INSERT INTO connections (requester_id, receiver_id, status)
@@ -134,10 +138,9 @@ module.exports = (db, auth) => {
         }
     });
 
-
     // Accept connection
     router.post('/:id/accept', auth, async (req, res) => {
-        const viewerId = req.session.userId;  // receiver
+        const viewerId = req.session.userId;
         const requesterId = parseInt(req.params.id, 10);
 
         try {
@@ -154,13 +157,12 @@ module.exports = (db, auth) => {
             console.error("Error accepting request:", err);
             const redirectTo = req.body.redirectTo || `/users/${requesterId}`;
             res.redirect(redirectTo);
-
         }
     });
 
     // Decline connection
     router.post('/:id/decline', auth, async (req, res) => {
-        const viewerId = req.session.userId;  // receiver
+        const viewerId = req.session.userId;
         const requesterId = parseInt(req.params.id, 10);
 
         try {
@@ -177,61 +179,30 @@ module.exports = (db, auth) => {
             console.error("Error declining request:", err);
             const redirectTo = req.body.redirectTo || `/users/${requesterId}`;
             res.redirect(redirectTo);
-
         }
     });
+
     // Re-send connection request after you declined theirs
     router.post('/:id/request-again', auth, async (req, res) => {
-        const viewerId = req.session.userId;              // You (logged-in user)
-        const otherUserId = parseInt(req.params.id, 10);  // Profile you are viewing
+        const viewerId = req.session.userId;
+        const otherUserId = parseInt(req.params.id, 10);
 
         try {
-            // 1. Delete ANY existing connection between the two users
             await db.none(`
             DELETE FROM connections
             WHERE (requester_id = $1 AND receiver_id = $2)
                OR (requester_id = $2 AND receiver_id = $1)
         `, [viewerId, otherUserId]);
 
-            // 2. Create a fresh pending request (YOU → THEM)
             await db.none(`
             INSERT INTO connections (requester_id, receiver_id, status)
             VALUES ($1, $2, 'pending')
         `, [viewerId, otherUserId]);
 
-            // 3. Redirect to the user's profile
             res.redirect(`/users/${otherUserId}`);
 
         } catch (err) {
-            // Fail gracefully by redirecting back anyway
             res.redirect(`/users/${otherUserId}`);
-        }
-    });
-
-
-    // Request Again
-    router.post('/:id/request-again', auth, async (req, res) => {
-        const requesterId = req.session.userId;
-        const receiverId = parseInt(req.params.id, 10);
-
-        try {
-            // Delete any old declined/pending connection
-            await db.none(`
-            DELETE FROM connections
-            WHERE (requester_id = $1 AND receiver_id = $2)
-               OR (requester_id = $2 AND receiver_id = $1)
-        `, [requesterId, receiverId]);
-
-            // Create new pending request
-            await db.none(`
-            INSERT INTO connections (requester_id, receiver_id, status)
-            VALUES ($1, $2, 'pending')
-        `, [requesterId, receiverId]);
-
-            return res.redirect(`/users/${receiverId}`);
-        } catch (err) {
-            console.error('Error requesting again:', err);
-            return res.redirect(`/users/${receiverId}`);
         }
     });
 
@@ -251,9 +222,6 @@ module.exports = (db, auth) => {
             res.redirect(`/users/${otherUserId}`);
         }
     });
-
-
-
 
     return router;
 };

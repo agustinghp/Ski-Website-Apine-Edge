@@ -1,124 +1,123 @@
-<div class="container mt-4">
-    <!-- Back Button -->
-    <div class="mb-3">
-        <a href="/search" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Back to Search
-        </a>
-    </div>
-
+<div class="container mt-5">
     {{#if error}}
-    <div class="alert alert-danger" role="alert">
-        {{error}}
-    </div>
+        <div class="alert alert-danger">{{error}}</div>
     {{else}}
-
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-lg">
-                <!-- Service Header -->
-                <div class="card-header bg-info text-white py-4">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <span class="badge bg-white text-info mb-2">Service</span>
-                            <h2 class="mb-0">{{service.servicename}}</h2>
+        <div class="row">
+            <!-- Image Section -->
+            <div class="col-md-6">
+                {{#if images}}
+                    {{#if (eq images.length 1)}}
+                        <!-- Single image -->
+                        <img src="{{images.[0].image_path}}" class="img-fluid rounded" alt="{{service.servicename}}">
+                    {{else}}
+                        <!-- Image carousel for multiple images -->
+                        <div id="serviceCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-indicators">
+                                {{#each images}}
+                                    <button type="button" data-bs-target="#serviceCarousel" 
+                                            data-bs-slide-to="{{@index}}" 
+                                            {{#if @first}}class="active"{{/if}}></button>
+                                {{/each}}
+                            </div>
+                            <div class="carousel-inner">
+                                {{#each images}}
+                                    <div class="carousel-item {{#if @first}}active{{/if}}">
+                                        <img src="{{image_path}}" class="d-block w-100 rounded" alt="Service image {{@index}}">
+                                    </div>
+                                {{/each}}
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#serviceCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#serviceCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
                         </div>
-                        <div class="text-end">
-                            {{#if service.price}}
-                            <h3 class="mb-0">${{service.price}}</h3>
-                            {{else}}
-                            <h5 class="mb-0">Contact for Pricing</h5>
-                            {{/if}}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-body p-4">
-                    <!-- Description -->
-                    {{#if service.servicedescription}}
-                    <div class="mb-4">
-                        <h5 class="mb-3"><i class="bi bi-card-text"></i> About This Service</h5>
-                        <p class="lead text-muted">{{service.servicedescription}}</p>
-                    </div>
-                    <hr>
                     {{/if}}
-
-                    <!-- Service Provider Information -->
-                    <div class="mb-4">
-                        <h5 class="mb-3"><i class="bi bi-person"></i> Service Provider</h5>
-                        <div class="d-flex align-items-center p-3 bg-light rounded">
-                            <div class="me-3">
-                                <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center"
-                                    style="width: 70px; height: 70px; font-size: 28px;">
-                                    {{substring provider.username 0 1}}
-                                </div>
-                            </div>
-                            <div>
-                                <h5 class="mb-1">{{provider.username}}</h5>
-                                {{#if provider.location}}
-                                <p class="text-muted mb-1">
-                                    <i class="bi bi-geo-alt-fill"></i> {{provider.location}}
-                                </p>
-                                {{/if}}
-                                <p class="text-muted mb-0 small">Member since {{formatDate provider.created_at}}</p>
-                            </div>
+                {{else}}
+                    <!-- Placeholder if no images -->
+                    <div class="bg-light d-flex align-items-center justify-content-center rounded" style="height: 400px;">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-briefcase" style="font-size: 4rem;"></i>
+                            <p>No image available</p>
                         </div>
                     </div>
-
-                    <!-- Pricing Information -->
-                    <div class="mb-4">
-                        <h5 class="mb-3"><i class="bi bi-cash-coin"></i> Pricing</h5>
-                        <div class="card border-primary">
-                            <div class="card-body text-center">
-                                {{#if service.price}}
-                                <h2 class="text-primary mb-2">${{service.price}}</h2>
-                                <p class="text-muted mb-0">Starting Price</p>
-                                {{else}}
-                                <h4 class="text-primary mb-2">Custom Pricing</h4>
-                                <p class="text-muted mb-0">Contact provider for a personalized quote</p>
-                                {{/if}}
-                            </div>
-                        </div>
-                    </div>
-
-                    <hr>
-
-                    <!-- Action Buttons -->
-                    <div class="d-grid gap-2">
-                        {{> contact-button
-                        userId=userId
-                        isOwner=isOwner
-                        otherUserId=provider.id
-                        connectionStatus=connectionStatus
-                        }}
-                    </div>
-
-
-                    <!-- Listing Info -->
-                    <div class="mt-4 text-muted small text-center">
-                        <i class="bi bi-clock"></i> Listed on {{formatDate service.created_at}}
-                    </div>
-                </div>
+                {{/if}}
             </div>
 
-            <!-- Tips for Customers -->
-            <div class="card mt-4 border-info">
-                <div class="card-body">
-                    <h6 class="card-title text-info">
-                        <i class="bi bi-info-circle-fill"></i> Tips for Using Services
-                    </h6>
-                    <ul class="mb-0 small">
-                        <li>Ask questions before booking to ensure the service meets your needs</li>
-                        <li>Discuss pricing and timeline upfront</li>
-                        <li>Check the provider's location for convenience</li>
-                        <li>Leave a review after service completion to help others</li>
-                    </ul>
+            <!-- Service Details Section -->
+            <div class="col-md-6">
+                <span class="badge bg-info text-dark mb-2">Service</span>
+                <h1>{{service.servicename}}</h1>
+                
+                {{#if service.price}}
+                    <h3 class="text-success">${{service.price}}</h3>
+                {{else}}
+                    <h5 class="text-muted">Contact for Pricing</h5>
+                {{/if}}
+
+                {{#if service.servicedescription}}
+                    <div class="mb-3">
+                        <h5>Description</h5>
+                        <p>{{service.servicedescription}}</p>
+                    </div>
+                {{/if}}
+
+                <hr>
+
+                <!-- Provider Information -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Service Provider</h5>
+                        <div class="d-flex align-items-center mb-2">
+                            {{#if provider.profile_image}}
+                                <img src="{{provider.profile_image}}" alt="{{provider.username}}" 
+                                     class="rounded-circle me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                            {{else}}
+                                <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center me-2" 
+                                     style="width: 50px; height: 50px;">
+                                    <span class="fs-5">{{substring provider.username 0 1}}</span>
+                                </div>
+                            {{/if}}
+                            <div>
+                                <a href="/users/{{provider.id}}" class="text-decoration-none">
+                                    <strong>{{provider.username}}</strong>
+                                </a>
+                                <br>
+                                <small class="text-muted">
+                                    <i class="bi bi-geo-alt"></i> {{provider.location}}
+                                </small>
+                            </div>
+                        </div>
+                        <small class="text-muted">Member since {{formatDate provider.created_at}}</small>
+                    </div>
                 </div>
+
+                <!-- Action Buttons -->
+                {{#if userId}}
+                    {{#if isOwner}}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> This is your listing
+                        </div>
+                    {{else}}
+                        {{#if (eq connectionStatus 'accepted')}}
+                            <a href="/chat?userId={{provider.id}}" class="btn btn-success w-100">
+                                <i class="bi bi-chat-dots"></i> Message Provider
+                            </a>
+                        {{else if (eq connectionStatus 'pending')}}
+                            <button class="btn btn-secondary w-100" disabled>
+                                Connection Request Pending
+                            </button>
+                        {{else}}
+                            <a href="/users/{{provider.id}}" class="btn btn-primary w-100">
+                                View Provider Profile
+                            </a>
+                        {{/if}}
+                    {{/if}}
+                {{else}}
+                    <a href="/login" class="btn btn-primary w-100">Login to Contact Provider</a>
+                {{/if}}
             </div>
         </div>
-    </div>
-
     {{/if}}
 </div>
-
-<!-- Bootstrap Icons -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">

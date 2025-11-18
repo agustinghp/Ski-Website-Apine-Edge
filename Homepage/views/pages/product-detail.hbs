@@ -1,131 +1,136 @@
-<div class="container mt-4">
-    <!-- Back Button -->
-    <div class="mb-3">
-        <a href="/search" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Back to Search
-        </a>
-    </div>
-
+<!-- Updated product-detail.hbs with image display -->
+<div class="container mt-5">
     {{#if error}}
-    <div class="alert alert-danger" role="alert">
-        {{error}}
-    </div>
+        <div class="alert alert-danger">{{error}}</div>
     {{else}}
-
-    <div class="row">
-        <!-- Product Image Section -->
-        <div class="col-lg-5 mb-4">
-            <div class="card border-0 shadow-sm">
-                {{#if product.imageUrl}}
-                <img src="{{product.imageUrl}}" class="card-img-top" alt="{{product.productname}}"
-                    style="height: 400px; object-fit: cover;">
+        <div class="row">
+            <!-- Image Section -->
+            <div class="col-md-6">
+                {{#if images}}
+                    {{#if (eq images.length 1)}}
+                        <!-- Single image -->
+                        <img src="{{images.[0].image_path}}" class="img-fluid rounded" alt="{{product.productname}}">
+                    {{else}}
+                        <!-- Image carousel for multiple images -->
+                        <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-indicators">
+                                {{#each images}}
+                                    <button type="button" data-bs-target="#productCarousel" 
+                                            data-bs-slide-to="{{@index}}" 
+                                            {{#if @first}}class="active"{{/if}}></button>
+                                {{/each}}
+                            </div>
+                            <div class="carousel-inner">
+                                {{#each images}}
+                                    <div class="carousel-item {{#if @first}}active{{/if}}">
+                                        <img src="{{image_path}}" class="d-block w-100 rounded" alt="Product image {{@index}}">
+                                    </div>
+                                {{/each}}
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+                        </div>
+                    {{/if}}
                 {{else}}
-                <img src="https://placehold.co/800x600/e8f4f8/0066cc?text={{product.brand}}+{{product.model}}"
-                    class="card-img-top" alt="{{product.productname}}" style="height: 400px; object-fit: cover;">
+                    <!-- Placeholder if no images -->
+                    <div class="bg-light d-flex align-items-center justify-content-center rounded" style="height: 400px;">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-image" style="font-size: 4rem;"></i>
+                            <p>No image available</p>
+                        </div>
+                    </div>
+                {{/if}}
+            </div>
+
+            <!-- Product Details Section -->
+            <div class="col-md-6">
+                <h1>{{product.productname}}</h1>
+                
+                <div class="mb-3">
+                    <span class="badge bg-primary">{{product.brand}}</span>
+                    <span class="badge bg-secondary">{{product.model}}</span>
+                </div>
+
+                <h3 class="text-success">${{product.price}}</h3>
+
+                {{#if product.productdescription}}
+                    <div class="mb-3">
+                        <h5>Description</h5>
+                        <p>{{product.productdescription}}</p>
+                    </div>
+                {{/if}}
+
+                <div class="mb-3">
+                    <h5>Specifications</h5>
+                    <ul class="list-unstyled">
+                        {{#if product.skilength}}
+                            <li><strong>Length:</strong> {{product.skilength}} cm</li>
+                        {{/if}}
+                        {{#if product.skiwidth}}
+                            <li><strong>Width:</strong> {{product.skiwidth}} mm</li>
+                        {{/if}}
+                    </ul>
+                </div>
+
+                <hr>
+
+                <!-- Seller Information -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Seller Information</h5>
+                        <div class="d-flex align-items-center mb-2">
+                            {{#if seller.profile_image}}
+                                <img src="{{seller.profile_image}}" alt="{{seller.username}}" 
+                                     class="rounded-circle me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                            {{else}}
+                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" 
+                                     style="width: 50px; height: 50px;">
+                                    <span class="fs-5">{{substring seller.username 0 1}}</span>
+                                </div>
+                            {{/if}}
+                            <div>
+                                <a href="/users/{{seller.id}}" class="text-decoration-none">
+                                    <strong>{{seller.username}}</strong>
+                                </a>
+                                <br>
+                                <small class="text-muted">
+                                    <i class="bi bi-geo-alt"></i> {{seller.location}}
+                                </small>
+                            </div>
+                        </div>
+                        <small class="text-muted">Member since {{formatDate seller.created_at}}</small>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                {{#if userId}}
+                    {{#if isOwner}}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> This is your listing
+                        </div>
+                    {{else}}
+                        {{#if (eq connectionStatus 'accepted')}}
+                            <a href="/chat?userId={{seller.id}}" class="btn btn-success w-100">
+                                <i class="bi bi-chat-dots"></i> Message Seller
+                            </a>
+                        {{else if (eq connectionStatus 'pending')}}
+                            <button class="btn btn-secondary w-100" disabled>
+                                Connection Request Pending
+                            </button>
+                        {{else}}
+                            <a href="/users/{{seller.id}}" class="btn btn-primary w-100">
+                                View Seller Profile
+                            </a>
+                        {{/if}}
+                    {{/if}}
+                {{else}}
+                    <a href="/login" class="btn btn-primary w-100">Login to Contact Seller</a>
                 {{/if}}
             </div>
         </div>
-
-        <!-- Product Details Section -->
-        <div class="col-lg-7">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <!-- Brand & Model -->
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                            <span class="badge bg-primary mb-2">{{product.brand}}</span>
-                            <h2 class="mb-1">{{product.productname}}</h2>
-                            <h5 class="text-muted">{{product.model}}</h5>
-                        </div>
-                        <div class="text-end">
-                            <h3 class="text-primary mb-0">${{product.price}}</h3>
-                        </div>
-                    </div>
-
-                    <hr>
-
-                    <!-- Specifications -->
-                    <div class="mb-4">
-                        <h5 class="mb-3"><i class="bi bi-info-circle"></i> Specifications</h5>
-                        <div class="row">
-                            {{#if product.skilength}}
-                            <div class="col-md-6 mb-2">
-                                <strong>Length:</strong> {{product.skilength}} cm
-                            </div>
-                            {{/if}}
-                            {{#if product.skiwidth}}
-                            <div class="col-md-6 mb-2">
-                                <strong>Width:</strong> {{product.skiwidth}} mm
-                            </div>
-                            {{/if}}
-                            <div class="col-md-6 mb-2">
-                                <strong>Brand:</strong> {{product.brand}}
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <strong>Model:</strong> {{product.model}}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Description -->
-                    {{#if product.productdescription}}
-                    <div class="mb-4">
-                        <h5 class="mb-3"><i class="bi bi-card-text"></i> Description</h5>
-                        <p class="text-muted">{{product.productdescription}}</p>
-                    </div>
-                    {{/if}}
-
-                    <hr>
-
-                    <!-- Seller Information -->
-                    <div class="mb-4">
-                        <h5 class="mb-3"><i class="bi bi-person"></i> Seller Information</h5>
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
-                                    style="width: 60px; height: 60px; font-size: 24px;">
-                                    {{substring seller.username 0 1}}
-                                </div>
-                            </div>
-                            <div>
-                                <h6 class="mb-1">
-                                    <a href="/users/{{seller.id}}" class="text-decoration-none">
-                                        {{seller.username}}
-                                    </a>
-                                </h6>
-
-                                {{#if seller.location}}
-                                <p class="text-muted mb-1">
-                                    <i class="bi bi-geo-alt"></i> {{seller.location}}
-                                </p>
-                                {{/if}}
-                                <p class="text-muted mb-0 small">Member since {{formatDate seller.created_at}}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="d-grid gap-2">
-                        {{> contact-button
-                        userId=userId
-                        isOwner=isOwner
-                        otherUserId=seller.id
-                        connectionStatus=connectionStatus
-                        }}
-                    </div>
-
-
-                    <!-- Listing Info -->
-                    <div class="mt-3 text-muted small text-center">
-                        Listed on {{formatDate product.created_at}}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     {{/if}}
 </div>
-
-<!-- Bootstrap Icons -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">

@@ -1,185 +1,186 @@
+<!-- Updated create-listing.hbs with image upload -->
 <div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
+    <h1>Create a Listing</h1>
 
-            {{#if message}}
-            <div class="alert alert-{{message.type}} alert-dismissible fade show" role="alert">
-                {{message.text}}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {{/if}}
+    {{#if message}}
+    <div class="alert alert-{{message.type}} alert-dismissible fade show" role="alert">
+        {{message.text}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {{/if}}
 
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0"><i class="bi bi-plus-circle"></i> Create New Listing</h3>
+    <!-- Tabs for Product vs Service -->
+    <ul class="nav nav-tabs mt-4" id="listingTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {{#if (or (not listingType) (eq listingType 'product'))}}active{{/if}}" 
+                    id="product-tab" data-bs-toggle="tab" data-bs-target="#product" 
+                    type="button" role="tab">
+                Product Listing
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {{#if (eq listingType 'service')}}active{{/if}}" 
+                    id="service-tab" data-bs-toggle="tab" data-bs-target="#service" 
+                    type="button" role="tab">
+                Service Listing
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content mt-3" id="listingTabContent">
+        
+        <!-- PRODUCT LISTING FORM -->
+        <div class="tab-pane fade {{#if (or (not listingType) (eq listingType 'product'))}}show active{{/if}}" 
+             id="product" role="tabpanel">
+            <form action="/create-listing/product" method="POST" enctype="multipart/form-data">
+                
+                <div class="mb-3">
+                    <label for="brand" class="form-label">Brand *</label>
+                    <input type="text" class="form-control" id="brand" name="brand" 
+                           value="{{formData.brand}}" required>
                 </div>
-                <div class="card-body p-4">
 
-                    <!-- Listing Type Selection -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">What would you like to list?</label>
-                        <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="listingType" id="productRadio" value="product"
-                                checked>
-                            <label class="btn btn-outline-primary" for="productRadio">
-                                <i class="bi bi-box-seam"></i> Product (Skis/Gear)
-                            </label>
+                <div class="mb-3">
+                    <label for="model" class="form-label">Model *</label>
+                    <input type="text" class="form-control" id="model" name="model" 
+                           value="{{formData.model}}" required>
+                </div>
 
-                            <input type="radio" class="btn-check" name="listingType" id="serviceRadio" value="service">
-                            <label class="btn btn-outline-primary" for="serviceRadio">
-                                <i class="bi bi-tools"></i> Service (Tuning/Lessons)
-                            </label>
-                        </div>
+                <div class="mb-3">
+                    <label for="productName" class="form-label">Product Name *</label>
+                    <input type="text" class="form-control" id="productName" name="productName" 
+                           value="{{formData.productName}}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="productDescription" class="form-label">Description</label>
+                    <textarea class="form-control" id="productDescription" name="productDescription" 
+                              rows="4">{{formData.productDescription}}</textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="skiLength" class="form-label">Ski Length (cm)</label>
+                        <input type="number" class="form-control" id="skiLength" name="skiLength" 
+                               value="{{formData.skiLength}}">
                     </div>
-
-                    <!-- PRODUCT FORM -->
-                    <div id="clientMessageContainer"></div>
-                    <form id="productForm" action="/create-listing/product" method="POST" class="listing-form">
-                        <h5 class="text-primary mb-3"><i class="bi bi-box-seam"></i> Product Details</h5>
-
-                        <div class="row">
-                            <!-- Brand -->
-                            <div class="col-md-6 mb-3">
-                                <label for="product_brand" class="form-label">Brand *</label>
-                                <input type="text" class="form-control" id="product_brand" name="brand" required
-                                    placeholder="e.g., Rossignol" value="{{formData.brand}}">
-
-                            </div>
-
-                            <!-- Model -->
-                            <div class="col-md-6 mb-3">
-                                <label for="product_model" class="form-label">Model *</label>
-                                <input type="text" class="form-control" id="product_model" name="model" required
-                                    placeholder="e.g., Experience 88" value="{{formData.model}}">
-
-                            </div>
-                        </div>
-
-                        <!-- Product Name -->
-                        <div class="mb-3">
-                            <label for="product_name" class="form-label">Product Name *</label>
-                            <input type="text" class="form-control" id="product_name" name="productName" required
-                                placeholder="e.g., All-Mountain Carver" value="{{formData.productName}}">
-
-                            <div class="form-text">Give your listing a catchy, descriptive name</div>
-                        </div>
-
-                        <!-- Description -->
-                        <div class="mb-3">
-                            <label for="product_description" class="form-label">Description</label>
-                            <textarea class="form-control" id="product_description" name="productDescription"
-                                rows="4">{{formData.productDescription}}</textarea>
-
-                        </div>
-
-                        <!-- Ski Dimensions -->
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="product_length" class="form-label">Ski Length (cm)</label>
-                                <input type="number" step="0.1" class="form-control" id="product_length"
-                                    name="skiLength" placeholder="e.g., 177.0" value="{{formData.skiLength}}">
-
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="product_width" class="form-label">Ski Width (mm)</label>
-                                <input type="number" step="0.1" class="form-control" id="product_width" name="skiWidth"
-                                    placeholder="e.g., 88.0" value="{{formData.skiWidth}}">
-
-                            </div>
-                        </div>
-
-                        <!-- Price -->
-                        <div class="mb-4">
-                            <label for="product_price" class="form-label">Price (USD) *</label>
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number" step="0.01" class="form-control" id="product_price" name="price"
-                                    required placeholder="425.00" value="{{formData.price}}">
-
-                            </div>
-                            <div class="form-text">Set a fair price based on condition and market value</div>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-check-circle"></i> Create Product Listing
-                            </button>
-                        </div>
-                    </form>
-
-                    <!-- SERVICE FORM -->
-                    <div id="clientMessageContainer"></div>
-                    <form id="serviceForm" action="/create-listing/service" method="POST" class="listing-form"
-                        style="display: none;">
-                        <h5 class="text-primary mb-3"><i class="bi bi-tools"></i> Service Details</h5>
-
-                        <!-- Service Name -->
-                        <div class="mb-3">
-                            <label for="service_name" class="form-label">Service Name *</label>
-                            <input type="text" class="form-control" id="service_name" name="serviceName" required
-                                placeholder="e.g., Professional Ski Tuning & Waxing" value="{{formData.serviceName}}">
-
-                        </div>
-
-                        <!-- Description -->
-                        <div class="mb-3">
-                            <label for="service_description" class="form-label">Service Description</label>
-                            <textarea class="form-control" id="service_description" name="serviceDescription"
-                                rows="5">{{formData.serviceDescription}}</textarea>
-
-                            <div class="form-text">Be detailed to help customers understand what you offer</div>
-                        </div>
-
-                        <!-- Price -->
-                        <div class="mb-4">
-                            <label for="service_price" class="form-label">Price (USD)</label>
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number" step="0.01" class="form-control" id="service_price" name="price"
-                                    placeholder="75.00" value="{{formData.price}}">
-
-                            </div>
-                            <div class="form-text">Leave blank if pricing varies or is by quote</div>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-check-circle"></i> Create Service Listing
-                            </button>
-                        </div>
-                    </form>
-
+                    <div class="col-md-6 mb-3">
+                        <label for="skiWidth" class="form-label">Ski Width (mm)</label>
+                        <input type="number" class="form-control" id="skiWidth" name="skiWidth" 
+                               value="{{formData.skiWidth}}">
+                    </div>
                 </div>
-            </div>
 
-            <!-- Tips Card -->
-            <div class="card mt-4 border-info">
-                <div class="card-body">
-                    <h6 class="card-title text-info"><i class="bi bi-lightbulb"></i> Tips for Great Listings</h6>
-                    <ul class="mb-0 small">
-                        <li>Be honest about condition and usage</li>
-                        <li>Include specific details (brand, model, size)</li>
-                        <li>Price competitively by checking similar listings</li>
-                        <li>Respond promptly to inquiries</li>
-                        <li>Consider offering local pickup or meet-ups</li>
-                    </ul>
+                <div class="mb-3">
+                    <label for="price" class="form-label">Price ($) *</label>
+                    <input type="number" step="0.01" class="form-control" id="price" name="price" 
+                           value="{{formData.price}}" required>
                 </div>
-            </div>
 
+                <!-- IMAGE UPLOAD -->
+                <div class="mb-3">
+                    <label for="productImages" class="form-label">Product Images (Max 5)</label>
+                    <input type="file" class="form-control" id="productImages" name="productImages" 
+                           accept="image/*" multiple>
+                    <div class="form-text">You can upload up to 5 images. First image will be the primary image.</div>
+                </div>
+
+                <div id="productImagePreview" class="mb-3 d-flex flex-wrap gap-2"></div>
+
+                <button type="submit" class="btn btn-primary">Create Product Listing</button>
+            </form>
         </div>
+
+        <!-- SERVICE LISTING FORM -->
+        <div class="tab-pane fade {{#if (eq listingType 'service')}}show active{{/if}}" 
+             id="service" role="tabpanel">
+            <form action="/create-listing/service" method="POST" enctype="multipart/form-data">
+                
+                <div class="mb-3">
+                    <label for="serviceName" class="form-label">Service Name *</label>
+                    <input type="text" class="form-control" id="serviceName" name="serviceName" 
+                           value="{{formData.serviceName}}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="serviceDescription" class="form-label">Description</label>
+                    <textarea class="form-control" id="serviceDescription" name="serviceDescription" 
+                              rows="4">{{formData.serviceDescription}}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="servicePrice" class="form-label">Price ($)</label>
+                    <input type="number" step="0.01" class="form-control" id="servicePrice" name="price" 
+                           value="{{formData.price}}">
+                </div>
+
+                <!-- IMAGE UPLOAD -->
+                <div class="mb-3">
+                    <label for="serviceImages" class="form-label">Service Images (Max 5)</label>
+                    <input type="file" class="form-control" id="serviceImages" name="serviceImages" 
+                           accept="image/*" multiple>
+                    <div class="form-text">You can upload up to 5 images. First image will be the primary image.</div>
+                </div>
+
+                <div id="serviceImagePreview" class="mb-3 d-flex flex-wrap gap-2"></div>
+
+                <button type="submit" class="btn btn-primary">Create Service Listing</button>
+            </form>
+        </div>
+
     </div>
 </div>
 
-<!-- Bootstrap Icons -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-
-<!-- Pass server listingType into JS -->
 <script>
-    window.listingTypeFromServer = "{{listingType}}";
+// Image preview for product images
+document.getElementById('productImages')?.addEventListener('change', function(e) {
+    const preview = document.getElementById('productImagePreview');
+    preview.innerHTML = '';
+    
+    if (this.files.length > 5) {
+        alert('Maximum 5 images allowed');
+        this.value = '';
+        return;
+    }
+    
+    Array.from(this.files).forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const div = document.createElement('div');
+            div.className = 'position-relative';
+            div.innerHTML = `
+                <img src="${e.target.result}" style="width: 100px; height: 100px; object-fit: cover;" class="rounded">
+                ${index === 0 ? '<span class="badge bg-primary position-absolute top-0 start-0">Primary</span>' : ''}
+            `;
+            preview.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+});
+
+// Image preview for service images
+document.getElementById('serviceImages')?.addEventListener('change', function(e) {
+    const preview = document.getElementById('serviceImagePreview');
+    preview.innerHTML = '';
+    
+    if (this.files.length > 5) {
+        alert('Maximum 5 images allowed');
+        this.value = '';
+        return;
+    }
+    
+    Array.from(this.files).forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const div = document.createElement('div');
+            div.className = 'position-relative';
+            div.innerHTML = `
+                <img src="${e.target.result}" style="width: 100px; height: 100px; object-fit: cover;" class="rounded">
+                ${index === 0 ? '<span class="badge bg-primary position-absolute top-0 start-0">Primary</span>' : ''}
+            `;
+            preview.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+});
 </script>
-
-<!-- Load all create-listing JavaScript -->
-<script src="/js/createListing.js"></script>
-

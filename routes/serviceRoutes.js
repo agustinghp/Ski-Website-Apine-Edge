@@ -19,7 +19,7 @@ module.exports = (db) => {
 
             // Get service with provider information
             const service = await db.oneOrNone(`
-                SELECT s.*, u.username, u.location, u.created_at as provider_created_at, u.id as provider_id
+                SELECT s.*, u.username, u.location, u.created_at as provider_created_at, u.id as provider_id, u.profile_image
                 FROM Services s
                 JOIN users u ON s.user_id = u.id
                 WHERE s.id = $1
@@ -33,19 +33,28 @@ module.exports = (db) => {
                 });
             }
 
+            // Get all images for this service
+            const images = await db.any(`
+                SELECT image_path, is_primary
+                FROM service_images
+                WHERE service_id = $1
+                ORDER BY is_primary DESC, id ASC
+            `, [serviceId]);
+
             // Create provider object
             const provider = {
                 id: service.provider_id,
                 username: service.username,
                 location: service.location,
-                created_at: service.provider_created_at
+                created_at: service.provider_created_at,
+                profile_image: service.profile_image
             };
 
             // Check if current user is the owner
             const isOwner = viewerId === service.user_id;
 
-            // --- NEW: Connection status between viewer and provider ---
-            let connectionStatus = 'none'; // 'none', 'pending', 'accepted', 'declined'
+            // Connection status between viewer and provider
+            let connectionStatus = 'none';
 
             if (viewerId && !isOwner) {
                 const connection = await db.oneOrNone(`
@@ -56,18 +65,18 @@ module.exports = (db) => {
                 `, [viewerId, provider.id]);
 
                 if (connection) {
-                    connectionStatus = connection.status; // pending / accepted / declined
+                    connectionStatus = connection.status;
                 }
             }
-            // --- END NEW ---
 
             res.render('pages/service-detail', {
                 title: service.servicename,
                 userId: viewerId,
                 service,
+                images,
                 provider,
                 isOwner,
-                connectionStatus   // <-- now available to the template
+                connectionStatus
             });
 
         } catch (error) {

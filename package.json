@@ -22,6 +22,7 @@
     "testandrun": "npm run test && npm run dev"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.934.0",
     "axios": "^1.13.1",
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.2.0",
@@ -31,7 +32,9 @@
     "express-handlebars": "^8.0.3",
     "express-session": "^1.18.2",
     "handlebars": "^4.7.8",
+    "multer": "^2.0.2",
     "pg-promise": "^12.2.0",
+    "sharp": "^0.34.5",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
