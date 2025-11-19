@@ -8,10 +8,31 @@ module.exports = (db) => {
     try {
       const searchQuery = req.query.query || '';
       const searchType = req.query.type || 'all';
+      const sortBy = req.query.sortBy || '';
 
       let products = [];
       let services = [];
       let users = [];
+
+      // Build ORDER BY clause based on sortBy
+      let productOrderBy = 'p.id DESC';
+      let serviceOrderBy = 's.id DESC';
+
+      if (sortBy === 'price_asc') {
+        productOrderBy = 'p.price ASC NULLS LAST, p.id DESC';
+        serviceOrderBy = 's.price ASC NULLS LAST, s.id DESC';
+      } else if (sortBy === 'price_desc') {
+        productOrderBy = 'p.price DESC NULLS LAST, p.id DESC';
+        serviceOrderBy = 's.price DESC NULLS LAST, s.id DESC';
+      } else if (sortBy === 'length_asc') {
+        productOrderBy = 'p.skiLength ASC NULLS LAST, p.id DESC';
+      } else if (sortBy === 'length_desc') {
+        productOrderBy = 'p.skiLength DESC NULLS LAST, p.id DESC';
+      } else if (sortBy === 'width_asc') {
+        productOrderBy = 'p.skiWidth ASC NULLS LAST, p.id DESC';
+      } else if (sortBy === 'width_desc') {
+        productOrderBy = 'p.skiWidth DESC NULLS LAST, p.id DESC';
+      }
 
       // If search query is empty or just whitespace, show all items
       if (searchQuery.trim() === '') {
@@ -26,7 +47,7 @@ module.exports = (db) => {
             FROM Products p 
             JOIN users u ON p.user_id = u.id
             LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = true
-            ORDER BY p.id DESC
+            ORDER BY ${productOrderBy}
           `;
           products = await db.any(productQuery);
         }
@@ -41,7 +62,7 @@ module.exports = (db) => {
             FROM Services s 
             JOIN users u ON s.user_id = u.id
             LEFT JOIN service_images si ON s.id = si.service_id AND si.is_primary = true
-            ORDER BY s.id DESC
+            ORDER BY ${serviceOrderBy}
           `;
           services = await db.any(serviceQuery);
         }
@@ -76,7 +97,7 @@ module.exports = (db) => {
               OR p.productDescription ILIKE $1 
               OR p.brand ILIKE $1 
               OR p.model ILIKE $1
-            ORDER BY p.id DESC
+            ORDER BY ${productOrderBy}
           `;
           products = await db.any(productQuery, [searchPattern]);
         }
@@ -93,7 +114,7 @@ module.exports = (db) => {
             WHERE 
               s.serviceName ILIKE $1 
               OR s.serviceDescription ILIKE $1
-            ORDER BY s.id DESC
+            ORDER BY ${serviceOrderBy}
           `;
           services = await db.any(serviceQuery, [searchPattern]);
         }
@@ -140,6 +161,7 @@ module.exports = (db) => {
         title: 'Search Results',
         query: searchQuery,
         searchType: searchType,
+        sortBy: sortBy,
         products: products,
         services: services,
         users: users,
@@ -154,6 +176,7 @@ module.exports = (db) => {
         title: 'Search Skis',
         query: req.query.query || '',
         searchType: req.query.type || 'all',
+        sortBy: req.query.sortBy || '',
         products: [],
         services: [],
         users: [],

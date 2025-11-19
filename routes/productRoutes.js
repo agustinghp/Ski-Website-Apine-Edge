@@ -89,5 +89,37 @@ module.exports = (db) => {
         }
     });
 
+    // Delete Product
+    router.post('/:id/delete', async (req, res) => {
+        try {
+            const productId = parseInt(req.params.id, 10);
+            const userId = req.session.userId;
+
+            if (!userId) {
+                return res.redirect('/login');
+            }
+
+            // Check if the user owns this product
+            const product = await db.oneOrNone('SELECT user_id FROM Products WHERE id = $1', [productId]);
+
+            if (!product) {
+                return res.redirect('/profile');
+            }
+
+            if (product.user_id !== userId) {
+                return res.status(403).send('Unauthorized');
+            }
+
+            // Delete the product (CASCADE will handle related records)
+            await db.none('DELETE FROM Products WHERE id = $1', [productId]);
+
+            res.redirect('/profile');
+
+        } catch (error) {
+            console.error('Error deleting product:', error);
+            res.redirect('/profile');
+        }
+    });
+
     return router;
 };

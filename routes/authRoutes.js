@@ -96,15 +96,15 @@ module.exports = (db) => {
 
     // Handle Register Form Submission
     router.post('/register', async (req, res) => {
-        const { username, email, password } = req.body;
+        const { username, email, password, location } = req.body;
 
-        if (!username || !email || !password) {
+        if (!username || !email || !password || !location) {
             return res.render('pages/register', {
                 title: 'Register',
                 userId: req.session.userId,
                 message: {
                     type: 'danger',
-                    text: 'Username, email, and password are required.'
+                    text: 'Username, email, location, and password are required.'
                 }
             });
         }
@@ -113,8 +113,8 @@ module.exports = (db) => {
             const hash = await bcrypt.hash(password, 10);
 
             const newUser = await db.one(
-                'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username',
-                [username, email, hash]
+                'INSERT INTO users (username, email, password_hash, location) VALUES ($1, $2, $3, $4) RETURNING id, username',
+                [username, email, hash, location]
             );
 
             req.session.userId = newUser.id;
