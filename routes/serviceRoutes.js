@@ -89,5 +89,37 @@ module.exports = (db) => {
         }
     });
 
+    // Delete Service
+    router.post('/:id/delete', async (req, res) => {
+        try {
+            const serviceId = parseInt(req.params.id, 10);
+            const userId = req.session.userId;
+
+            if (!userId) {
+                return res.redirect('/login');
+            }
+
+            // Check if the user owns this service
+            const service = await db.oneOrNone('SELECT user_id FROM Services WHERE id = $1', [serviceId]);
+
+            if (!service) {
+                return res.redirect('/profile');
+            }
+
+            if (service.user_id !== userId) {
+                return res.status(403).send('Unauthorized');
+            }
+
+            // Delete the service (CASCADE will handle related records)
+            await db.none('DELETE FROM Services WHERE id = $1', [serviceId]);
+
+            res.redirect('/profile');
+
+        } catch (error) {
+            console.error('Error deleting service:', error);
+            res.redirect('/profile');
+        }
+    });
+
     return router;
 };
