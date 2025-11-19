@@ -3,7 +3,7 @@
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
             <form action="/search" method="GET" class="row g-3">
-                <div class="col-md-8">
+                <div class="col-md-6">
                     <input type="text" name="query" class="form-control form-control-lg"
                         placeholder="Search gear, services, or people..." value="{{query}}">
                 </div>
@@ -13,6 +13,17 @@
                         <option value="products" {{#if (eq searchType 'products' )}}selected{{/if}}>Products</option>
                         <option value="services" {{#if (eq searchType 'services' )}}selected{{/if}}>Services</option>
                         <option value="users" {{#if (eq searchType 'users' )}}selected{{/if}}>Users</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="sortBy" class="form-select form-select-lg">
+                        <option value="" {{#unless sortBy}}selected{{/unless}}>Sort By</option>
+                        <option value="price_asc" {{#if (eq sortBy 'price_asc')}}selected{{/if}}>Price: Low to High</option>
+                        <option value="price_desc" {{#if (eq sortBy 'price_desc')}}selected{{/if}}>Price: High to Low</option>
+                        <option value="length_asc" {{#if (eq sortBy 'length_asc')}}selected{{/if}}>Length: Short to Long</option>
+                        <option value="length_desc" {{#if (eq sortBy 'length_desc')}}selected{{/if}}>Length: Long to Short</option>
+                        <option value="width_asc" {{#if (eq sortBy 'width_asc')}}selected{{/if}}>Width: Narrow to Wide</option>
+                        <option value="width_desc" {{#if (eq sortBy 'width_desc')}}selected{{/if}}>Width: Wide to Narrow</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -26,7 +37,7 @@
     {{#if query}}
     <div class="mb-3">
         <h5>Search results for: <span class="text-primary">"{{query}}"</span></h5>
-        <p class="text-muted">Found {{resultCount}} result(s)</p>
+        <p class="text-muted">Found {{resultCount}} result(s){{#if sortBy}} - Sorted by {{sortBy}}{{/if}}</p>
     </div>
     {{/if}}
 
