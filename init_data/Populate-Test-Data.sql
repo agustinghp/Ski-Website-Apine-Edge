@@ -21,7 +21,8 @@ INSERT INTO users (username, email, password_hash, location) VALUES
 ('dave_downhill', 'dave@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Steamboat Springs, Colorado'),
 ('rachel_run', 'rachel@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Sun Valley, Idaho'),
 ('tom_trail', 'tom@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Mammoth Lakes, California'),
-('nina_nordic', 'nina@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Boulder, Colorado');
+('nina_nordic', 'nina@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Boulder, Colorado'),
+
 
 -- =====================================================
 -- Insert Test Products (Skis)
@@ -162,8 +163,20 @@ INSERT INTO reviewsSellers (reviewer_id, reviewee_id, rating, comment) VALUES
 (10, 9, 5, 'Excellent service and great quality gear. Very satisfied!'),
 (1, 10, 4, 'Good seller, fair price. Minor wear but expected for used gear.');
 
+
+-- Insert data into product_images table
+INSERT INTO product_images (id, product_id, image_path, is_primary, created_at) VALUES
+(1, 10, 'https://pub-a8456622b43541f3a13144fc0d1dedcd.r2.dev/products/product-22-0-1763500034106.jpg', true, '2025-11-18 21:07:15.261304'),
+(2, 10, 'https://pub-a8456622b43541f3a13144fc0d1dedcd.r2.dev/products/product-22-1-1763500035284.jpg', false, '2025-11-18 21:07:15.766795'),
+(3, 8, 'https://pub-a8456622b43541f3a13144fc0d1dedcd.r2.dev/products/product-23-0-1763500771694.jpg', true, '2025-11-18 21:19:32.632302'),
+(4, 8, 'https://pub-a8456622b43541f3a13144fc0d1dedcd.r2.dev/products/product-23-1-1763500772653.jpg', false, '2025-11-18 21:19:33.20403'),
+(5, 8, 'https://pub-a8456622b43541f3a13144fc0d1dedcd.r2.dev/products/product-23-2-1763500773208.jpg', false, '2025-11-18 21:19:33.662444');
+
+-- Insert data into service_images table
+INSERT INTO service_images (id, service_id, image_path, is_primary, created_at) VALUES
+(1, 1, 'https://pub-a8456622b43541f3a13144fc0d1dedcd.r2.dev/services/service-24-0-1763500215065.jpg', true, '2025-11-18 21:10:15.729285');
 -- =====================================================
--- Verification Queries (Optional - run to check data)
+-- Verification Queries
 -- =====================================================
 
 -- Check user count
