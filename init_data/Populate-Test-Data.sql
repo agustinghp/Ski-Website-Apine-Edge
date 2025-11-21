@@ -21,7 +21,7 @@ INSERT INTO users (username, email, password_hash, location) VALUES
 ('dave_downhill', 'dave@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Steamboat Springs, Colorado'),
 ('rachel_run', 'rachel@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Sun Valley, Idaho'),
 ('tom_trail', 'tom@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Mammoth Lakes, California'),
-('nina_nordic', 'nina@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Boulder, Colorado'),
+('nina_nordic', 'nina@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Boulder, Colorado');
 
 
 -- =====================================================
