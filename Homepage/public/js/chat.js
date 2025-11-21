@@ -18,9 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.querySelector('.chat-sidebar');
     const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
 
+
     let typingTimeout;
     let activeChatUserId = null;
     let activeChatUsername = null;
+
+    // On initial load — hide the profile button
+    document.getElementById("chat-profile-btn").style.display = "none";
+
 
     // Guard: if core elements are missing, exit early
     if (!connectionList || !chatForm || !messageInput || !sendButton) {
@@ -117,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
             chatHeader.style.display = "flex";
             chatHeaderName.textContent = activeChatUsername;
             chatHeaderBtn.href = `/users/${activeChatUserId}`;
+            chatHeaderBtn.style.display = "inline-block";
         }
 
 
