@@ -4,6 +4,7 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
+    profile_image VARCHAR(255),
     password_hash VARCHAR(255) NOT NULL,
     location VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -79,4 +80,21 @@ CREATE TABLE reviewsServices (
     comment TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (reviewer_id, service_id)
+);
+
+CREATE TABLE product_images (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER REFERENCES Products(id) ON DELETE CASCADE,
+    image_path VARCHAR(255) NOT NULL,
+    is_primary BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE service_images (
+    id SERIAL PRIMARY KEY,
+    service_id INTEGER REFERENCES Services(id) ON DELETE CASCADE,
+    image_path VARCHAR(255) NOT NULL,
+    is_primary BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
