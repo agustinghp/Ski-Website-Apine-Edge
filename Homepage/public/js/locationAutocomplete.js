@@ -38,13 +38,7 @@ function initAutocomplete() {
     const lngField = document.getElementById("longitude");
     const locationField = document.getElementById("location"); // city, state
 
-    if (!input) {
-        console.warn("Autocomplete input not found.");
-        return;
-    }
-
-    if (!latField || !lngField || !locationField) {
-        console.warn("Hidden form fields not found.");
+    if (!input || !latField || !lngField || !locationField) {
         return;
     }
 
@@ -54,9 +48,7 @@ function initAutocomplete() {
         return;
     }
 
-    // Check if PlaceAutocompleteElement is available
     if (!google.maps.places.PlaceAutocompleteElement) {
-        console.error("PlaceAutocompleteElement not available. Make sure you're using the latest Google Maps API.");
         return;
     }
 
@@ -138,7 +130,6 @@ function initAutocomplete() {
     
     autocompleteElement.addEventListener('focus', tryMakeTransparent);
     autocompleteElement.addEventListener('input', tryMakeTransparent);
-    autocompleteElement.addEventListener('gmp-placeselect', tryMakeTransparent);
     
     // Also try to inject a style tag into shadow DOM if accessible
     const tryInjectStyle = () => {
@@ -214,76 +205,47 @@ function initAutocomplete() {
     // Also listen for any other events that might indicate value changes
     autocompleteElement.addEventListener('gmp-suggestionsupdate', updateHiddenInput);
     
-    // Handler function for place selection (used by both events)
+    // Handler function for place selection
     const handlePlaceSelection = async (event) => {
-        console.log('Place selected event fired:', event);
-        console.log('Event details:', {
-            placePrediction: event.placePrediction,
-            place: event.place,
-            target: event.target
-        });
-        
         try {
             let place = null;
             
-            // Try new API first (gmp-select with placePrediction)
             if (event.placePrediction && typeof event.placePrediction.toPlace === 'function') {
                 place = await event.placePrediction.toPlace();
-                console.log('Got place from placePrediction.toPlace()');
-            }
-            // Fallback to old API (gmp-placeselect with place)
-            else if (event.place) {
+            } else if (event.place) {
                 place = event.place;
-                console.log('Got place from event.place');
             }
 
             if (!place) {
-                console.error("Place data missing. Event structure:", event);
                 return;
             }
-            
-            console.log('Place object:', place);
 
             // Fetch place details with all needed fields
             await place.fetchFields({ 
                 fields: ['location', 'addressComponents', 'formattedAddress'] 
             });
 
-            // ---------------------------------
-            // 1. Save exact lat/lng
-            // ---------------------------------
+            // Save exact lat/lng
             let lat, lng;
             
             if (place.location) {
-                // lat() and lng() are methods, not properties
                 lat = typeof place.location.lat === 'function' ? place.location.lat() : place.location.lat;
                 lng = typeof place.location.lng === 'function' ? place.location.lng() : place.location.lng;
             } else {
-                console.error("Location coordinates not found in place object.");
                 return;
             }
 
-            // Re-fetch fields to ensure we have the latest references
             const currentLatField = document.getElementById('latitude');
             const currentLngField = document.getElementById('longitude');
             const currentLocationField = document.getElementById('location');
             
-            if (currentLatField) {
-                currentLatField.value = lat;
-                console.log('Set latitude:', lat);
-            }
-            if (currentLngField) {
-                currentLngField.value = lng;
-                console.log('Set longitude:', lng);
-            }
+            if (currentLatField) currentLatField.value = lat;
+            if (currentLngField) currentLngField.value = lng;
 
             // Update the hidden input
             updateHiddenInput();
 
-            // ---------------------------------
-            // 2. Extract City + State
-            // ---------------------------------
-            // State name to abbreviation mapping (fallback)
+            // Extract City + State
             const stateAbbreviations = {
                 'alabama': 'AL', 'alaska': 'AK', 'arizona': 'AZ', 'arkansas': 'AR', 'california': 'CA',
                 'colorado': 'CO', 'connecticut': 'CT', 'delaware': 'DE', 'florida': 'FL', 'georgia': 'GA',
@@ -380,35 +342,18 @@ function initAutocomplete() {
                 }
             }
 
-            if (currentLocationField) {
-                currentLocationField.value = cityState;
-                console.log('Set location:', cityState);
-            }
-            
-            // Also update the hidden autocomplete input with the formatted address
+            if (currentLocationField) currentLocationField.value = cityState;
             if (hiddenInput) {
                 hiddenInput.value = place.formattedAddress || cityState || autocompleteElement.value;
             }
-            
-            console.log('Place selection completed successfully');
         } catch (error) {
-            console.error("❌ Error processing place selection:", error);
+            console.error("Error processing place selection:", error);
         }
     };
     
-    // Listen for both new and old events
     autocompleteElement.addEventListener('gmp-select', handlePlaceSelection);
-    // Also listen for deprecated event as fallback
-    autocompleteElement.addEventListener('gmp-placeselect', handlePlaceSelection);
 
-    // Track the current input value from suggestions update event
     let currentInputValue = '';
-    
-    // Listen for suggestions update to track the input value
-    autocompleteElement.addEventListener('gmp-suggestionsupdate', (event) => {
-        // The event doesn't directly expose the value, but we can track it from input events
-        console.log('Suggestions updated:', event);
-    });
     
     // Helper function to get the value from the autocomplete element
     const getAutocompleteValue = () => {
@@ -429,7 +374,7 @@ function initAutocomplete() {
                 }
             }
         } catch (err) {
-            console.error('Error accessing shadow DOM:', err);
+            // Can't access shadow DOM
         }
         
         // Fallback to tracked value or direct value property
@@ -516,11 +461,11 @@ function initAutocomplete() {
         });
     };
 
-    // Add form validation
+    // Form validation
     const form = parentDiv.closest('form');
     if (form) {
         form.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Always prevent default first, we'll submit manually if validation passes
+            e.preventDefault();
             
             // Re-fetch the fields in case they were moved or recreated
             const currentLatField = document.getElementById('latitude');
@@ -530,7 +475,6 @@ function initAutocomplete() {
             // Update hidden input one more time before submission
             updateHiddenInput();
             
-            // Check if location is selected - use the current field references
             let hasLat = currentLatField && currentLatField.value && currentLatField.value.trim() !== '';
             let hasLng = currentLngField && currentLngField.value && currentLngField.value.trim() !== '';
             let hasLocation = currentLocationField && currentLocationField.value && currentLocationField.value.trim() !== '';
@@ -538,14 +482,11 @@ function initAutocomplete() {
             // If fields are empty, try to get value from autocomplete and geocode it
             if ((!hasLat || !hasLng || !hasLocation)) {
                 const autocompleteValue = getAutocompleteValue();
-                console.log('Autocomplete value from shadow DOM:', autocompleteValue);
                 
                 if (autocompleteValue && autocompleteValue.trim() !== '') {
                     try {
-                        console.log('Attempting to geocode:', autocompleteValue);
                         const geocodeResult = await geocodeAddress(autocompleteValue);
                         
-                        // Set the values from geocoding
                         if (currentLatField) currentLatField.value = geocodeResult.lat;
                         if (currentLngField) currentLngField.value = geocodeResult.lng;
                         if (currentLocationField) currentLocationField.value = geocodeResult.location;
@@ -553,49 +494,31 @@ function initAutocomplete() {
                         hasLat = true;
                         hasLng = true;
                         hasLocation = true;
-                        
-                        console.log('Geocoding successful:', geocodeResult);
                     } catch (error) {
-                        console.error('Geocoding error:', error);
                         showMessage('danger', 'Please select a location from the autocomplete suggestions. We could not find the location you entered.');
                         autocompleteElement.focus();
                         return false;
                     }
                 } else {
-                    // No value in autocomplete
                     showMessage('danger', 'Please select a location from the autocomplete suggestions.');
                     autocompleteElement.focus();
                     return false;
                 }
             }
             
-            // Debug logging
-            console.log('Form submission validation (final):', {
-                hasLat,
-                hasLng,
-                hasLocation,
-                latValue: currentLatField?.value,
-                lngValue: currentLngField?.value,
-                locationValue: currentLocationField?.value
-            });
-            
-            // If we still don't have the required values, prevent submission
             if (!hasLocation || !hasLat || !hasLng) {
                 showMessage('danger', 'Please select a location from the autocomplete suggestions.');
                 autocompleteElement.focus();
                 return false;
             }
             
-            // All validation passed, submit the form
             form.submit();
         });
     }
 }
 
-// Initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initAutocomplete);
 } else {
-    // DOM is already ready, but wait for Google Maps API
     initAutocomplete();
 }

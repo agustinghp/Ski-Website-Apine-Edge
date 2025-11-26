@@ -156,13 +156,6 @@ module.exports = (db) => {
             });
 
         } catch (error) {
-            console.error('Registration error:', error);
-            console.error('Error code:', error.code);
-            console.error('Error constraint:', error.constraint);
-            console.error('Error message:', error.message);
-            console.error('Full error object:', JSON.stringify(error, null, 2));
-            
-            // Check if it's a unique constraint violation (backup check)
             let errorMessage = 'Registration failed. Please try again.';
             
             // Check for PostgreSQL unique violation error code (23505)
