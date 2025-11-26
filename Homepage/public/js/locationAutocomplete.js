@@ -1,3 +1,36 @@
+// Helper function to show Bootstrap alert messages (like the message partial)
+function showMessage(type, text) {
+    // Find the card-body where messages are displayed
+    const cardBody = document.querySelector('.card-body');
+    if (!cardBody) return;
+    
+    // Remove any existing client-side messages
+    const existingMessage = cardBody.querySelector('.client-message-alert');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+    
+    // Create the alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show client-message-alert`;
+    alertDiv.setAttribute('role', 'alert');
+    alertDiv.innerHTML = `
+        ${text}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Insert at the top of card-body (where {{> message}} appears)
+    const form = cardBody.querySelector('form');
+    if (form) {
+        cardBody.insertBefore(alertDiv, form);
+    } else {
+        cardBody.insertBefore(alertDiv, cardBody.firstChild);
+    }
+    
+    // Scroll to the message
+    alertDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
 // Wait for both DOM and Google Maps API to be ready
 function initAutocomplete() {
     const input = document.getElementById("autocomplete");
@@ -147,7 +180,30 @@ function initAutocomplete() {
     
     // Update hidden input whenever autocomplete value changes
     const updateHiddenInput = () => {
-        const value = autocompleteElement.value || '';
+        let value = '';
+        
+        // Try to get value from shadow DOM
+        try {
+            const shadowRoot = autocompleteElement.shadowRoot || 
+                              autocompleteElement.openOrClosedShadowRoot ||
+                              autocompleteElement.__shadowRoot;
+            if (shadowRoot) {
+                const internalInput = shadowRoot.querySelector('input');
+                if (internalInput) {
+                    value = internalInput.value || '';
+                    currentInputValue = value;
+                }
+            }
+        } catch (err) {
+            // Can't access shadow DOM
+        }
+        
+        // Fallback to direct value property
+        if (!value) {
+            value = autocompleteElement.value || '';
+            currentInputValue = value;
+        }
+        
         hiddenInput.value = value;
     };
     
@@ -155,15 +211,38 @@ function initAutocomplete() {
     autocompleteElement.addEventListener('input', updateHiddenInput);
     autocompleteElement.addEventListener('change', updateHiddenInput);
     
-    // Listen for place selection
-    autocompleteElement.addEventListener('gmp-placeselect', async (event) => {
+    // Also listen for any other events that might indicate value changes
+    autocompleteElement.addEventListener('gmp-suggestionsupdate', updateHiddenInput);
+    
+    // Handler function for place selection (used by both events)
+    const handlePlaceSelection = async (event) => {
+        console.log('Place selected event fired:', event);
+        console.log('Event details:', {
+            placePrediction: event.placePrediction,
+            place: event.place,
+            target: event.target
+        });
+        
         try {
-            const place = event.place;
+            let place = null;
+            
+            // Try new API first (gmp-select with placePrediction)
+            if (event.placePrediction && typeof event.placePrediction.toPlace === 'function') {
+                place = await event.placePrediction.toPlace();
+                console.log('Got place from placePrediction.toPlace()');
+            }
+            // Fallback to old API (gmp-placeselect with place)
+            else if (event.place) {
+                place = event.place;
+                console.log('Got place from event.place');
+            }
 
             if (!place) {
-                console.error("Place data missing.");
+                console.error("Place data missing. Event structure:", event);
                 return;
             }
+            
+            console.log('Place object:', place);
 
             // Fetch place details with all needed fields
             await place.fetchFields({ 
@@ -176,15 +255,27 @@ function initAutocomplete() {
             let lat, lng;
             
             if (place.location) {
-                lat = place.location.lat;
-                lng = place.location.lng;
+                // lat() and lng() are methods, not properties
+                lat = typeof place.location.lat === 'function' ? place.location.lat() : place.location.lat;
+                lng = typeof place.location.lng === 'function' ? place.location.lng() : place.location.lng;
             } else {
                 console.error("Location coordinates not found in place object.");
                 return;
             }
 
-            latField.value = lat;
-            lngField.value = lng;
+            // Re-fetch fields to ensure we have the latest references
+            const currentLatField = document.getElementById('latitude');
+            const currentLngField = document.getElementById('longitude');
+            const currentLocationField = document.getElementById('location');
+            
+            if (currentLatField) {
+                currentLatField.value = lat;
+                console.log('Set latitude:', lat);
+            }
+            if (currentLngField) {
+                currentLngField.value = lng;
+                console.log('Set longitude:', lng);
+            }
 
             // Update the hidden input
             updateHiddenInput();
@@ -192,6 +283,21 @@ function initAutocomplete() {
             // ---------------------------------
             // 2. Extract City + State
             // ---------------------------------
+            // State name to abbreviation mapping (fallback)
+            const stateAbbreviations = {
+                'alabama': 'AL', 'alaska': 'AK', 'arizona': 'AZ', 'arkansas': 'AR', 'california': 'CA',
+                'colorado': 'CO', 'connecticut': 'CT', 'delaware': 'DE', 'florida': 'FL', 'georgia': 'GA',
+                'hawaii': 'HI', 'idaho': 'ID', 'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA',
+                'kansas': 'KS', 'kentucky': 'KY', 'louisiana': 'LA', 'maine': 'ME', 'maryland': 'MD',
+                'massachusetts': 'MA', 'michigan': 'MI', 'minnesota': 'MN', 'mississippi': 'MS', 'missouri': 'MO',
+                'montana': 'MT', 'nebraska': 'NE', 'nevada': 'NV', 'new hampshire': 'NH', 'new jersey': 'NJ',
+                'new mexico': 'NM', 'new york': 'NY', 'north carolina': 'NC', 'north dakota': 'ND', 'ohio': 'OH',
+                'oklahoma': 'OK', 'oregon': 'OR', 'pennsylvania': 'PA', 'rhode island': 'RI', 'south carolina': 'SC',
+                'south dakota': 'SD', 'tennessee': 'TN', 'texas': 'TX', 'utah': 'UT', 'vermont': 'VT',
+                'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV', 'wisconsin': 'WI', 'wyoming': 'WY',
+                'district of columbia': 'DC'
+            };
+            
             const components = place.addressComponents || [];
             let city = "";
             let state = "";
@@ -209,9 +315,20 @@ function initAutocomplete() {
                     city = longName || shortName;
                 }
                 
-                // State: administrative_area_level_1 (use short name for state code like "MA")
+                // State: administrative_area_level_1 (always use short name for state code like "CO")
                 if (!state && types.includes("administrative_area_level_1")) {
-                    state = shortName || longName;
+                    // Prefer shortName (abbreviation)
+                    if (shortName) {
+                        state = shortName.toUpperCase();
+                    } else if (longName) {
+                        // If we only have longName, try to convert it to abbreviation
+                        const longNameLower = longName.toLowerCase();
+                        state = stateAbbreviations[longNameLower] || longName;
+                        // If it's already 2 characters, uppercase it; otherwise keep as-is (will be full name)
+                        if (state.length === 2) {
+                            state = state.toUpperCase();
+                        }
+                    }
                 }
             });
 
@@ -239,12 +356,22 @@ function initAutocomplete() {
                                 ? `${parts[parts.length - 3]}, ${parts[parts.length - 2].split(' ')[0]}` 
                                 : secondLastPart;
                         } else {
-                            // Extract state code from last part (might be "State ZIP")
+                            // Extract state code from last part (might be "State ZIP" or "CO ZIP")
                             const stateMatch = lastPart.match(/^([A-Z]{2})\s/);
                             if (stateMatch) {
+                                // Found two-letter state code
                                 cityState = `${secondLastPart}, ${stateMatch[1]}`;
                             } else {
-                                cityState = `${secondLastPart}, ${lastPart.split(' ')[0]}`;
+                                // Try to extract state abbreviation from full state name
+                                // This is a fallback - ideally we'd have the abbreviation from address components
+                                const stateAbbr = lastPart.split(' ')[0];
+                                // If it looks like a state abbreviation (2 letters), use it
+                                if (stateAbbr.length === 2 && /^[A-Z]{2}$/.test(stateAbbr.toUpperCase())) {
+                                    cityState = `${secondLastPart}, ${stateAbbr.toUpperCase()}`;
+                                } else {
+                                    // Use the city only if we can't determine state abbreviation
+                                    cityState = secondLastPart;
+                                }
                             }
                         }
                     } else {
@@ -253,26 +380,214 @@ function initAutocomplete() {
                 }
             }
 
-            locationField.value = cityState;
+            if (currentLocationField) {
+                currentLocationField.value = cityState;
+                console.log('Set location:', cityState);
+            }
+            
+            // Also update the hidden autocomplete input with the formatted address
+            if (hiddenInput) {
+                hiddenInput.value = place.formattedAddress || cityState || autocompleteElement.value;
+            }
+            
+            console.log('Place selection completed successfully');
         } catch (error) {
             console.error("❌ Error processing place selection:", error);
         }
+    };
+    
+    // Listen for both new and old events
+    autocompleteElement.addEventListener('gmp-select', handlePlaceSelection);
+    // Also listen for deprecated event as fallback
+    autocompleteElement.addEventListener('gmp-placeselect', handlePlaceSelection);
+
+    // Track the current input value from suggestions update event
+    let currentInputValue = '';
+    
+    // Listen for suggestions update to track the input value
+    autocompleteElement.addEventListener('gmp-suggestionsupdate', (event) => {
+        // The event doesn't directly expose the value, but we can track it from input events
+        console.log('Suggestions updated:', event);
     });
+    
+    // Helper function to get the value from the autocomplete element
+    const getAutocompleteValue = () => {
+        // Try to get value from the hidden input first (updated by input/change events)
+        if (hiddenInput && hiddenInput.value) {
+            return hiddenInput.value;
+        }
+        
+        // Try to access the shadow DOM
+        try {
+            const shadowRoot = autocompleteElement.shadowRoot || 
+                              autocompleteElement.openOrClosedShadowRoot ||
+                              autocompleteElement.__shadowRoot;
+            if (shadowRoot) {
+                const internalInput = shadowRoot.querySelector('input');
+                if (internalInput && internalInput.value) {
+                    return internalInput.value;
+                }
+            }
+        } catch (err) {
+            console.error('Error accessing shadow DOM:', err);
+        }
+        
+        // Fallback to tracked value or direct value property
+        return currentInputValue || autocompleteElement.value || '';
+    };
+
+    // Helper function to geocode an address
+    const geocodeAddress = async (address) => {
+        return new Promise((resolve, reject) => {
+            if (!google || !google.maps || !google.maps.Geocoder) {
+                reject(new Error('Google Maps Geocoder not available'));
+                return;
+            }
+            
+            // State name to abbreviation mapping (fallback)
+            const stateAbbreviations = {
+                'alabama': 'AL', 'alaska': 'AK', 'arizona': 'AZ', 'arkansas': 'AR', 'california': 'CA',
+                'colorado': 'CO', 'connecticut': 'CT', 'delaware': 'DE', 'florida': 'FL', 'georgia': 'GA',
+                'hawaii': 'HI', 'idaho': 'ID', 'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA',
+                'kansas': 'KS', 'kentucky': 'KY', 'louisiana': 'LA', 'maine': 'ME', 'maryland': 'MD',
+                'massachusetts': 'MA', 'michigan': 'MI', 'minnesota': 'MN', 'mississippi': 'MS', 'missouri': 'MO',
+                'montana': 'MT', 'nebraska': 'NE', 'nevada': 'NV', 'new hampshire': 'NH', 'new jersey': 'NJ',
+                'new mexico': 'NM', 'new york': 'NY', 'north carolina': 'NC', 'north dakota': 'ND', 'ohio': 'OH',
+                'oklahoma': 'OK', 'oregon': 'OR', 'pennsylvania': 'PA', 'rhode island': 'RI', 'south carolina': 'SC',
+                'south dakota': 'SD', 'tennessee': 'TN', 'texas': 'TX', 'utah': 'UT', 'vermont': 'VT',
+                'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV', 'wisconsin': 'WI', 'wyoming': 'WY',
+                'district of columbia': 'DC'
+            };
+            
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: address }, (results, status) => {
+                if (status === 'OK' && results && results.length > 0) {
+                    const result = results[0];
+                    const location = result.geometry.location;
+                    const lat = location.lat();
+                    const lng = location.lng();
+                    
+                    // Extract city and state from address components
+                    const components = result.address_components || [];
+                    let city = "";
+                    let state = "";
+                    
+                    components.forEach(c => {
+                        const types = c.types || [];
+                        const shortName = c.short_name || "";
+                        const longName = c.long_name || "";
+                        
+                        if (!city && (types.includes("locality") || types.includes("sublocality") || types.includes("sublocality_level_1"))) {
+                            city = longName || shortName;
+                        }
+                        
+                        if (!state && types.includes("administrative_area_level_1")) {
+                            // Always prefer short_name (abbreviation)
+                            if (shortName) {
+                                state = shortName.toUpperCase();
+                            } else if (longName) {
+                                // If we only have longName, try to convert it to abbreviation
+                                const longNameLower = longName.toLowerCase();
+                                state = stateAbbreviations[longNameLower] || longName;
+                                // If it's already 2 characters, uppercase it; otherwise keep as-is (will be full name)
+                                if (state.length === 2) {
+                                    state = state.toUpperCase();
+                                }
+                            }
+                        }
+                    });
+                    
+                    let cityState = "";
+                    if (city && state) {
+                        cityState = `${city}, ${state}`;
+                    } else if (city) {
+                        cityState = city;
+                    } else if (state) {
+                        cityState = state;
+                    } else {
+                        cityState = result.formatted_address || address;
+                    }
+                    
+                    resolve({ lat, lng, location: cityState, formattedAddress: result.formatted_address });
+                } else {
+                    reject(new Error(`Geocoding failed: ${status}`));
+                }
+            });
+        });
+    };
 
     // Add form validation
     const form = parentDiv.closest('form');
     if (form) {
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Always prevent default first, we'll submit manually if validation passes
+            
+            // Re-fetch the fields in case they were moved or recreated
+            const currentLatField = document.getElementById('latitude');
+            const currentLngField = document.getElementById('longitude');
+            const currentLocationField = document.getElementById('location');
+            
             // Update hidden input one more time before submission
             updateHiddenInput();
             
-            // Check if location is selected
-            if (!locationField.value || !latField.value || !lngField.value) {
-                e.preventDefault();
-                alert('Please select a location from the autocomplete suggestions.');
+            // Check if location is selected - use the current field references
+            let hasLat = currentLatField && currentLatField.value && currentLatField.value.trim() !== '';
+            let hasLng = currentLngField && currentLngField.value && currentLngField.value.trim() !== '';
+            let hasLocation = currentLocationField && currentLocationField.value && currentLocationField.value.trim() !== '';
+            
+            // If fields are empty, try to get value from autocomplete and geocode it
+            if ((!hasLat || !hasLng || !hasLocation)) {
+                const autocompleteValue = getAutocompleteValue();
+                console.log('Autocomplete value from shadow DOM:', autocompleteValue);
+                
+                if (autocompleteValue && autocompleteValue.trim() !== '') {
+                    try {
+                        console.log('Attempting to geocode:', autocompleteValue);
+                        const geocodeResult = await geocodeAddress(autocompleteValue);
+                        
+                        // Set the values from geocoding
+                        if (currentLatField) currentLatField.value = geocodeResult.lat;
+                        if (currentLngField) currentLngField.value = geocodeResult.lng;
+                        if (currentLocationField) currentLocationField.value = geocodeResult.location;
+                        
+                        hasLat = true;
+                        hasLng = true;
+                        hasLocation = true;
+                        
+                        console.log('Geocoding successful:', geocodeResult);
+                    } catch (error) {
+                        console.error('Geocoding error:', error);
+                        showMessage('danger', 'Please select a location from the autocomplete suggestions. We could not find the location you entered.');
+                        autocompleteElement.focus();
+                        return false;
+                    }
+                } else {
+                    // No value in autocomplete
+                    showMessage('danger', 'Please select a location from the autocomplete suggestions.');
+                    autocompleteElement.focus();
+                    return false;
+                }
+            }
+            
+            // Debug logging
+            console.log('Form submission validation (final):', {
+                hasLat,
+                hasLng,
+                hasLocation,
+                latValue: currentLatField?.value,
+                lngValue: currentLngField?.value,
+                locationValue: currentLocationField?.value
+            });
+            
+            // If we still don't have the required values, prevent submission
+            if (!hasLocation || !hasLat || !hasLng) {
+                showMessage('danger', 'Please select a location from the autocomplete suggestions.');
                 autocompleteElement.focus();
                 return false;
             }
+            
+            // All validation passed, submit the form
+            form.submit();
         });
     }
 }
