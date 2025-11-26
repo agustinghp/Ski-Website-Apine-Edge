@@ -13,6 +13,7 @@ const pgSession = require('connect-pg-simple')(session);
 const bcrypt = require('bcryptjs'); //  To hash passwords
 const axios = require('axios'); // To make HTTP requests from our server.
 require('dotenv').config();
+app.locals.GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
 // http and socket.io
 const http = require('http');

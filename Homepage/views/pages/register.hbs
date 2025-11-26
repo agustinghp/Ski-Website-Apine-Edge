@@ -16,12 +16,21 @@
             <input type="email" class="form-control form-control-lg" id="email" name="email" required>
           </div>
 
+          {{!-- All the location Logic --}}
+
           <div class="mb-3">
-            <label for="location" class="form-label">Location</label>
-            <input type="text" class="form-control form-control-lg" id="location" name="location" 
-                   placeholder="e.g., Denver, CO" required>
-            <small class="form-text text-muted">Your location will be visible to other users</small>
+            <label for="autocomplete">Location</label>
+
+            <gmpx-place-autocomplete id="autocomplete" placeholder="Enter your location" type="geocode">
+            </gmpx-place-autocomplete>
+
           </div>
+
+          <input type="hidden" id="latitude" name="latitude">
+          <input type="hidden" id="longitude" name="longitude">
+          <input type="hidden" id="location" name="location">
+
+
 
           <div class="mb-3">
             <label for="password" class="form-label">Password</label>
@@ -45,3 +54,4 @@
     </div>
   </div>
 </div>
+<script src="/js/locationAutocomplete.js"></script>

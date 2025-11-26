@@ -96,7 +96,7 @@ module.exports = (db) => {
 
     // Handle Register Form Submission
     router.post('/register', async (req, res) => {
-        const { username, email, password, location } = req.body;
+        const { username, email, password, location, latitude, longitude } = req.body;
 
         if (!username || !email || !password || !location) {
             return res.render('pages/register', {
@@ -112,9 +112,13 @@ module.exports = (db) => {
         try {
             const hash = await bcrypt.hash(password, 10);
 
+            // Convert latitude and longitude to numbers, or null if not provided
+            const lat = latitude ? parseFloat(latitude) : null;
+            const lng = longitude ? parseFloat(longitude) : null;
+
             const newUser = await db.one(
-                'INSERT INTO users (username, email, password_hash, location) VALUES ($1, $2, $3, $4) RETURNING id, username',
-                [username, email, hash, location]
+                'INSERT INTO users (username, email, password_hash, location, latitude, longitude) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, username',
+                [username, email, hash, location, lat, lng]
             );
 
             req.session.userId = newUser.id;

@@ -73,3 +73,8 @@ body {
     display: inline-block;
 }
 
+gmpx-place-autocomplete {
+    display: block;
+    width: 100%;
+    min-height: 48px; /* Ensures it displays like a normal input */
+}
