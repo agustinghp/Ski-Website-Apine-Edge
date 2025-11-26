@@ -6,7 +6,11 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL UNIQUE,
     profile_image VARCHAR(255),
     password_hash VARCHAR(255) NOT NULL,
+    -- All the location Information
     location VARCHAR(100),
+    latitude DECIMAL(9,6),
+    longitude DECIMAL(9,6),
+    -- When the user was created
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

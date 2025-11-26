@@ -96,7 +96,7 @@ module.exports = (db) => {
 
     // Handle Register Form Submission
     router.post('/register', async (req, res) => {
-        const { username, email, password, location } = req.body;
+        const { username, email, password, location, latitude, longitude } = req.body;
 
         if (!username || !email || !password || !location) {
             return res.render('pages/register', {
@@ -110,11 +110,41 @@ module.exports = (db) => {
         }
 
         try {
+            // Check if username already exists
+            const existingUsername = await db.oneOrNone('SELECT id FROM users WHERE username = $1', [username]);
+            if (existingUsername) {
+                return res.render('pages/register', {
+                    title: 'Register',
+                    userId: req.session.userId,
+                    message: {
+                        type: 'danger',
+                        text: 'This username is already taken. Please choose a different username.'
+                    }
+                });
+            }
+
+            // Check if email already exists
+            const existingEmail = await db.oneOrNone('SELECT id FROM users WHERE email = $1', [email]);
+            if (existingEmail) {
+                return res.render('pages/register', {
+                    title: 'Register',
+                    userId: req.session.userId,
+                    message: {
+                        type: 'danger',
+                        text: 'This email is already registered. Please use a different email or try logging in.'
+                    }
+                });
+            }
+
             const hash = await bcrypt.hash(password, 10);
 
+            // Convert latitude and longitude to numbers, or null if not provided
+            const lat = latitude ? parseFloat(latitude) : null;
+            const lng = longitude ? parseFloat(longitude) : null;
+
             const newUser = await db.one(
-                'INSERT INTO users (username, email, password_hash, location) VALUES ($1, $2, $3, $4) RETURNING id, username',
-                [username, email, hash, location]
+                'INSERT INTO users (username, email, password_hash, location, latitude, longitude) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, username',
+                [username, email, hash, location, lat, lng]
             );
 
             req.session.userId = newUser.id;
@@ -127,12 +157,45 @@ module.exports = (db) => {
 
         } catch (error) {
             console.error('Registration error:', error);
+            console.error('Error code:', error.code);
+            console.error('Error constraint:', error.constraint);
+            console.error('Error message:', error.message);
+            console.error('Full error object:', JSON.stringify(error, null, 2));
+            
+            // Check if it's a unique constraint violation (backup check)
+            let errorMessage = 'Registration failed. Please try again.';
+            
+            // Check for PostgreSQL unique violation error code (23505)
+            // Also check for string version '23505' and numeric 23505
+            const errorCode = error.code || error.errno || '';
+            const constraintName = (error.constraint || '').toLowerCase();
+            const errorDetail = (error.detail || error.message || '').toLowerCase();
+            
+            if (errorCode === '23505' || errorCode === 23505 || String(errorCode).includes('23505')) {
+                if (constraintName.includes('username') || errorDetail.includes('username')) {
+                    errorMessage = 'This username is already taken. Please choose a different username.';
+                } else if (constraintName.includes('email') || errorDetail.includes('email')) {
+                    errorMessage = 'This email is already registered. Please use a different email or try logging in.';
+                } else if (errorDetail.includes('unique') || errorDetail.includes('duplicate')) {
+                    errorMessage = 'Username or email is already in use. Please choose different values.';
+                }
+            }
+            // Check error message for duplicate key hints (case-insensitive)
+            else if (error.message && typeof error.message === 'string') {
+                const lowerMessage = error.message.toLowerCase();
+                if (lowerMessage.includes('username') && (lowerMessage.includes('unique') || lowerMessage.includes('duplicate') || lowerMessage.includes('already'))) {
+                    errorMessage = 'This username is already taken. Please choose a different username.';
+                } else if (lowerMessage.includes('email') && (lowerMessage.includes('unique') || lowerMessage.includes('duplicate') || lowerMessage.includes('already'))) {
+                    errorMessage = 'This email is already registered. Please use a different email or try logging in.';
+                }
+            }
+            
             return res.render('pages/register', {
                 title: 'Register',
                 userId: req.session.userId,
                 message: {
                     type: 'danger',
-                    text: 'Registration failed. Username or email may already be in use.'
+                    text: errorMessage
                 }
             });
         }

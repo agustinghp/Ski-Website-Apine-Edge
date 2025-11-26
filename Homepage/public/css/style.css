@@ -19,6 +19,20 @@
 body {
     /* Set the font for the whole site */
     font-family: var(--bs-font-sans-serif);
+    /* Force light color scheme to prevent dark mode detection */
+    color-scheme: light;
+}
+
+/* Override any dark mode media queries */
+@media (prefers-color-scheme: dark) {
+    gmp-place-autocomplete {
+        --gmpx-color-surface: #fff !important;
+        --gmpx-color-on-surface: #212529 !important;
+        --gmpx-color-on-surface-variant: #212529 !important;
+        --gmpx-color-primary: #0d6efd !important;
+        --gmpx-color-outline: #ced4da !important;
+        --gmpx-color-on-primary: #fff !important;
+    }
 }
 
 /* Make primary buttons "pop" more */
@@ -73,3 +87,22 @@ body {
     display: inline-block;
 }
 
+/* Google Maps Place Autocomplete Element styling */
+gmp-place-autocomplete {
+    display: block;
+    width: 100%;
+}
+
+/* Use CSS filter to invert colors - makes black background white and white text black */
+/* Note: Border is handled by the overlay, not the element itself */
+gmp-place-autocomplete {
+    filter: invert(1) hue-rotate(180deg);
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0.375rem !important;
+}
+
+/* Invert icons back to normal colors */
+gmp-place-autocomplete::part(icon) {
+    filter: invert(1) hue-rotate(180deg);
+}

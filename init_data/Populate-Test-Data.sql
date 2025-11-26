@@ -11,17 +11,17 @@
 -- Password for all test users is: "password123"
 -- Hashed using bcrypt with 10 rounds
 
-INSERT INTO users (username, email, password_hash, location) VALUES
-('john_powder', 'john@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Aspen, Colorado'),
-('sarah_slopes', 'sarah@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Park City, Utah'),
-('mike_mountain', 'mike@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Breckenridge, Colorado'),
-('emma_edge', 'emma@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Jackson Hole, Wyoming'),
-('alex_alpine', 'alex@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Vail, Colorado'),
-('lisa_lodge', 'lisa@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Telluride, Colorado'),
-('dave_downhill', 'dave@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Steamboat Springs, Colorado'),
-('rachel_run', 'rachel@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Sun Valley, Idaho'),
-('tom_trail', 'tom@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Mammoth Lakes, California'),
-('nina_nordic', 'nina@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Boulder, Colorado');
+INSERT INTO users (username, email, password_hash, location, latitude, longitude) VALUES
+('john_powder', 'john@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Aspen, CO', 39.1911, -106.8175),
+('sarah_slopes', 'sarah@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Park City, UT', 40.6461, -111.4980),
+('mike_mountain', 'mike@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Breckenridge, CO', 39.4817, -106.0384),
+('emma_edge', 'emma@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Jackson Hole, WY', 43.4799, -110.7624),
+('alex_alpine', 'alex@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Vail, CO', 39.6403, -106.3742),
+('lisa_lodge', 'lisa@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Telluride, CO', 37.9375, -107.8123),
+('dave_downhill', 'dave@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Steamboat Springs, CO', 40.4850, -106.8317),
+('rachel_run', 'rachel@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Sun Valley, ID', 43.6971, -114.3517),
+('tom_trail', 'tom@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Mammoth Lakes, CA', 37.6308, -119.0326),
+('nina_nordic', 'nina@example.com', '$2a$10$rZ8qY5F5Z5Z5Z5Z5Z5Z5ZeK5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'Boulder, CO', 40.0150, -105.2705);
 
 
 -- =====================================================
