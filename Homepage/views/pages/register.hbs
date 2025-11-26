@@ -19,11 +19,8 @@
           {{!-- All the location Logic --}}
 
           <div class="mb-3">
-            <label for="autocomplete">Location</label>
-
-            <gmpx-place-autocomplete id="autocomplete" placeholder="Enter your location" type="geocode">
-            </gmpx-place-autocomplete>
-
+            <label for="autocomplete" class="form-label">Location</label>
+            <input type="text" class="form-control form-control-lg" id="autocomplete" name="autocomplete" placeholder="Enter your location (address, city, etc.)" autocomplete="off" required>
           </div>
 
           <input type="hidden" id="latitude" name="latitude">
