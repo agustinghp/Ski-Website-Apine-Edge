@@ -1,180 +1,325 @@
-<!-- Updated product-detail.hbs with image display and delete functionality -->
-<div class="container mt-5">
+<!-- Beautiful Product Detail Page -->
+<link rel="stylesheet" href="/css/product-detail.css">
+<div class="product-detail-page">
     {{#if error}}
-        <div class="alert alert-danger">{{error}}</div>
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{error}}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     {{else}}
-        <div class="row">
+        <!-- Breadcrumb Navigation -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/" class="text-decoration-none"><i class="bi bi-house-door"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="/search" class="text-decoration-none">Products</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{product.productname}}</li>
+            </ol>
+        </nav>
+
+        <div class="row g-4">
             <!-- Image Section -->
-            <div class="col-md-6">
-                {{#if images}}
-                    {{#if (eq images.length 1)}}
-                        <!-- Single image -->
-                        <img src="{{images.[0].image_path}}" class="img-fluid rounded" alt="{{product.productname}}">
+            <div class="col-lg-6">
+                <div class="product-image-container">
+                    {{#if images}}
+                        {{#if (eq images.length 1)}}
+                            <!-- Single image with shadow -->
+                            <div class="single-image-wrapper shadow-lg rounded-4 overflow-hidden" style="height: 550px;">
+                                <img src="{{images.[0].image_path}}" class="img-fluid w-100 h-100" 
+                                     style="object-fit: cover;" 
+                                     alt="{{product.productname}}">
+                            </div>
+                        {{else}}
+                            <!-- Enhanced Image carousel -->
+                            <div id="productCarousel" class="carousel slide carousel-fade shadow-lg rounded-4 overflow-hidden" 
+                                 style="height: 550px;" data-bs-ride="carousel">
+                                <div class="carousel-indicators">
+                                    {{#each images}}
+                                        <button type="button" data-bs-target="#productCarousel" 
+                                                data-bs-slide-to="{{@index}}" 
+                                                {{#if @first}}class="active" aria-current="true"{{/if}}
+                                                aria-label="Slide {{@index}}"></button>
+                                    {{/each}}
+                                </div>
+                                <div class="carousel-inner h-100">
+                                    {{#each images}}
+                                        <div class="carousel-item h-100 {{#if @first}}active{{/if}}">
+                                            <img src="{{image_path}}" class="d-block w-100 h-100" 
+                                                 style="object-fit: cover;" 
+                                                 alt="Product image {{@index}}">
+                                        </div>
+                                    {{/each}}
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            </div>
+                        {{/if}}
                     {{else}}
-                        <!-- Image carousel for multiple images -->
-                        <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-indicators">
-                                {{#each images}}
-                                    <button type="button" data-bs-target="#productCarousel" 
-                                            data-bs-slide-to="{{@index}}" 
-                                            {{#if @first}}class="active"{{/if}}></button>
-                                {{/each}}
+                        <!-- Enhanced placeholder -->
+                        <div class="bg-gradient bg-light d-flex align-items-center justify-content-center rounded-4 shadow-lg" 
+                             style="height: 550px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                            <div class="text-center text-muted">
+                                <i class="bi bi-image" style="font-size: 5rem; opacity: 0.3;"></i>
+                                <p class="mt-3 mb-0 fs-5">No image available</p>
                             </div>
-                            <div class="carousel-inner">
-                                {{#each images}}
-                                    <div class="carousel-item {{#if @first}}active{{/if}}">
-                                        <img src="{{image_path}}" class="d-block w-100 rounded" alt="Product image {{@index}}">
-                                    </div>
-                                {{/each}}
-                            </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon"></span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
-                                <span class="carousel-control-next-icon"></span>
-                            </button>
                         </div>
                     {{/if}}
-                {{else}}
-                    <!-- Placeholder if no images -->
-                    <div class="bg-light d-flex align-items-center justify-content-center rounded" style="height: 400px;">
-                        <div class="text-center text-muted">
-                            <i class="bi bi-image" style="font-size: 4rem;"></i>
-                            <p>No image available</p>
-                        </div>
-                    </div>
-                {{/if}}
+                </div>
             </div>
 
             <!-- Product Details Section -->
-            <div class="col-md-6">
-                <h1>{{product.productname}}</h1>
-                
-                <div class="mb-3">
-                    <span class="badge bg-primary">{{product.brand}}</span>
-                    <span class="badge bg-secondary">{{product.model}}</span>
-                </div>
-
-                <h3 class="text-success">${{product.price}}</h3>
-
-                {{#if product.productdescription}}
+            <div class="col-lg-6">
+                <div class="product-details">
+                    <!-- Product Type Badge -->
                     <div class="mb-3">
-                        <h5>Description</h5>
-                        <p>{{product.productdescription}}</p>
+                        <span class="badge bg-primary bg-gradient px-3 py-2 fs-6 text-capitalize">
+                            <i class="bi bi-tag-fill me-1"></i>{{product.producttype}}
+                        </span>
                     </div>
-                {{/if}}
 
-                <div class="mb-3">
-                    <h5>Specifications</h5>
-                    <ul class="list-unstyled">
-                        {{#if (eq product.producttype 'snowboard')}}
-                            {{#if product.snowboardlength}}
-                                <li><strong>Length:</strong> {{product.snowboardlength}} cm</li>
+                    <!-- Product Title -->
+                    <h1 class="product-title mb-3 fw-bold">{{product.productname}}</h1>
+                    
+                    <!-- Brand and Model -->
+                    <div class="mb-4">
+                        <div class="d-flex flex-wrap align-items-center gap-3">
+                            <div class="brand-model-item">
+                                <small class="text-muted d-block mb-1 fw-semibold">Brand</small>
+                                <span class="badge bg-light text-dark border px-3 py-2 fs-6">
+                                    <i class="bi bi-award-fill me-1"></i>{{product.brand}}
+                                </span>
+                            </div>
+                            {{#if product.model}}
+                            <div class="brand-model-item">
+                                <small class="text-muted d-block mb-1 fw-semibold">Model</small>
+                                <span class="badge bg-light text-dark border px-3 py-2 fs-6">
+                                    <i class="bi bi-box-seam me-1"></i>{{product.model}}
+                                </span>
+                            </div>
                             {{/if}}
-                            {{#if product.snowboardwidth}}
-                                <li><strong>Width:</strong> {{product.snowboardwidth}} mm</li>
-                            {{/if}}
-                        {{else if (eq product.producttype 'helmet')}}
-                            {{#if product.helmetsize}}
-                                <li><strong>Size:</strong> {{product.helmetsize}} cm</li>
-                            {{/if}}
-                        {{else if (eq product.producttype 'boots')}}
-                            {{#if product.boottype}}
-                                <li><strong>Type:</strong> {{#if (eq product.boottype 'ski')}}Ski Boots{{else}}Snowboard Boots{{/if}}</li>
-                            {{/if}}
-                            {{#if product.bootsize}}
-                                <li><strong>Size:</strong> {{product.bootsize}} (US)</li>
-                            {{/if}}
-                        {{else if (eq product.producttype 'poles')}}
-                            {{#if product.poleslength}}
-                                <li><strong>Length:</strong> {{product.poleslength}} cm</li>
-                            {{/if}}
-                        {{else if (eq product.producttype 'goggles')}}
-                            {{#if product.clothingsize}}
-                                <li><strong>Size:</strong> {{product.clothingsize}}</li>
-                            {{/if}}
-                        {{else if (eq product.producttype 'gloves')}}
-                            {{#if product.clothingsize}}
-                                <li><strong>Size:</strong> {{product.clothingsize}}</li>
-                            {{/if}}
-                        {{else if (eq product.producttype 'jackets')}}
-                            {{#if product.clothingsize}}
-                                <li><strong>Size:</strong> {{product.clothingsize}}</li>
-                            {{/if}}
-                        {{else if (eq product.producttype 'pants')}}
-                            {{#if product.clothingsize}}
-                                <li><strong>Size:</strong> {{product.clothingsize}}</li>
-                            {{/if}}
-                        {{else if (eq product.producttype 'other')}}
-                            <li><em>No specific specifications</em></li>
-                        {{else}}
-                            {{#if product.skilength}}
-                                <li><strong>Length:</strong> {{product.skilength}} cm</li>
-                            {{/if}}
-                            {{#if product.skiwidth}}
-                                <li><strong>Width:</strong> {{product.skiwidth}} mm</li>
-                            {{/if}}
-                        {{/if}}
-                    </ul>
-                </div>
+                        </div>
+                    </div>
 
-                <hr>
+                    <!-- Price Section -->
+                    <div class="price-section mb-4 p-4 bg-light rounded-4 border">
+                        <div class="d-flex align-items-baseline">
+                            <span class="text-muted me-2 fs-5">Price:</span>
+                            <span class="display-4 fw-bold text-success mb-0">${{product.price}}</span>
+                        </div>
+                    </div>
 
-                <!-- Seller Information -->
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Seller Information</h5>
-                        <div class="d-flex align-items-center mb-2">
-                            {{#if seller.profile_image}}
-                                <img src="{{seller.profile_image}}" alt="{{seller.username}}" 
-                                     class="rounded-circle me-2" style="width: 50px; height: 50px; object-fit: cover;">
-                            {{else}}
-                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" 
-                                     style="width: 50px; height: 50px;">
-                                    <span class="fs-5">{{substring seller.username 0 1}}</span>
+                    <!-- Description -->
+                    {{#if product.productdescription}}
+                        <div class="description-section mb-4">
+                            <h5 class="section-title mb-3">
+                                <i class="bi bi-card-text me-2"></i>Description
+                            </h5>
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <p class="card-text mb-0 lh-lg">{{product.productdescription}}</p>
                                 </div>
-                            {{/if}}
-                            <div>
-                                <a href="/users/{{seller.id}}" class="text-decoration-none">
-                                    <strong>{{seller.username}}</strong>
-                                </a>
-                                <br>
+                            </div>
+                        </div>
+                    {{/if}}
+
+                    <!-- Specifications -->
+                    <div class="specifications-section mb-4">
+                        <h5 class="section-title mb-3">
+                            <i class="bi bi-list-check me-2"></i>Specifications
+                        </h5>
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    {{#if (eq product.producttype 'snowboard')}}
+                                        {{#if product.snowboardlength}}
+                                            <div class="col-6">
+                                                <div class="spec-item">
+                                                    <small class="text-muted d-block mb-1">Length</small>
+                                                    <strong class="fs-6">{{product.snowboardlength}} cm</strong>
+                                                </div>
+                                            </div>
+                                        {{/if}}
+                                        {{#if product.snowboardwidth}}
+                                            <div class="col-6">
+                                                <div class="spec-item">
+                                                    <small class="text-muted d-block mb-1">Width</small>
+                                                    <strong class="fs-6">{{product.snowboardwidth}} mm</strong>
+                                                </div>
+                                            </div>
+                                        {{/if}}
+                                    {{else if (eq product.producttype 'helmet')}}
+                                        {{#if product.helmetsize}}
+                                            <div class="col-6">
+                                                <div class="spec-item">
+                                                    <small class="text-muted d-block mb-1">Size</small>
+                                                    <strong class="fs-6">{{product.helmetsize}} cm</strong>
+                                                </div>
+                                            </div>
+                                        {{/if}}
+                                    {{else if (eq product.producttype 'boots')}}
+                                        {{#if product.boottype}}
+                                            <div class="col-6">
+                                                <div class="spec-item">
+                                                    <small class="text-muted d-block mb-1">Type</small>
+                                                    <strong class="fs-6">{{#if (eq product.boottype 'ski')}}Ski Boots{{else}}Snowboard Boots{{/if}}</strong>
+                                                </div>
+                                            </div>
+                                        {{/if}}
+                                        {{#if product.bootsize}}
+                                            <div class="col-6">
+                                                <div class="spec-item">
+                                                    <small class="text-muted d-block mb-1">Size</small>
+                                                    <strong class="fs-6">{{product.bootsize}} (US)</strong>
+                                                </div>
+                                            </div>
+                                        {{/if}}
+                                    {{else if (eq product.producttype 'poles')}}
+                                        {{#if product.poleslength}}
+                                            <div class="col-6">
+                                                <div class="spec-item">
+                                                    <small class="text-muted d-block mb-1">Length</small>
+                                                    <strong class="fs-6">{{product.poleslength}} cm</strong>
+                                                </div>
+                                            </div>
+                                        {{/if}}
+                                    {{else if (eq product.producttype 'goggles')}}
+                                        {{#if product.clothingsize}}
+                                            <div class="col-6">
+                                                <div class="spec-item">
+                                                    <small class="text-muted d-block mb-1">Size</small>
+                                                    <strong class="fs-6">{{product.clothingsize}}</strong>
+                                                </div>
+                                            </div>
+                                        {{/if}}
+                                    {{else if (eq product.producttype 'gloves')}}
+                                        {{#if product.clothingsize}}
+                                            <div class="col-6">
+                                                <div class="spec-item">
+                                                    <small class="text-muted d-block mb-1">Size</small>
+                                                    <strong class="fs-6">{{product.clothingsize}}</strong>
+                                                </div>
+                                            </div>
+                                        {{/if}}
+                                    {{else if (eq product.producttype 'jackets')}}
+                                        {{#if product.clothingsize}}
+                                            <div class="col-6">
+                                                <div class="spec-item">
+                                                    <small class="text-muted d-block mb-1">Size</small>
+                                                    <strong class="fs-6">{{product.clothingsize}}</strong>
+                                                </div>
+                                            </div>
+                                        {{/if}}
+                                    {{else if (eq product.producttype 'pants')}}
+                                        {{#if product.clothingsize}}
+                                            <div class="col-6">
+                                                <div class="spec-item">
+                                                    <small class="text-muted d-block mb-1">Size</small>
+                                                    <strong class="fs-6">{{product.clothingsize}}</strong>
+                                                </div>
+                                            </div>
+                                        {{/if}}
+                                    {{else if (eq product.producttype 'other')}}
+                                        <div class="col-12">
+                                            <div class="spec-item">
+                                                <em class="text-muted">No specific specifications</em>
+                                            </div>
+                                        </div>
+                                    {{else}}
+                                        {{#if product.skilength}}
+                                            <div class="col-6">
+                                                <div class="spec-item">
+                                                    <small class="text-muted d-block mb-1">Length</small>
+                                                    <strong class="fs-6">{{product.skilength}} cm</strong>
+                                                </div>
+                                            </div>
+                                        {{/if}}
+                                        {{#if product.skiwidth}}
+                                            <div class="col-6">
+                                                <div class="spec-item">
+                                                    <small class="text-muted d-block mb-1">Width</small>
+                                                    <strong class="fs-6">{{product.skiwidth}} mm</strong>
+                                                </div>
+                                            </div>
+                                        {{/if}}
+                                    {{/if}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seller Information Card -->
+                    <div class="seller-section mb-4">
+                        <h5 class="section-title mb-3">
+                            <i class="bi bi-person-circle me-2"></i>Seller Information
+                        </h5>
+                        <div class="card border-0 shadow-sm seller-card">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center mb-3">
+                                    {{#if seller.profile_image}}
+                                        <img src="{{seller.profile_image}}" alt="{{seller.username}}" 
+                                             class="rounded-circle me-3 shadow-sm" 
+                                             style="width: 70px; height: 70px; object-fit: cover; border: 3px solid #fff;">
+                                    {{else}}
+                                        <div class="rounded-circle bg-gradient bg-primary text-white d-flex align-items-center justify-content-center me-3 shadow-sm" 
+                                             style="width: 70px; height: 70px; border: 3px solid #fff;">
+                                            <span class="fs-3 fw-bold">{{substring seller.username 0 1}}</span>
+                                        </div>
+                                    {{/if}}
+                                    <div class="flex-grow-1">
+                                        <a href="/users/{{seller.id}}" class="text-decoration-none text-dark">
+                                            <h6 class="mb-1 fw-bold fs-5">{{seller.username}}</h6>
+                                        </a>
+                                        <small class="text-muted d-block">
+                                            <i class="bi bi-geo-alt-fill me-1"></i>{{seller.location}}
+                                        </small>
+                                    </div>
+                                </div>
+                                <hr class="my-3">
                                 <small class="text-muted">
-                                    <i class="bi bi-geo-alt"></i> {{seller.location}}
+                                    <i class="bi bi-calendar-check me-1"></i>Member since {{formatDate seller.created_at}}
                                 </small>
                             </div>
                         </div>
-                        <small class="text-muted">Member since {{formatDate seller.created_at}}</small>
                     </div>
-                </div>
 
-                <!-- Action Buttons -->
-                {{#if userId}}
-                    {{#if isOwner}}
-                        <div class="alert alert-info mb-3">
-                            <i class="bi bi-info-circle"></i> This is your listing
-                        </div>
-                        <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                            <i class="bi bi-trash"></i> Delete Listing
-                        </button>
-                    {{else}}
-                        {{#if (eq connectionStatus 'accepted')}}
-                            <a href="/chat?userId={{seller.id}}" class="btn btn-success w-100">
-                                <i class="bi bi-chat-dots"></i> Message Seller
-                            </a>
-                        {{else if (eq connectionStatus 'pending')}}
-                            <button class="btn btn-secondary w-100" disabled>
-                                Connection Request Pending
-                            </button>
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        {{#if userId}}
+                            {{#if isOwner}}
+                                <div class="alert alert-info border-0 shadow-sm mb-3" role="alert">
+                                    <i class="bi bi-info-circle-fill me-2"></i>This is your listing
+                                </div>
+                                <button type="button" class="btn btn-danger btn-lg w-100 shadow-sm" 
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    <i class="bi bi-trash-fill me-2"></i>Delete Listing
+                                </button>
+                            {{else}}
+                                {{#if (eq connectionStatus 'accepted')}}
+                                    <a href="/chat?userId={{seller.id}}" class="btn btn-success btn-lg w-100 shadow-sm mb-2">
+                                        <i class="bi bi-chat-dots-fill me-2"></i>Message Seller
+                                    </a>
+                                {{else if (eq connectionStatus 'pending')}}
+                                    <button class="btn btn-secondary btn-lg w-100 shadow-sm" disabled>
+                                        <i class="bi bi-hourglass-split me-2"></i>Connection Request Pending
+                                    </button>
+                                {{else}}
+                                    <a href="/users/{{seller.id}}" class="btn btn-primary btn-lg w-100 shadow-sm">
+                                        <i class="bi bi-person-circle me-2"></i>View Seller Profile
+                                    </a>
+                                {{/if}}
+                            {{/if}}
                         {{else}}
-                            <a href="/users/{{seller.id}}" class="btn btn-primary w-100">
-                                View Seller Profile
+                            <a href="/login" class="btn btn-primary btn-lg w-100 shadow-sm">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Login to Contact Seller
                             </a>
                         {{/if}}
-                    {{/if}}
-                {{else}}
-                    <a href="/login" class="btn btn-primary w-100">Login to Contact Seller</a>
-                {{/if}}
+                    </div>
+                </div>
             </div>
         </div>
     {{/if}}
@@ -183,19 +328,25 @@
 <!-- Delete Confirmation Modal -->
 {{#if isOwner}}
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="deleteModalLabel">
+          <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Confirm Delete
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        Are you sure you want to delete this product listing? This action cannot be undone.
+      <div class="modal-body pt-0">
+        <p class="mb-0">Are you sure you want to delete <strong>"{{product.productname}}"</strong>? This action cannot be undone.</p>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle me-1"></i>Cancel
+        </button>
         <form action="/products/{{product.id}}/delete" method="POST" style="display: inline;">
-          <button type="submit" class="btn btn-danger">Delete</button>
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash-fill me-1"></i>Delete Listing
+          </button>
         </form>
       </div>
     </div>
