@@ -1,0 +1,555 @@
+<link rel="stylesheet" href="/css/advanced-search.css">
+
+<div class="container mt-4">
+    <h2 class="mb-4">Advanced Product Search</h2>
+    
+    <!-- Search Form -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form id="advanced-search-form" action="/search/advanced-search" method="GET" class="row g-3">
+                <!-- Text Search -->
+                <div class="col-12">
+                    <label for="query" class="form-label">Search Products</label>
+                    <input type="text" name="query" id="query" class="form-control form-control-lg"
+                        placeholder="Search by name, model, description, or seller username..." value="{{query}}">
+                </div>
+                
+                <!-- Filters Toggle Header -->
+                <div class="col-12">
+                    <button type="button" class="btn btn-link p-0 text-decoration-none filters-toggle-btn w-100 text-start" 
+                            data-bs-toggle="collapse" data-bs-target="#filters-collapse" 
+                            aria-expanded="true" aria-controls="filters-collapse">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label mb-0 d-flex align-items-center" style="cursor: pointer;">
+                                <span class="fw-bold">Filters</span>
+                                <i class="fas fa-chevron-down ms-2 filters-chevron"></i>
+                                <small class="text-muted ms-2 filters-hint">(click to collapse)</small>
+                            </label>
+                        </div>
+                    </button>
+                </div>
+                
+                <!-- Collapsible Filters Section -->
+                <div class="collapse show col-12" id="filters-collapse">
+                
+                <!-- Product Type -->
+                <div class="col-md-6">
+                    <label for="productType" class="form-label">Product Type <span class="text-danger">*</span></label>
+                    <select name="productType" id="productType" class="form-select form-select-lg" required>
+                        <option value="ski" {{#if (eq productType 'ski')}}selected{{/if}}>Skis</option>
+                        <option value="snowboard" {{#if (eq productType 'snowboard')}}selected{{/if}}>Snowboards</option>
+                        <option value="helmet" {{#if (eq productType 'helmet')}}selected{{/if}}>Helmets</option>
+                        <option value="boots" {{#if (eq productType 'boots')}}selected{{/if}}>Boots</option>
+                        <option value="poles" {{#if (eq productType 'poles')}}selected{{/if}}>Poles</option>
+                        <option value="goggles" {{#if (eq productType 'goggles')}}selected{{/if}}>Goggles</option>
+                        <option value="gloves" {{#if (eq productType 'gloves')}}selected{{/if}}>Gloves</option>
+                        <option value="jackets" {{#if (eq productType 'jackets')}}selected{{/if}}>Jackets</option>
+                        <option value="pants" {{#if (eq productType 'pants')}}selected{{/if}}>Pants</option>
+                        <option value="other" {{#if (eq productType 'other')}}selected{{/if}}>Other</option>
+                    </select>
+                </div>
+                
+                <!-- Brand Filter -->
+                <div class="col-12">
+                    <div class="filter-group">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <button type="button" class="btn btn-link p-0 text-decoration-none brand-toggle-btn" data-bs-toggle="collapse" data-bs-target="#brand-collapse" aria-expanded="false" aria-controls="brand-collapse">
+                                <label class="form-label mb-0 d-flex align-items-center" style="cursor: pointer;">
+                                    <span>Brand</span>
+                                    <i class="fas fa-chevron-down ms-2 brand-chevron"></i>
+                                    <small class="text-muted ms-2 brand-hint">(click to expand)</small>
+                                </label>
+                            </button>
+                            <div class="brand-control-buttons">
+                                <button type="button" class="btn btn-sm btn-outline-secondary select-all-brands">Select All</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary deselect-all-brands">Clear</button>
+                            </div>
+                        </div>
+                        <div class="collapse" id="brand-collapse">
+                            <div class="brand-buttons" id="brand-buttons-container">
+                                {{#if availableBrands}}
+                                    {{#each availableBrands}}
+                                        {{#if (inArray ../brands this)}}
+                                            <button type="button" class="brand-button selected" data-brand="{{this}}">{{this}}</button>
+                                        {{else}}
+                                            <button type="button" class="brand-button" data-brand="{{this}}">{{this}}</button>
+                                        {{/if}}
+                                    {{/each}}
+                                {{else}}
+                                    <p class="text-muted small mb-0">Select a product type to see available brands</p>
+                                {{/if}}
+                            </div>
+                            <!-- Custom Brands Container -->
+                            <div id="custom-brands-container" class="custom-brands-container">
+                                {{#if customBrands}}
+                                    {{#each customBrands}}
+                                        <button type="button" class="custom-brand-button {{#if (inArray ../brands this)}}selected{{/if}}" data-brand="{{this}}">
+                                            {{this}}
+                                            <button type="button" class="custom-brand-delete" aria-label="Remove brand">×</button>
+                                        </button>
+                                    {{/each}}
+                                {{/if}}
+                            </div>
+                            <!-- Hidden input to store custom brands for form submission -->
+                            <input type="hidden" name="customBrands" id="custom-brands-hidden" value="{{#each customBrands}}{{this}}{{#unless @last}},{{/unless}}{{/each}}">
+                            <!-- Add Custom Brand UI -->
+                            <div class="add-custom-brand-section mt-3">
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="add-custom-brand-btn">
+                                    <i class="fas fa-plus"></i> Add Brand for Filter
+                                </button>
+                                <div id="custom-brand-input-container" class="custom-brand-input-container mt-2" style="display: none;">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control form-control-sm" id="custom-brand-input" 
+                                               placeholder="Enter brand name..." maxlength="50">
+                                        <button type="button" class="btn btn-sm btn-primary" id="add-custom-brand-submit">
+                                            Add
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" id="cancel-custom-brand">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">Press Enter to add, or click Add button</small>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" class="brands-input" value="{{#each brands}}{{this}}{{#unless @last}},{{/unless}}{{/each}}">
+                    </div>
+                </div>
+                
+                <!-- Price Range -->
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label mb-0">Price Range ($)</label>
+                        <button type="button" class="btn btn-sm btn-outline-secondary price-reset-btn" data-min="0" data-max="1000">Reset</button>
+                    </div>
+                    <div class="price-input-container">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label for="minPrice" class="form-label small">Min Price</label>
+                                <input type="number" name="minPrice" id="minPrice" class="form-control price-input" 
+                                    min="0" max="99999.99" step="0.01" 
+                                    value="{{#if minPrice}}{{minPrice}}{{else}}0{{/if}}" 
+                                    placeholder="0">
+                            </div>
+                            <div class="col-6">
+                                <label for="maxPrice" class="form-label small">Max Price</label>
+                                <input type="number" name="maxPrice" id="maxPrice" class="form-control price-input" 
+                                    min="0" max="99999.99" step="0.01" 
+                                    value="{{#if maxPrice}}{{maxPrice}}{{else}}1000{{/if}}" 
+                                    placeholder="1000">
+                            </div>
+                        </div>
+                        <small class="text-muted">Maximum price: $99,999.99</small>
+                    </div>
+                </div>
+                
+                <!-- Sort By -->
+                <div class="col-md-6">
+                    <label for="sortBy" class="form-label">Sort By</label>
+                    <select name="sortBy" id="sortBy" class="form-select form-select-lg">
+                        <option value="" {{#unless sortBy}}selected{{/unless}}>Default</option>
+                        <option value="price_asc" {{#if (eq sortBy 'price_asc')}}selected{{/if}}>Price: Low to High</option>
+                        <option value="price_desc" {{#if (eq sortBy 'price_desc')}}selected{{/if}}>Price: High to Low</option>
+                    </select>
+                </div>
+                
+                <!-- Category-Specific Filters -->
+                
+                <!-- Ski Filters -->
+                <div id="ski-filters" class="category-filters col-12 {{#if (eq productType 'ski')}}active{{/if}}">
+                    <h5 class="mb-3">Ski Filters</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="filter-group">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="mb-0">Length (cm)</label>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary slider-reset-btn" data-slider-type="skiLength" data-min="50" data-max="250">Reset</button>
+                                </div>
+                                <div class="range-slider-container">
+                                    <div class="range-slider-wrapper">
+                                        <div class="range-slider-track"></div>
+                                        <input type="range" class="range-slider-input range-slider-min-input" 
+                                            min="50" max="250" step="1" 
+                                            value="{{#if minSkiLength}}{{minSkiLength}}{{else}}50{{/if}}">
+                                        <input type="range" class="range-slider-input range-slider-max-input" 
+                                            min="50" max="250" step="1" 
+                                            value="{{#if maxSkiLength}}{{maxSkiLength}}{{else}}250{{/if}}">
+                                    </div>
+                                    <div class="range-slider-values">
+                                        <input type="number" class="range-slider-min-input-text" data-type="skiLength" min="50" max="250" step="1" value="{{#if minSkiLength}}{{minSkiLength}}{{else}}50{{/if}}">
+                                        <input type="number" class="range-slider-max-input-text" data-type="skiLength" min="50" max="250" step="1" value="{{#if maxSkiLength}}{{maxSkiLength}}{{else}}250{{/if}}">
+                                    </div>
+                                    <input type="hidden" name="minSkiLength" value="{{minSkiLength}}">
+                                    <input type="hidden" name="maxSkiLength" value="{{maxSkiLength}}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="filter-group">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="mb-0">Width (mm)</label>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary slider-reset-btn" data-slider-type="skiWidth" data-min="40" data-max="200">Reset</button>
+                                </div>
+                                <div class="range-slider-container">
+                                    <div class="range-slider-wrapper">
+                                        <div class="range-slider-track"></div>
+                                        <input type="range" class="range-slider-input range-slider-min-input" 
+                                            min="40" max="200" step="1" 
+                                            value="{{#if minSkiWidth}}{{minSkiWidth}}{{else}}40{{/if}}">
+                                        <input type="range" class="range-slider-input range-slider-max-input" 
+                                            min="40" max="200" step="1" 
+                                            value="{{#if maxSkiWidth}}{{maxSkiWidth}}{{else}}200{{/if}}">
+                                    </div>
+                                    <div class="range-slider-values">
+                                        <input type="number" class="range-slider-min-input-text" data-type="skiWidth" min="40" max="200" step="1" value="{{#if minSkiWidth}}{{minSkiWidth}}{{else}}40{{/if}}">
+                                        <input type="number" class="range-slider-max-input-text" data-type="skiWidth" min="40" max="200" step="1" value="{{#if maxSkiWidth}}{{maxSkiWidth}}{{else}}200{{/if}}">
+                                    </div>
+                                    <input type="hidden" name="minSkiWidth" value="{{minSkiWidth}}">
+                                    <input type="hidden" name="maxSkiWidth" value="{{maxSkiWidth}}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Snowboard Filters -->
+                <div id="snowboard-filters" class="category-filters col-12 {{#if (eq productType 'snowboard')}}active{{/if}}">
+                    <h5 class="mb-3">Snowboard Filters</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="filter-group">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="mb-0">Length (cm)</label>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary slider-reset-btn" data-slider-type="snowboardLength" data-min="100" data-max="200">Reset</button>
+                                </div>
+                                <div class="range-slider-container">
+                                    <div class="range-slider-wrapper">
+                                        <div class="range-slider-track"></div>
+                                        <input type="range" class="range-slider-input range-slider-min-input" 
+                                            min="100" max="200" step="1" 
+                                            value="{{#if minSnowboardLength}}{{minSnowboardLength}}{{else}}100{{/if}}">
+                                        <input type="range" class="range-slider-input range-slider-max-input" 
+                                            min="100" max="200" step="1" 
+                                            value="{{#if maxSnowboardLength}}{{maxSnowboardLength}}{{else}}200{{/if}}">
+                                    </div>
+                                    <div class="range-slider-values">
+                                        <input type="number" class="range-slider-min-input-text" data-type="snowboardLength" min="100" max="200" step="1" value="{{#if minSnowboardLength}}{{minSnowboardLength}}{{else}}100{{/if}}">
+                                        <input type="number" class="range-slider-max-input-text" data-type="snowboardLength" min="100" max="200" step="1" value="{{#if maxSnowboardLength}}{{maxSnowboardLength}}{{else}}200{{/if}}">
+                                    </div>
+                                    <input type="hidden" name="minSnowboardLength" value="{{minSnowboardLength}}">
+                                    <input type="hidden" name="maxSnowboardLength" value="{{maxSnowboardLength}}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="filter-group">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="mb-0">Width (mm)</label>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary slider-reset-btn" data-slider-type="snowboardWidth" data-min="200" data-max="300">Reset</button>
+                                </div>
+                                <div class="range-slider-container">
+                                    <div class="range-slider-wrapper">
+                                        <div class="range-slider-track"></div>
+                                        <input type="range" class="range-slider-input range-slider-min-input" 
+                                            min="200" max="300" step="1" 
+                                            value="{{#if minSnowboardWidth}}{{minSnowboardWidth}}{{else}}200{{/if}}">
+                                        <input type="range" class="range-slider-input range-slider-max-input" 
+                                            min="200" max="300" step="1" 
+                                            value="{{#if maxSnowboardWidth}}{{maxSnowboardWidth}}{{else}}300{{/if}}">
+                                    </div>
+                                    <div class="range-slider-values">
+                                        <input type="number" class="range-slider-min-input-text" data-type="snowboardWidth" min="200" max="300" step="1" value="{{#if minSnowboardWidth}}{{minSnowboardWidth}}{{else}}200{{/if}}">
+                                        <input type="number" class="range-slider-max-input-text" data-type="snowboardWidth" min="200" max="300" step="1" value="{{#if maxSnowboardWidth}}{{maxSnowboardWidth}}{{else}}300{{/if}}">
+                                    </div>
+                                    <input type="hidden" name="minSnowboardWidth" value="{{minSnowboardWidth}}">
+                                    <input type="hidden" name="maxSnowboardWidth" value="{{maxSnowboardWidth}}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Helmet Filters -->
+                <div id="helmet-filters" class="category-filters col-12 {{#if (eq productType 'helmet')}}active{{/if}}">
+                    <h5 class="mb-3">Helmet Filters</h5>
+                    <div class="filter-group">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="mb-0">Size (cm)</label>
+                            <button type="button" class="btn btn-sm btn-outline-secondary slider-reset-btn" data-slider-type="helmetSize" data-min="48" data-max="65">Reset</button>
+                        </div>
+                        <div class="range-slider-container">
+                            <div class="range-slider-wrapper">
+                                <div class="range-slider-track"></div>
+                                <input type="range" class="range-slider-input range-slider-min-input" 
+                                    min="48" max="65" step="0.5" 
+                                    value="{{#if minHelmetSize}}{{minHelmetSize}}{{else}}48{{/if}}">
+                                <input type="range" class="range-slider-input range-slider-max-input" 
+                                    min="48" max="65" step="0.5" 
+                                    value="{{#if maxHelmetSize}}{{maxHelmetSize}}{{else}}65{{/if}}">
+                            </div>
+                            <div class="range-slider-values">
+                                <input type="number" class="range-slider-min-input-text" data-type="helmetSize" min="48" max="65" step="0.5" value="{{#if minHelmetSize}}{{minHelmetSize}}{{else}}48{{/if}}">
+                                <input type="number" class="range-slider-max-input-text" data-type="helmetSize" min="48" max="65" step="0.5" value="{{#if maxHelmetSize}}{{maxHelmetSize}}{{else}}65{{/if}}">
+                            </div>
+                            <input type="hidden" name="minHelmetSize" value="{{minHelmetSize}}">
+                            <input type="hidden" name="maxHelmetSize" value="{{maxHelmetSize}}">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Boot Filters -->
+                <div id="boots-filters" class="category-filters col-12 {{#if (eq productType 'boots')}}active{{/if}}">
+                    <h5 class="mb-3">Boot Filters</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="filter-group">
+                                <label for="bootType">Boot Type</label>
+                                <select name="bootType" id="bootType" class="form-select">
+                                    <option value="">Any</option>
+                                    <option value="ski" {{#if (eq bootType 'ski')}}selected{{/if}}>Ski Boots</option>
+                                    <option value="snowboard" {{#if (eq bootType 'snowboard')}}selected{{/if}}>Snowboard Boots</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="filter-group">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="mb-0">Size (US)</label>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary slider-reset-btn" data-slider-type="bootSize" data-min="3" data-max="16">Reset</button>
+                                </div>
+                                <div class="range-slider-container">
+                                    <div class="range-slider-wrapper">
+                                        <div class="range-slider-track"></div>
+                                        <input type="range" class="range-slider-input range-slider-min-input" 
+                                            min="3" max="16" step="0.5" 
+                                            value="{{#if minBootSize}}{{minBootSize}}{{else}}3{{/if}}">
+                                        <input type="range" class="range-slider-input range-slider-max-input" 
+                                            min="3" max="16" step="0.5" 
+                                            value="{{#if maxBootSize}}{{maxBootSize}}{{else}}16{{/if}}">
+                                    </div>
+                                    <div class="range-slider-values">
+                                        <input type="number" class="range-slider-min-input-text" data-type="bootSize" min="3" max="16" step="0.5" value="{{#if minBootSize}}{{minBootSize}}{{else}}3{{/if}}">
+                                        <input type="number" class="range-slider-max-input-text" data-type="bootSize" min="3" max="16" step="0.5" value="{{#if maxBootSize}}{{maxBootSize}}{{else}}16{{/if}}">
+                                    </div>
+                                    <input type="hidden" name="minBootSize" value="{{minBootSize}}">
+                                    <input type="hidden" name="maxBootSize" value="{{maxBootSize}}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pole Filters -->
+                <div id="poles-filters" class="category-filters col-12 {{#if (eq productType 'poles')}}active{{/if}}">
+                    <h5 class="mb-3">Pole Filters</h5>
+                    <div class="filter-group">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="mb-0">Length (cm)</label>
+                            <button type="button" class="btn btn-sm btn-outline-secondary slider-reset-btn" data-slider-type="poleLength" data-min="80" data-max="160">Reset</button>
+                        </div>
+                        <div class="range-slider-container">
+                            <div class="range-slider-wrapper">
+                                <div class="range-slider-track"></div>
+                                <input type="range" class="range-slider-input range-slider-min-input" 
+                                    min="80" max="160" step="1" 
+                                    value="{{#if minPoleLength}}{{minPoleLength}}{{else}}80{{/if}}">
+                                <input type="range" class="range-slider-input range-slider-max-input" 
+                                    min="80" max="160" step="1" 
+                                    value="{{#if maxPoleLength}}{{maxPoleLength}}{{else}}160{{/if}}">
+                            </div>
+                            <div class="range-slider-values">
+                                <input type="number" class="range-slider-min-input-text" data-type="poleLength" min="80" max="160" step="1" value="{{#if minPoleLength}}{{minPoleLength}}{{else}}80{{/if}}">
+                                <input type="number" class="range-slider-max-input-text" data-type="poleLength" min="80" max="160" step="1" value="{{#if maxPoleLength}}{{maxPoleLength}}{{else}}160{{/if}}">
+                            </div>
+                            <input type="hidden" name="minPoleLength" value="{{minPoleLength}}">
+                            <input type="hidden" name="maxPoleLength" value="{{maxPoleLength}}">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Clothing Filters (Goggles, Gloves, Jackets, Pants) -->
+                <div id="goggles-filters" class="category-filters col-12 {{#if (eq productType 'goggles')}}active{{/if}}">
+                    <h5 class="mb-3">Goggle Filters</h5>
+                    <div class="filter-group">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="mb-0">Size</label>
+                            <div class="size-control-buttons">
+                                <button type="button" class="btn btn-sm btn-outline-secondary select-all-sizes" data-category="goggles">Select All</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary deselect-all-sizes" data-category="goggles">Clear</button>
+                            </div>
+                        </div>
+                        <div class="clothing-size-buttons" data-category="goggles">
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'One Size')}}selected{{/if}}" data-size="One Size" data-category="goggles">One Size</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'XS')}}selected{{/if}}" data-size="XS" data-category="goggles">XS</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'S')}}selected{{/if}}" data-size="S" data-category="goggles">S</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'M')}}selected{{/if}}" data-size="M" data-category="goggles">M</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'L')}}selected{{/if}}" data-size="L" data-category="goggles">L</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'XL')}}selected{{/if}}" data-size="XL" data-category="goggles">XL</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'XXL')}}selected{{/if}}" data-size="XXL" data-category="goggles">XXL</button>
+                        </div>
+                        <input type="hidden" class="clothing-sizes-input" data-category="goggles" value="{{#each clothingSizes}}{{this}}{{#unless @last}},{{/unless}}{{/each}}">
+                    </div>
+                </div>
+                
+                <div id="gloves-filters" class="category-filters col-12 {{#if (eq productType 'gloves')}}active{{/if}}">
+                    <h5 class="mb-3">Glove Filters</h5>
+                    <div class="filter-group">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="mb-0">Size</label>
+                            <div class="size-control-buttons">
+                                <button type="button" class="btn btn-sm btn-outline-secondary select-all-sizes" data-category="gloves">Select All</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary deselect-all-sizes" data-category="gloves">Clear</button>
+                            </div>
+                        </div>
+                        <div class="clothing-size-buttons" data-category="gloves">
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'XS')}}selected{{/if}}" data-size="XS" data-category="gloves">XS</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'S')}}selected{{/if}}" data-size="S" data-category="gloves">S</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'M')}}selected{{/if}}" data-size="M" data-category="gloves">M</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'L')}}selected{{/if}}" data-size="L" data-category="gloves">L</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'XL')}}selected{{/if}}" data-size="XL" data-category="gloves">XL</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'XXL')}}selected{{/if}}" data-size="XXL" data-category="gloves">XXL</button>
+                        </div>
+                        <input type="hidden" class="clothing-sizes-input" data-category="gloves" value="{{#each clothingSizes}}{{this}}{{#unless @last}},{{/unless}}{{/each}}">
+                    </div>
+                </div>
+                
+                <div id="jackets-filters" class="category-filters col-12 {{#if (eq productType 'jackets')}}active{{/if}}">
+                    <h5 class="mb-3">Jacket Filters</h5>
+                    <div class="filter-group">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="mb-0">Size</label>
+                            <div class="size-control-buttons">
+                                <button type="button" class="btn btn-sm btn-outline-secondary select-all-sizes" data-category="jackets">Select All</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary deselect-all-sizes" data-category="jackets">Clear</button>
+                            </div>
+                        </div>
+                        <div class="clothing-size-buttons" data-category="jackets">
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'XS')}}selected{{/if}}" data-size="XS" data-category="jackets">XS</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'S')}}selected{{/if}}" data-size="S" data-category="jackets">S</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'M')}}selected{{/if}}" data-size="M" data-category="jackets">M</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'L')}}selected{{/if}}" data-size="L" data-category="jackets">L</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'XL')}}selected{{/if}}" data-size="XL" data-category="jackets">XL</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'XXL')}}selected{{/if}}" data-size="XXL" data-category="jackets">XXL</button>
+                        </div>
+                        <input type="hidden" class="clothing-sizes-input" data-category="jackets" value="{{#each clothingSizes}}{{this}}{{#unless @last}},{{/unless}}{{/each}}">
+                    </div>
+                </div>
+                
+                <div id="pants-filters" class="category-filters col-12 {{#if (eq productType 'pants')}}active{{/if}}">
+                    <h5 class="mb-3">Pants Filters</h5>
+                    <div class="filter-group">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="mb-0">Size</label>
+                            <div class="size-control-buttons">
+                                <button type="button" class="btn btn-sm btn-outline-secondary select-all-sizes" data-category="pants">Select All</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary deselect-all-sizes" data-category="pants">Clear</button>
+                            </div>
+                        </div>
+                        <div class="clothing-size-buttons" data-category="pants">
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'XS')}}selected{{/if}}" data-size="XS" data-category="pants">XS</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'S')}}selected{{/if}}" data-size="S" data-category="pants">S</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'M')}}selected{{/if}}" data-size="M" data-category="pants">M</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'L')}}selected{{/if}}" data-size="L" data-category="pants">L</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'XL')}}selected{{/if}}" data-size="XL" data-category="pants">XL</button>
+                            <button type="button" class="size-button {{#if (inArray clothingSizes 'XXL')}}selected{{/if}}" data-size="XXL" data-category="pants">XXL</button>
+                        </div>
+                        <input type="hidden" class="clothing-sizes-input" data-category="pants" value="{{#each clothingSizes}}{{this}}{{#unless @last}},{{/unless}}{{/each}}">
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Search</button>
+                </div>
+                
+                </div>
+                <!-- End Collapsible Filters Section -->
+            </form>
+        </div>
+    </div>
+    
+    <!-- Results Section -->
+    {{#if hasResults}}
+    <div class="mb-3">
+        <h5>Search Results: <span class="text-primary">{{resultCount}} product(s) found</span></h5>
+    </div>
+    
+    <div class="row g-3">
+        {{#each products}}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0">
+                {{#if primary_image}}
+                    <img src="{{primary_image}}" class="card-img-top" 
+                         style="height: 250px; object-fit: cover;" alt="{{productname}}">
+                {{else}}
+                    <div class="bg-light d-flex align-items-center justify-content-center" 
+                         style="height: 250px;">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-image" style="font-size: 3rem;"></i>
+                            <p class="mb-0 mt-2">{{brand}} {{model}}</p>
+                        </div>
+                    </div>
+                {{/if}}
+                <div class="card-body">
+                    <h5 class="card-title">{{brand}} {{model}}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        {{#if (eq producttype 'snowboard')}}
+                            {{#if snowboardlength}}{{snowboardlength}}cm{{/if}}
+                            {{#if snowboardwidth}} | Width: {{snowboardwidth}}mm{{/if}}
+                        {{else if (eq producttype 'helmet')}}
+                            {{#if helmetsize}}Size: {{helmetsize}}cm{{/if}}
+                        {{else if (eq producttype 'boots')}}
+                            {{#if boottype}}{{#if (eq boottype 'ski')}}Ski Boots{{else}}Snowboard Boots{{/if}}{{/if}}
+                            {{#if bootsize}} | Size: {{bootsize}} (US){{/if}}
+                        {{else if (eq producttype 'poles')}}
+                            {{#if poleslength}}Length: {{poleslength}}cm{{/if}}
+                        {{else if (eq producttype 'goggles')}}
+                            {{#if clothingsize}}Size: {{clothingsize}}{{/if}}
+                        {{else if (eq producttype 'gloves')}}
+                            {{#if clothingsize}}Size: {{clothingsize}}{{/if}}
+                        {{else if (eq producttype 'jackets')}}
+                            {{#if clothingsize}}Size: {{clothingsize}}{{/if}}
+                        {{else if (eq producttype 'pants')}}
+                            {{#if clothingsize}}Size: {{clothingsize}}{{/if}}
+                        {{else if (eq producttype 'other')}}
+                            Other Gear
+                        {{else}}
+                            {{#if skilength}}{{skilength}}cm{{/if}}
+                            {{#if skiwidth}} | Width: {{skiwidth}}mm{{/if}}
+                        {{/if}}
+                    </h6>
+                    <p class="card-text">{{productdescription}}</p>
+                    <p class="text-muted mb-0">
+                        <small>
+                            <i class="bi bi-person"></i> {{seller_name}}
+                            {{#if seller_location}} | <i class="bi bi-geo-alt"></i> {{seller_location}}{{/if}}
+                        </small>
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-0 pb-3">
+                    <span class="fs-4 fw-bold text-primary">${{price}}</span>
+                    <a href="/products/{{id}}" class="btn btn-secondary float-end">View Details</a>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+    {{else}}
+    {{#if productType}}
+    <div class="alert alert-info" role="alert">
+        No products found matching your criteria. Try adjusting your filters.
+    </div>
+    {{else}}
+    <div class="alert alert-info" role="alert">
+        Please select a product type to begin searching.
+    </div>
+    {{/if}}
+    {{/if}}
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+<!-- Advanced Search JavaScript -->
+<script src="/js/advancedSearch.js"></script>
+

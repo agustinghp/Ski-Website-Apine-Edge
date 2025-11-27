@@ -1,0 +1,468 @@
+/* Dual Range Slider Styles */
+.range-slider-container {
+    position: relative;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.range-slider-wrapper {
+    position: relative;
+    height: 6px;
+    background: #dee2e6;
+    border-radius: 3px;
+    margin: 30px 0;
+}
+
+.range-slider-track {
+    position: absolute;
+    height: 100%;
+    background: #007bff;
+    border-radius: 3px;
+    z-index: 1;
+}
+
+.range-slider-input {
+    position: absolute;
+    width: 100%;
+    height: 6px;
+    background: none;
+    pointer-events: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    z-index: 2;
+}
+
+.range-slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: all;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.1s ease;
+}
+
+.range-slider-input::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+.range-slider-input::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #007bff;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: all;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.range-slider-input::-moz-range-thumb:hover {
+    transform: scale(1.1);
+}
+
+.range-slider-input::-ms-thumb {
+    width: 20px;
+    height: 20px;
+    background: #007bff;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: all;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.range-slider-values {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.range-slider-min-input-text,
+.range-slider-max-input-text {
+    font-weight: 600;
+    color: #007bff;
+    font-size: 0.9rem;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 4px 8px;
+    width: 80px;
+    text-align: center;
+    background: white;
+    transition: border-color 0.2s ease;
+}
+
+.range-slider-min-input-text:focus,
+.range-slider-max-input-text:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.range-slider-min-input-text:invalid,
+.range-slider-max-input-text:invalid {
+    border-color: #dc3545;
+}
+
+/* Category-specific filter sections */
+.category-filters {
+    display: none;
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.category-filters.active {
+    display: block;
+}
+
+.filter-group {
+    margin-bottom: 25px;
+}
+
+.filter-group:last-child {
+    margin-bottom: 0;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* Multi-select styling */
+.clothing-size-select {
+    min-height: 120px;
+}
+
+.clothing-size-select option {
+    padding: 8px;
+}
+
+/* Button styling for clothing sizes */
+.clothing-size-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+.size-button {
+    padding: 8px 16px;
+    border: 2px solid #dee2e6;
+    background: white;
+    color: #495057;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 60px;
+}
+
+.size-button:hover {
+    border-color: #007bff;
+    color: #007bff;
+    background: #f0f7ff;
+}
+
+.size-button.selected {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.size-button.selected:hover {
+    background: #0056b3;
+    border-color: #0056b3;
+}
+
+.size-control-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+/* Button styling for brands */
+.brand-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+.brand-button {
+    padding: 8px 16px;
+    border: 2px solid #dee2e6;
+    background: white;
+    color: #495057;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 80px;
+}
+
+.brand-button:hover {
+    border-color: #007bff;
+    color: #007bff;
+    background: #f0f7ff;
+}
+
+.brand-button.selected {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.brand-button.selected:hover {
+    background: #0056b3;
+    border-color: #0056b3;
+}
+
+.brand-control-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+/* Brand toggle button */
+.brand-toggle-btn {
+    color: #495057;
+    text-decoration: none;
+}
+
+.brand-toggle-btn:hover {
+    color: #007bff;
+}
+
+.brand-toggle-btn:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.brand-chevron {
+    transition: transform 0.3s ease;
+    font-size: 0.875rem;
+}
+
+.brand-toggle-btn[aria-expanded="true"] .brand-chevron {
+    transform: rotate(180deg);
+}
+
+.brand-hint {
+    font-size: 0.75rem;
+    font-weight: normal;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.brand-toggle-btn:hover .brand-hint {
+    opacity: 1;
+}
+
+/* Filters toggle button */
+.filters-toggle-btn {
+    color: #495057;
+    text-decoration: none;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    transition: all 0.2s ease;
+}
+
+.filters-toggle-btn:hover {
+    color: #007bff;
+    border-bottom-color: #007bff;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.filters-toggle-btn:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.filters-toggle-btn label {
+    user-select: none;
+}
+
+.filters-chevron {
+    transition: transform 0.3s ease;
+    font-size: 0.875rem;
+}
+
+.filters-toggle-btn[aria-expanded="true"] .filters-chevron {
+    transform: rotate(180deg);
+}
+
+.filters-hint {
+    font-size: 0.75rem;
+    font-weight: normal;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.filters-toggle-btn:hover .filters-hint {
+    opacity: 1;
+}
+
+/* Reset button for sliders */
+.slider-reset-btn {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    line-height: 1.2;
+}
+
+/* Price input container */
+.price-input-container {
+    margin-top: 10px;
+}
+
+.price-input-container .form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 5px;
+}
+
+.price-input-container .price-input {
+    font-size: 1rem;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.price-input-container .price-input:focus {
+    border-color: #007bff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.price-input-container small {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.price-reset-btn {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    line-height: 1.2;
+}
+
+/* Custom Brands Styles */
+.custom-brands-container {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px dashed #dee2e6;
+}
+
+.custom-brands-container:empty {
+    display: none;
+}
+
+.custom-brand-button {
+    position: relative;
+    padding: 8px 30px 8px 16px;
+    border: 2px solid #28a745;
+    background: white;
+    color: #495057;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 80px;
+    display: inline-block;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.custom-brand-button:hover {
+    border-color: #28a745;
+    color: #28a745;
+    background: #f0fff4;
+}
+
+.custom-brand-button.selected {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.custom-brand-button.selected:hover {
+    background: #218838;
+    border-color: #218838;
+}
+
+.custom-brand-delete {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    padding: 0;
+    color: #495057;
+    transition: all 0.2s ease;
+}
+
+.custom-brand-button.selected .custom-brand-delete {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.custom-brand-delete:hover {
+    background: #dc3545;
+    color: white;
+    transform: scale(1.1);
+}
+
+.add-custom-brand-section {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #dee2e6;
+}
+
+.custom-brand-input-container {
+    max-width: 400px;
+}
+
+.custom-brand-input-container .input-group {
+    display: flex;
+    gap: 5px;
+}
+
+.custom-brand-input-container .form-control {
+    flex: 1;
+}
+
+#custom-brand-input:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+

@@ -69,6 +69,12 @@ const hbs = handlebars.create({
     substring: function (str, start, end) {
       if (!str) return '';
       return str.substring(start, end).toUpperCase();
+    },
+
+    // Check if value is in array
+    inArray: function (array, value) {
+      if (!array || !Array.isArray(array)) return false;
+      return array.includes(value);
     }
   }
 

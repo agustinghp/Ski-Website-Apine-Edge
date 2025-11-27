@@ -84,61 +84,9 @@
                     <label for="brand" class="form-label">Brand *</label>
                     <select class="form-control" id="brand" name="brand" required>
                         <option value="">Select a brand</option>
-                        <!-- Ski brands -->
-                        <option value="Armada" data-category="ski" {{#if (eq formData.brand 'Armada')}}selected{{/if}}>Armada</option>
-                        <option value="Atomic" data-category="ski" {{#if (eq formData.brand 'Atomic')}}selected{{/if}}>Atomic</option>
-                        <option value="Black Diamond" data-category="ski" {{#if (eq formData.brand 'Black Diamond')}}selected{{/if}}>Black Diamond</option>
-                        <option value="Blizzard" data-category="ski" {{#if (eq formData.brand 'Blizzard')}}selected{{/if}}>Blizzard</option>
-                        <option value="DPS" data-category="ski" {{#if (eq formData.brand 'DPS')}}selected{{/if}}>DPS</option>
-                        <option value="Dynafit" data-category="ski" {{#if (eq formData.brand 'Dynafit')}}selected{{/if}}>Dynafit</option>
-                        <option value="Fischer" data-category="ski" {{#if (eq formData.brand 'Fischer')}}selected{{/if}}>Fischer</option>
-                        <option value="Head" data-category="ski" {{#if (eq formData.brand 'Head')}}selected{{/if}}>Head</option>
-                        <option value="K2" data-category="ski,snowboard,boots" {{#if (eq formData.brand 'K2')}}selected{{/if}}>K2</option>
-                        <option value="Line" data-category="ski" {{#if (eq formData.brand 'Line')}}selected{{/if}}>Line</option>
-                        <option value="Moment" data-category="ski" {{#if (eq formData.brand 'Moment')}}selected{{/if}}>Moment</option>
-                        <option value="Movement" data-category="ski" {{#if (eq formData.brand 'Movement')}}selected{{/if}}>Movement</option>
-                        <option value="Nordica" data-category="ski,boots" {{#if (eq formData.brand 'Nordica')}}selected{{/if}}>Nordica</option>
-                        <option value="Rossignol" data-category="ski,boots" {{#if (eq formData.brand 'Rossignol')}}selected{{/if}}>Rossignol</option>
-                        <option value="Salomon" data-category="ski,snowboard,boots" {{#if (eq formData.brand 'Salomon')}}selected{{/if}}>Salomon</option>
-                        <option value="Volkl" data-category="ski" {{#if (eq formData.brand 'Volkl')}}selected{{/if}}>Volkl</option>
-                        <!-- Snowboard brands -->
-                        <option value="Burton" data-category="snowboard,jackets,pants,gloves" {{#if (eq formData.brand 'Burton')}}selected{{/if}}>Burton</option>
-                        <option value="Capita" data-category="snowboard" {{#if (eq formData.brand 'Capita')}}selected{{/if}}>Capita</option>
-                        <option value="GNU" data-category="snowboard" {{#if (eq formData.brand 'GNU')}}selected{{/if}}>GNU</option>
-                        <option value="Jones" data-category="snowboard" {{#if (eq formData.brand 'Jones')}}selected{{/if}}>Jones</option>
-                        <option value="Lib Tech" data-category="snowboard" {{#if (eq formData.brand 'Lib Tech')}}selected{{/if}}>Lib Tech</option>
-                        <option value="Never Summer" data-category="snowboard" {{#if (eq formData.brand 'Never Summer')}}selected{{/if}}>Never Summer</option>
-                        <option value="Ride" data-category="snowboard" {{#if (eq formData.brand 'Ride')}}selected{{/if}}>Ride</option>
-                        <option value="Westbeach" data-category="snowboard" {{#if (eq formData.brand 'Westbeach')}}selected{{/if}}>Westbeach</option>
-                        <!-- Helmet brands -->
-                        <option value="Anon" data-category="helmet,goggles" {{#if (eq formData.brand 'Anon')}}selected{{/if}}>Anon</option>
-                        <option value="Bern" data-category="helmet" {{#if (eq formData.brand 'Bern')}}selected{{/if}}>Bern</option>
-                        <option value="Giro" data-category="helmet,goggles" {{#if (eq formData.brand 'Giro')}}selected{{/if}}>Giro</option>
-                        <option value="POC" data-category="helmet,goggles" {{#if (eq formData.brand 'POC')}}selected{{/if}}>POC</option>
-                        <option value="Smith" data-category="helmet,goggles" {{#if (eq formData.brand 'Smith')}}selected{{/if}}>Smith</option>
-                        <option value="Uvex" data-category="helmet" {{#if (eq formData.brand 'Uvex')}}selected{{/if}}>Uvex</option>
-                        <!-- Boot brands -->
-                        <option value="Dalbello" data-category="boots" {{#if (eq formData.brand 'Dalbello')}}selected{{/if}}>Dalbello</option>
-                        <option value="Full Tilt" data-category="boots" {{#if (eq formData.brand 'Full Tilt')}}selected{{/if}}>Full Tilt</option>
-                        <option value="Lange" data-category="boots" {{#if (eq formData.brand 'Lange')}}selected{{/if}}>Lange</option>
-                        <option value="Tecnica" data-category="boots" {{#if (eq formData.brand 'Tecnica')}}selected{{/if}}>Tecnica</option>
-                        <!-- Goggle brands -->
-                        <option value="Dragon" data-category="goggles" {{#if (eq formData.brand 'Dragon')}}selected{{/if}}>Dragon</option>
-                        <option value="Oakley" data-category="goggles" {{#if (eq formData.brand 'Oakley')}}selected{{/if}}>Oakley</option>
-                        <option value="Zeal" data-category="goggles" {{#if (eq formData.brand 'Zeal')}}selected{{/if}}>Zeal</option>
-                        <!-- Apparel brands -->
-                        <option value="Arc'teryx" data-category="jackets,pants,gloves" {{#if (eq formData.brand "Arc'teryx")}}selected{{/if}}>Arc'teryx</option>
-                        <option value="Columbia" data-category="jackets,pants,gloves" {{#if (eq formData.brand 'Columbia')}}selected{{/if}}>Columbia</option>
-                        <option value="Helly Hansen" data-category="jackets,pants,gloves" {{#if (eq formData.brand 'Helly Hansen')}}selected{{/if}}>Helly Hansen</option>
-                        <option value="Patagonia" data-category="jackets,pants,gloves" {{#if (eq formData.brand 'Patagonia')}}selected{{/if}}>Patagonia</option>
-                        <option value="The North Face" data-category="jackets,pants,gloves" {{#if (eq formData.brand 'The North Face')}}selected{{/if}}>The North Face</option>
-                        <option value="Volcom" data-category="jackets,pants,gloves" {{#if (eq formData.brand 'Volcom')}}selected{{/if}}>Volcom</option>
-                        <!-- Other gear brands (poles, bindings) -->
-                        <option value="Komperdell" data-category="poles" {{#if (eq formData.brand 'Komperdell')}}selected{{/if}}>Komperdell</option>
-                        <option value="Leki" data-category="poles" {{#if (eq formData.brand 'Leki')}}selected{{/if}}>Leki</option>
-                        <option value="Look" data-category="poles" {{#if (eq formData.brand 'Look')}}selected{{/if}}>Look</option>
-                        <option value="Marker" data-category="poles" {{#if (eq formData.brand 'Marker')}}selected{{/if}}>Marker</option>
-                        <option value="Tyrolia" data-category="poles" {{#if (eq formData.brand 'Tyrolia')}}selected{{/if}}>Tyrolia</option>
+                        {{#each brands}}
+                        <option value="{{@key}}" data-category="{{this}}" {{#if (eq ../formData.brand @key)}}selected{{/if}}>{{@key}}</option>
+                        {{/each}}
                         <!-- Other option - always visible -->
                         <option value="Other" data-category="all" {{#if (eq formData.brand 'Other')}}selected{{/if}}>Other</option>
                     </select>

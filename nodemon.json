@@ -3,9 +3,10 @@
     "index.js",
     "routes",
     "Homepage/views",
-    "Homepage/public"
+    "Homepage/public",
+    "brands.json"
   ],
-  "ext": "js,hbs,css",
+  "ext": "js,hbs,css,json",
   "ignore": [
     "node_modules"
   ],
