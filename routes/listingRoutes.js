@@ -14,7 +14,7 @@ module.exports = (db, auth) => {
 
     // Handle Product Listing Creation with Images
     router.post('/product', auth, upload.array('productImages', 5), async (req, res) => {
-        const { brand, model, productName, productDescription, productType, skiLength, skiWidth, snowboardLength, snowboardWidth, helmetSize, bootType, bootSize, polesLength, clothingSize, price } = req.body;
+        const { brand, customBrand, model, productName, productDescription, productType, skiLength, skiWidth, snowboardLength, snowboardWidth, helmetSize, bootType, bootSize, polesLength, clothingSize, price } = req.body;
         const userId = req.session.userId;
 
         // Character limits
@@ -23,8 +23,43 @@ module.exports = (db, auth) => {
         const MAX_MODEL_LENGTH = 50;
         const MAX_DESCRIPTION_LENGTH = 5000;
 
+        // Handle brand: use customBrand if "Other" is selected, otherwise use brand
+        let finalBrand = '';
+        if (brand === 'Other') {
+            // Use custom brand if "Other" is selected
+            const trimmedCustomBrand = customBrand && typeof customBrand === 'string' ? customBrand.trim() : '';
+            if (!trimmedCustomBrand) {
+                return res.render('pages/create-listing', {
+                    title: 'Create Listing',
+                    userId,
+                    listingType: 'product',
+                    formData: req.body,
+                    message: {
+                        type: 'danger',
+                        text: 'Custom brand is required when "Other" is selected. Please enter a brand name.'
+                    }
+                });
+            }
+            if (trimmedCustomBrand.length > MAX_BRAND_LENGTH) {
+                return res.render('pages/create-listing', {
+                    title: 'Create Listing',
+                    userId,
+                    listingType: 'product',
+                    formData: req.body,
+                    message: {
+                        type: 'danger',
+                        text: `Custom brand cannot exceed ${MAX_BRAND_LENGTH} characters.`
+                    }
+                });
+            }
+            finalBrand = trimmedCustomBrand;
+        } else {
+            // Use selected brand from dropdown
+            finalBrand = brand && typeof brand === 'string' ? brand.trim() : '';
+        }
+
         // Trim and normalize fields
-        const trimmedBrand = brand && typeof brand === 'string' ? brand.trim() : '';
+        const trimmedBrand = finalBrand;
         const trimmedProductName = productName && typeof productName === 'string' ? productName.trim() : '';
         const normalizedModel = (model && typeof model === 'string' && model.trim()) || null;
         const normalizedProductType = (productType && typeof productType === 'string' && productType.trim()) || 'ski';
@@ -40,7 +75,7 @@ module.exports = (db, auth) => {
                 formData: req.body,
                 message: {
                     type: 'danger',
-                    text: 'Brand is required and cannot be empty or contain only spaces.'
+                    text: 'Brand is required. Please select a brand from the list or choose "Other" to enter a custom brand.'
                 }
             });
         }
@@ -189,6 +224,23 @@ module.exports = (db, auth) => {
                     message: {
                         type: 'danger',
                         text: 'Please fill in all required fields (Boot Type and Boot Size).'
+                    }
+                });
+            }
+            
+            // Validate boot size range
+            const bootSizeValue = parseFloat(bootSize);
+            const MIN_BOOT_SIZE = 3;
+            const MAX_BOOT_SIZE = 16;
+            if (isNaN(bootSizeValue) || bootSizeValue < MIN_BOOT_SIZE || bootSizeValue > MAX_BOOT_SIZE) {
+                return res.render('pages/create-listing', {
+                    title: 'Create Listing',
+                    userId,
+                    listingType: 'product',
+                    formData: req.body,
+                    message: {
+                        type: 'danger',
+                        text: `Boot Size must be between ${MIN_BOOT_SIZE} and ${MAX_BOOT_SIZE} (US size).`
                     }
                 });
             }

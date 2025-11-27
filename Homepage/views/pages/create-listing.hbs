@@ -82,8 +82,73 @@
 
                 <div class="mb-3">
                     <label for="brand" class="form-label">Brand *</label>
-                    <input type="text" class="form-control" id="brand" name="brand" 
-                           value="{{formData.brand}}" required maxlength="50">
+                    <select class="form-control" id="brand" name="brand" required>
+                        <option value="">Select a brand</option>
+                        <!-- Ski brands -->
+                        <option value="Armada" data-category="ski" {{#if (eq formData.brand 'Armada')}}selected{{/if}}>Armada</option>
+                        <option value="Atomic" data-category="ski" {{#if (eq formData.brand 'Atomic')}}selected{{/if}}>Atomic</option>
+                        <option value="Black Diamond" data-category="ski" {{#if (eq formData.brand 'Black Diamond')}}selected{{/if}}>Black Diamond</option>
+                        <option value="Blizzard" data-category="ski" {{#if (eq formData.brand 'Blizzard')}}selected{{/if}}>Blizzard</option>
+                        <option value="DPS" data-category="ski" {{#if (eq formData.brand 'DPS')}}selected{{/if}}>DPS</option>
+                        <option value="Dynafit" data-category="ski" {{#if (eq formData.brand 'Dynafit')}}selected{{/if}}>Dynafit</option>
+                        <option value="Fischer" data-category="ski" {{#if (eq formData.brand 'Fischer')}}selected{{/if}}>Fischer</option>
+                        <option value="Head" data-category="ski" {{#if (eq formData.brand 'Head')}}selected{{/if}}>Head</option>
+                        <option value="K2" data-category="ski,snowboard,boots" {{#if (eq formData.brand 'K2')}}selected{{/if}}>K2</option>
+                        <option value="Line" data-category="ski" {{#if (eq formData.brand 'Line')}}selected{{/if}}>Line</option>
+                        <option value="Moment" data-category="ski" {{#if (eq formData.brand 'Moment')}}selected{{/if}}>Moment</option>
+                        <option value="Movement" data-category="ski" {{#if (eq formData.brand 'Movement')}}selected{{/if}}>Movement</option>
+                        <option value="Nordica" data-category="ski,boots" {{#if (eq formData.brand 'Nordica')}}selected{{/if}}>Nordica</option>
+                        <option value="Rossignol" data-category="ski,boots" {{#if (eq formData.brand 'Rossignol')}}selected{{/if}}>Rossignol</option>
+                        <option value="Salomon" data-category="ski,snowboard,boots" {{#if (eq formData.brand 'Salomon')}}selected{{/if}}>Salomon</option>
+                        <option value="Volkl" data-category="ski" {{#if (eq formData.brand 'Volkl')}}selected{{/if}}>Volkl</option>
+                        <!-- Snowboard brands -->
+                        <option value="Burton" data-category="snowboard,jackets,pants,gloves" {{#if (eq formData.brand 'Burton')}}selected{{/if}}>Burton</option>
+                        <option value="Capita" data-category="snowboard" {{#if (eq formData.brand 'Capita')}}selected{{/if}}>Capita</option>
+                        <option value="GNU" data-category="snowboard" {{#if (eq formData.brand 'GNU')}}selected{{/if}}>GNU</option>
+                        <option value="Jones" data-category="snowboard" {{#if (eq formData.brand 'Jones')}}selected{{/if}}>Jones</option>
+                        <option value="Lib Tech" data-category="snowboard" {{#if (eq formData.brand 'Lib Tech')}}selected{{/if}}>Lib Tech</option>
+                        <option value="Never Summer" data-category="snowboard" {{#if (eq formData.brand 'Never Summer')}}selected{{/if}}>Never Summer</option>
+                        <option value="Ride" data-category="snowboard" {{#if (eq formData.brand 'Ride')}}selected{{/if}}>Ride</option>
+                        <option value="Westbeach" data-category="snowboard" {{#if (eq formData.brand 'Westbeach')}}selected{{/if}}>Westbeach</option>
+                        <!-- Helmet brands -->
+                        <option value="Anon" data-category="helmet,goggles" {{#if (eq formData.brand 'Anon')}}selected{{/if}}>Anon</option>
+                        <option value="Bern" data-category="helmet" {{#if (eq formData.brand 'Bern')}}selected{{/if}}>Bern</option>
+                        <option value="Giro" data-category="helmet,goggles" {{#if (eq formData.brand 'Giro')}}selected{{/if}}>Giro</option>
+                        <option value="POC" data-category="helmet,goggles" {{#if (eq formData.brand 'POC')}}selected{{/if}}>POC</option>
+                        <option value="Smith" data-category="helmet,goggles" {{#if (eq formData.brand 'Smith')}}selected{{/if}}>Smith</option>
+                        <option value="Uvex" data-category="helmet" {{#if (eq formData.brand 'Uvex')}}selected{{/if}}>Uvex</option>
+                        <!-- Boot brands -->
+                        <option value="Dalbello" data-category="boots" {{#if (eq formData.brand 'Dalbello')}}selected{{/if}}>Dalbello</option>
+                        <option value="Full Tilt" data-category="boots" {{#if (eq formData.brand 'Full Tilt')}}selected{{/if}}>Full Tilt</option>
+                        <option value="Lange" data-category="boots" {{#if (eq formData.brand 'Lange')}}selected{{/if}}>Lange</option>
+                        <option value="Tecnica" data-category="boots" {{#if (eq formData.brand 'Tecnica')}}selected{{/if}}>Tecnica</option>
+                        <!-- Goggle brands -->
+                        <option value="Dragon" data-category="goggles" {{#if (eq formData.brand 'Dragon')}}selected{{/if}}>Dragon</option>
+                        <option value="Oakley" data-category="goggles" {{#if (eq formData.brand 'Oakley')}}selected{{/if}}>Oakley</option>
+                        <option value="Zeal" data-category="goggles" {{#if (eq formData.brand 'Zeal')}}selected{{/if}}>Zeal</option>
+                        <!-- Apparel brands -->
+                        <option value="Arc'teryx" data-category="jackets,pants,gloves" {{#if (eq formData.brand "Arc'teryx")}}selected{{/if}}>Arc'teryx</option>
+                        <option value="Columbia" data-category="jackets,pants,gloves" {{#if (eq formData.brand 'Columbia')}}selected{{/if}}>Columbia</option>
+                        <option value="Helly Hansen" data-category="jackets,pants,gloves" {{#if (eq formData.brand 'Helly Hansen')}}selected{{/if}}>Helly Hansen</option>
+                        <option value="Patagonia" data-category="jackets,pants,gloves" {{#if (eq formData.brand 'Patagonia')}}selected{{/if}}>Patagonia</option>
+                        <option value="The North Face" data-category="jackets,pants,gloves" {{#if (eq formData.brand 'The North Face')}}selected{{/if}}>The North Face</option>
+                        <option value="Volcom" data-category="jackets,pants,gloves" {{#if (eq formData.brand 'Volcom')}}selected{{/if}}>Volcom</option>
+                        <!-- Other gear brands (poles, bindings) -->
+                        <option value="Komperdell" data-category="poles" {{#if (eq formData.brand 'Komperdell')}}selected{{/if}}>Komperdell</option>
+                        <option value="Leki" data-category="poles" {{#if (eq formData.brand 'Leki')}}selected{{/if}}>Leki</option>
+                        <option value="Look" data-category="poles" {{#if (eq formData.brand 'Look')}}selected{{/if}}>Look</option>
+                        <option value="Marker" data-category="poles" {{#if (eq formData.brand 'Marker')}}selected{{/if}}>Marker</option>
+                        <option value="Tyrolia" data-category="poles" {{#if (eq formData.brand 'Tyrolia')}}selected{{/if}}>Tyrolia</option>
+                        <!-- Other option - always visible -->
+                        <option value="Other" data-category="all" {{#if (eq formData.brand 'Other')}}selected{{/if}}>Other</option>
+                    </select>
+                </div>
+
+                <!-- Custom brand input (shown when "Other" is selected) -->
+                <div class="mb-3" id="customBrandContainer" style="display: none;">
+                    <label for="customBrand" class="form-label">Custom Brand *</label>
+                    <input type="text" class="form-control" id="customBrand" name="customBrand" 
+                           value="{{formData.customBrand}}" maxlength="50" placeholder="Enter brand name">
                 </div>
 
                 <div class="mb-3">
@@ -109,12 +174,12 @@
                     <div class="col-md-6 mb-3">
                         <label for="skiLength" class="form-label">Ski Length (cm) *</label>
                         <input type="number" class="form-control" id="skiLength" name="skiLength" 
-                               value="{{formData.skiLength}}" min="50" max="250" step="0.1">
+                               value="{{formData.skiLength}}" min="50" max="250" step="0.1" autocomplete="off" inputmode="numeric">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="skiWidth" class="form-label">Ski Width (mm) *</label>
                         <input type="number" class="form-control" id="skiWidth" name="skiWidth" 
-                               value="{{formData.skiWidth}}" min="40" max="200" step="0.1">
+                               value="{{formData.skiWidth}}" min="40" max="200" step="0.1" autocomplete="off" inputmode="numeric">
                     </div>
                 </div>
 
@@ -123,12 +188,12 @@
                     <div class="col-md-6 mb-3">
                         <label for="snowboardLength" class="form-label">Snowboard Length (cm) *</label>
                         <input type="number" class="form-control" id="snowboardLength" name="snowboardLength" 
-                               value="{{formData.snowboardLength}}" min="100" max="200" step="0.1">
+                               value="{{formData.snowboardLength}}" min="100" max="200" step="0.1" autocomplete="off" inputmode="numeric">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="snowboardWidth" class="form-label">Snowboard Width (mm) *</label>
                         <input type="number" class="form-control" id="snowboardWidth" name="snowboardWidth" 
-                               value="{{formData.snowboardWidth}}" min="200" max="300" step="0.1">
+                               value="{{formData.snowboardWidth}}" min="200" max="300" step="0.1" autocomplete="off" inputmode="numeric">
                     </div>
                 </div>
 
@@ -137,7 +202,7 @@
                     <div class="col-md-6 mb-3">
                         <label for="helmetSize" class="form-label">Helmet Size (cm) *</label>
                         <input type="number" class="form-control" id="helmetSize" name="helmetSize" 
-                               value="{{formData.helmetSize}}" min="48" max="65" step="0.5">
+                               value="{{formData.helmetSize}}" min="48" max="65" step="0.5" autocomplete="off" inputmode="numeric">
                         <div class="form-text">Measure around your head, just above your eyebrows</div>
                     </div>
                 </div>
@@ -170,8 +235,11 @@
                         <div class="col-md-6 mb-3">
                             <label for="bootSize" class="form-label">Boot Size (US) *</label>
                             <input type="number" class="form-control" id="bootSize" name="bootSize" 
-                                   value="{{formData.bootSize}}" min="3" max="16" step="0.5">
-                            <div class="form-text">US shoe size (e.g., 7, 7.5, 8, etc.)</div>
+                                   value="{{formData.bootSize}}" min="3" max="16" step="0.5" 
+                                   autocomplete="off" inputmode="numeric"
+                                   oninvalid="this.setCustomValidity('Boot size must be between 3 and 16 (US size)')" 
+                                   oninput="this.setCustomValidity('')">
+                            <div class="form-text">US shoe size (e.g., 7, 7.5, 8, etc.) Must be between 3 and 16.</div>
                         </div>
                     </div>
                 </div>
@@ -181,7 +249,7 @@
                     <div class="col-md-6 mb-3">
                         <label for="polesLength" class="form-label">Pole Length (cm) *</label>
                         <input type="number" class="form-control" id="polesLength" name="polesLength" 
-                               value="{{formData.polesLength}}" min="80" max="160" step="1">
+                               value="{{formData.polesLength}}" min="80" max="160" step="1" autocomplete="off" inputmode="numeric">
                         <div class="form-text">Length of the pole in centimeters</div>
                     </div>
                 </div>
@@ -214,7 +282,7 @@
                 <div class="mb-3">
                     <label for="price" class="form-label">Price ($) *</label>
                     <input type="number" step="0.01" class="form-control" id="price" name="price" 
-                           value="{{formData.price}}" required>
+                           value="{{formData.price}}" required autocomplete="off" inputmode="decimal">
                 </div>
 
                 <!-- IMAGE UPLOAD -->
@@ -251,7 +319,7 @@
                 <div class="mb-3">
                     <label for="servicePrice" class="form-label">Price ($)</label>
                     <input type="number" step="0.01" class="form-control" id="servicePrice" name="price" 
-                           value="{{formData.price}}">
+                           value="{{formData.price}}" autocomplete="off" inputmode="decimal">
                 </div>
 
                 <!-- IMAGE UPLOAD -->
@@ -274,6 +342,86 @@
 <script>
 // Product type toggle functionality
 document.addEventListener('DOMContentLoaded', function() {
+    // Brand dropdown toggle functionality
+    const brandSelect = document.getElementById('brand');
+    const customBrandContainer = document.getElementById('customBrandContainer');
+    const customBrandInput = document.getElementById('customBrand');
+    
+    function toggleCustomBrandInput() {
+        if (brandSelect && customBrandContainer && customBrandInput) {
+            if (brandSelect.value === 'Other') {
+                customBrandContainer.style.display = 'block';
+                customBrandInput.required = true;
+            } else {
+                customBrandContainer.style.display = 'none';
+                customBrandInput.required = false;
+                customBrandInput.value = '';
+            }
+        }
+    }
+    
+    // Set initial state based on form data
+    if (brandSelect) {
+        toggleCustomBrandInput();
+        brandSelect.addEventListener('change', toggleCustomBrandInput);
+    }
+    
+    // Function to filter brands based on product type
+    function filterBrandsByProductType(productType) {
+        if (!brandSelect) return;
+        
+        const selectedBrand = brandSelect.value;
+        const allOptions = brandSelect.querySelectorAll('option');
+        
+        // Map product types to brand categories
+        const categoryMap = {
+            'ski': ['ski'],
+            'snowboard': ['snowboard'],
+            'helmet': ['helmet'],
+            'boots': ['boots'],
+            'goggles': ['goggles'],
+            'gloves': ['jackets', 'pants', 'gloves'],
+            'jackets': ['jackets', 'pants', 'gloves'],
+            'pants': ['jackets', 'pants', 'gloves'],
+            'poles': ['poles'],
+            'other': ['all'] // Show all brands for "other"
+        };
+        
+        const allowedCategories = categoryMap[productType] || ['all'];
+        
+        // Show/hide options based on category
+        allOptions.forEach(option => {
+            if (option.value === '' || option.value === 'Other') {
+                // Always show placeholder and "Other" option
+                option.style.display = '';
+                return;
+            }
+            
+            const categories = option.getAttribute('data-category');
+            if (!categories) {
+                // If no category attribute, show it (backward compatibility)
+                option.style.display = '';
+                return;
+            }
+            
+            const categoryList = categories.split(',');
+            const shouldShow = allowedCategories.includes('all') || 
+                              categoryList.some(cat => allowedCategories.includes(cat.trim()));
+            
+            option.style.display = shouldShow ? '' : 'none';
+        });
+        
+        // If currently selected brand is hidden, reset to empty
+        const selectedOption = brandSelect.querySelector(`option[value="${selectedBrand}"]`);
+        if (selectedOption && selectedOption.style.display === 'none' && selectedBrand !== 'Other') {
+            brandSelect.value = '';
+            // Clear custom brand input if it was "Other"
+            if (customBrandInput) {
+                customBrandInput.value = '';
+            }
+        }
+    }
+    
     const productTypeRadios = document.querySelectorAll('input[name="productType"]');
     const skiDimensions = document.getElementById('skiDimensions');
     const snowboardDimensions = document.getElementById('snowboardDimensions');
@@ -364,6 +512,9 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (selectedType === 'other') {
             if (otherDimensions) otherDimensions.style.display = 'block';
         }
+        
+        // Filter brands based on selected product type
+        filterBrandsByProductType(selectedType);
     }
 
     // Set initial state (don't clear values on initial load)
@@ -378,14 +529,110 @@ document.addEventListener('DOMContentLoaded', function() {
     // This prevents autocomplete/autofill and browser validation from interfering
     const numberInputs = document.querySelectorAll('input[type="number"]');
     numberInputs.forEach(input => {
-        // Disable browser autocomplete for number inputs
+        // Disable browser autocomplete and autocorrect for number inputs
         input.setAttribute('autocomplete', 'off');
+        input.setAttribute('autocorrect', 'off');
+        input.setAttribute('autocapitalize', 'off');
+        input.setAttribute('spellcheck', 'false');
         
-        // Prevent browser from validating while typing
-        input.addEventListener('invalid', function(e) {
-            // Don't show browser validation while typing
-            e.preventDefault();
-        }, true);
+        // Store the value before any potential browser modification
+        let previousValue = input.value;
+        let previousSelectionStart = 0;
+        let previousSelectionEnd = 0;
+        
+        // Save selection position before input
+        input.addEventListener('keydown', function(e) {
+            previousSelectionStart = this.selectionStart || 0;
+            previousSelectionEnd = this.selectionEnd || 0;
+            previousValue = this.value;
+        });
+        
+        // Prevent browser from modifying the value unexpectedly
+        input.addEventListener('input', function(e) {
+            // If the input is focused and user is typing, allow the change
+            // But prevent browser autocomplete/autofill from changing values
+            const currentValue = this.value;
+            const currentSelectionStart = this.selectionStart || 0;
+            
+            // If browser moved cursor unexpectedly, try to restore it
+            if (this === document.activeElement && 
+                Math.abs(currentSelectionStart - (previousSelectionStart + 1)) > 2 &&
+                previousSelectionStart > 0) {
+                // Browser might have interfered with cursor position
+                // Try to restore reasonable position
+                setTimeout(() => {
+                    const expectedPosition = Math.min(previousSelectionStart + 1, currentValue.length);
+                    this.setSelectionRange(expectedPosition, expectedPosition);
+                }, 0);
+            }
+            
+            previousValue = currentValue;
+        });
+        
+        // Handle invalid input with custom feedback for boot size
+        if (input.id === 'bootSize') {
+            input.addEventListener('invalid', function(e) {
+                e.preventDefault();
+                
+                const bootSizeValue = parseFloat(this.value);
+                const MIN_BOOT_SIZE = 3;
+                const MAX_BOOT_SIZE = 16;
+                
+                let errorMessage = '';
+                if (isNaN(bootSizeValue)) {
+                    errorMessage = 'Boot Size must be a valid number.';
+                } else if (bootSizeValue < MIN_BOOT_SIZE || bootSizeValue > MAX_BOOT_SIZE) {
+                    errorMessage = `Boot Size must be between ${MIN_BOOT_SIZE} and ${MAX_BOOT_SIZE} (US size).`;
+                } else {
+                    errorMessage = 'Boot Size is required.';
+                }
+                
+                // Show error message using showClientMessage if available, otherwise create alert
+                if (typeof showClientMessage === 'function') {
+                    showClientMessage('danger', errorMessage);
+                    if (typeof markInvalidField === 'function') {
+                        markInvalidField(this);
+                    }
+                } else {
+                    // Fallback: create error message container
+                    let container = document.getElementById("clientMessageContainer");
+                    if (!container) {
+                        container = document.createElement("div");
+                        container.id = "clientMessageContainer";
+                        const form = document.querySelector('form[action="/create-listing/product"]');
+                        if (form) {
+                            form.insertBefore(container, form.firstChild);
+                        }
+                    }
+                    container.innerHTML = `
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            ${errorMessage}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `;
+                    this.classList.add('is-invalid');
+                }
+                
+                this.focus();
+            }, true);
+        } else {
+            // For other number inputs, prevent browser validation while typing
+            input.addEventListener('invalid', function(e) {
+                e.preventDefault();
+            }, true);
+        }
+        
+        // Clear validation state when user starts typing
+        input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+                this.classList.remove('is-invalid');
+            }
+            // Clear error message container if it exists
+            const container = document.getElementById("clientMessageContainer");
+            if (container && this.id === 'bootSize') {
+                container.innerHTML = '';
+            }
+        });
     });
 });
 

@@ -61,29 +61,46 @@ document.addEventListener("DOMContentLoaded", () => {
         productForm.addEventListener("submit", (e) => {
 
             // BRAND VALIDATION (REQUIRED, TRIMMED, LENGTH)
-            const brandInput = document.getElementById("brand");
-            const brandValue = brandInput ? brandInput.value.trim() : '';
+            const brandSelect = document.getElementById("brand");
+            const customBrandInput = document.getElementById("customBrand");
+            const brandValue = brandSelect ? brandSelect.value.trim() : '';
             
-            if (!brandValue) {
+            if (!brandValue || brandValue === '') {
                 e.preventDefault();
                 showClientMessage(
                     "danger",
-                    "Brand is required and cannot be empty or contain only spaces."
+                    "Brand is required. Please select a brand from the list or choose 'Other' to enter a custom brand."
                 );
-                markInvalidField(brandInput);
-                if (brandInput) brandInput.focus();
+                markInvalidField(brandSelect);
+                if (brandSelect) brandSelect.focus();
                 return;
             }
 
-            if (brandValue.length > MAX_BRAND_LENGTH) {
-                e.preventDefault();
-                showClientMessage(
-                    "danger",
-                    `Brand cannot exceed ${MAX_BRAND_LENGTH} characters.`
-                );
-                markInvalidField(brandInput);
-                if (brandInput) brandInput.focus();
-                return;
+            // If "Other" is selected, validate custom brand input
+            if (brandValue === 'Other') {
+                const customBrandValue = customBrandInput ? customBrandInput.value.trim() : '';
+                
+                if (!customBrandValue) {
+                    e.preventDefault();
+                    showClientMessage(
+                        "danger",
+                        "Custom brand is required when 'Other' is selected. Please enter a brand name."
+                    );
+                    markInvalidField(customBrandInput);
+                    if (customBrandInput) customBrandInput.focus();
+                    return;
+                }
+
+                if (customBrandValue.length > MAX_BRAND_LENGTH) {
+                    e.preventDefault();
+                    showClientMessage(
+                        "danger",
+                        `Custom brand cannot exceed ${MAX_BRAND_LENGTH} characters.`
+                    );
+                    markInvalidField(customBrandInput);
+                    if (customBrandInput) customBrandInput.focus();
+                    return;
+                }
             }
 
             // PRODUCT NAME VALIDATION (REQUIRED, TRIMMED, LENGTH)
