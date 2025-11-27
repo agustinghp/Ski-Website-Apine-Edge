@@ -14,11 +14,25 @@ module.exports = (db, auth) => {
 
     // Handle Product Listing Creation with Images
     router.post('/product', auth, upload.array('productImages', 5), async (req, res) => {
-        const { brand, model, productName, productDescription, skiLength, skiWidth, price } = req.body;
+        const { brand, model, productName, productDescription, productType, skiLength, skiWidth, snowboardLength, snowboardWidth, helmetSize, bootType, bootSize, polesLength, clothingSize, price } = req.body;
         const userId = req.session.userId;
 
-        // Validation: Check required fields
-        if (!brand || !model || !productName || !price) {
+        // Character limits
+        const MAX_BRAND_LENGTH = 50;
+        const MAX_PRODUCT_NAME_LENGTH = 50;
+        const MAX_MODEL_LENGTH = 50;
+        const MAX_DESCRIPTION_LENGTH = 5000;
+
+        // Trim and normalize fields
+        const trimmedBrand = brand && typeof brand === 'string' ? brand.trim() : '';
+        const trimmedProductName = productName && typeof productName === 'string' ? productName.trim() : '';
+        const normalizedModel = (model && typeof model === 'string' && model.trim()) || null;
+        const normalizedProductType = (productType && typeof productType === 'string' && productType.trim()) || 'ski';
+        const normalizedBootType = (bootType && typeof bootType === 'string' && bootType.trim()) || null;
+        const trimmedDescription = productDescription && typeof productDescription === 'string' ? productDescription.trim() : null;
+
+        // Validation: Check required fields (after trimming)
+        if (!trimmedBrand) {
             return res.render('pages/create-listing', {
                 title: 'Create Listing',
                 userId,
@@ -26,26 +40,210 @@ module.exports = (db, auth) => {
                 formData: req.body,
                 message: {
                     type: 'danger',
-                    text: 'Please fill in all required fields (Brand, Model, Product Name, and Price).'
+                    text: 'Brand is required and cannot be empty or contain only spaces.'
                 }
             });
         }
 
+        if (!trimmedProductName) {
+            return res.render('pages/create-listing', {
+                title: 'Create Listing',
+                userId,
+                listingType: 'product',
+                formData: req.body,
+                message: {
+                    type: 'danger',
+                    text: 'Product Name is required and cannot be empty or contain only spaces.'
+                }
+            });
+        }
+
+        if (!price) {
+            return res.render('pages/create-listing', {
+                title: 'Create Listing',
+                userId,
+                listingType: 'product',
+                formData: req.body,
+                message: {
+                    type: 'danger',
+                    text: 'Price is required.'
+                }
+            });
+        }
+
+        // Validation: Check character limits
+        if (trimmedBrand.length > MAX_BRAND_LENGTH) {
+            return res.render('pages/create-listing', {
+                title: 'Create Listing',
+                userId,
+                listingType: 'product',
+                formData: req.body,
+                message: {
+                    type: 'danger',
+                    text: `Brand cannot exceed ${MAX_BRAND_LENGTH} characters.`
+                }
+            });
+        }
+
+        if (trimmedProductName.length > MAX_PRODUCT_NAME_LENGTH) {
+            return res.render('pages/create-listing', {
+                title: 'Create Listing',
+                userId,
+                listingType: 'product',
+                formData: req.body,
+                message: {
+                    type: 'danger',
+                    text: `Product Name cannot exceed ${MAX_PRODUCT_NAME_LENGTH} characters.`
+                }
+            });
+        }
+
+        if (normalizedModel && normalizedModel.length > MAX_MODEL_LENGTH) {
+            return res.render('pages/create-listing', {
+                title: 'Create Listing',
+                userId,
+                listingType: 'product',
+                formData: req.body,
+                message: {
+                    type: 'danger',
+                    text: `Model cannot exceed ${MAX_MODEL_LENGTH} characters.`
+                }
+            });
+        }
+
+        if (trimmedDescription && trimmedDescription.length > MAX_DESCRIPTION_LENGTH) {
+            return res.render('pages/create-listing', {
+                title: 'Create Listing',
+                userId,
+                listingType: 'product',
+                formData: req.body,
+                message: {
+                    type: 'danger',
+                    text: `Description cannot exceed ${MAX_DESCRIPTION_LENGTH} characters.`
+                }
+            });
+        }
+
+        // Validation: Check for scientific notation in price
+        const priceStr = String(price).trim();
+        if (/[eE]/.test(priceStr)) {
+            return res.render('pages/create-listing', {
+                title: 'Create Listing',
+                userId,
+                listingType: 'product',
+                formData: req.body,
+                message: {
+                    type: 'danger',
+                    text: 'Price cannot use scientific notation. Please enter a regular number.'
+                }
+            });
+        }
+
+        // Validation: Check required dimension fields based on product type
+        if (normalizedProductType === 'ski') {
+            if (!skiLength || !skiWidth) {
+                return res.render('pages/create-listing', {
+                    title: 'Create Listing',
+                    userId,
+                    listingType: 'product',
+                    formData: req.body,
+                    message: {
+                        type: 'danger',
+                        text: 'Please fill in all required fields (Ski Length and Ski Width).'
+                    }
+                });
+            }
+        } else if (normalizedProductType === 'snowboard') {
+            if (!snowboardLength || !snowboardWidth) {
+                return res.render('pages/create-listing', {
+                    title: 'Create Listing',
+                    userId,
+                    listingType: 'product',
+                    formData: req.body,
+                    message: {
+                        type: 'danger',
+                        text: 'Please fill in all required fields (Snowboard Length and Snowboard Width).'
+                    }
+                });
+            }
+        } else if (normalizedProductType === 'helmet') {
+            if (!helmetSize) {
+                return res.render('pages/create-listing', {
+                    title: 'Create Listing',
+                    userId,
+                    listingType: 'product',
+                    formData: req.body,
+                    message: {
+                        type: 'danger',
+                        text: 'Please fill in the required field (Helmet Size).'
+                    }
+                });
+            }
+        } else if (normalizedProductType === 'boots') {
+            if (!bootType || !bootSize) {
+                return res.render('pages/create-listing', {
+                    title: 'Create Listing',
+                    userId,
+                    listingType: 'product',
+                    formData: req.body,
+                    message: {
+                        type: 'danger',
+                        text: 'Please fill in all required fields (Boot Type and Boot Size).'
+                    }
+                });
+            }
+        } else if (normalizedProductType === 'poles') {
+            if (!polesLength) {
+                return res.render('pages/create-listing', {
+                    title: 'Create Listing',
+                    userId,
+                    listingType: 'product',
+                    formData: req.body,
+                    message: {
+                        type: 'danger',
+                        text: 'Please fill in the required field (Pole Length).'
+                    }
+                });
+            }
+        } else if (['goggles', 'gloves', 'jackets', 'pants'].includes(normalizedProductType)) {
+            if (!clothingSize) {
+                return res.render('pages/create-listing', {
+                    title: 'Create Listing',
+                    userId,
+                    listingType: 'product',
+                    formData: req.body,
+                    message: {
+                        type: 'danger',
+                        text: 'Please select a size.'
+                    }
+                });
+            }
+        }
+        // 'other' type doesn't need validation
+
         try {
-            // Insert product first to get the product ID
+            // Insert product first to get the product ID (using trimmed values)
             const product = await db.one(`
-                INSERT INTO Products (user_id, productName, productDescription, brand, model, skiLength, skiWidth, price)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                INSERT INTO Products (user_id, productName, productDescription, brand, model, productType, skiLength, skiWidth, snowboardLength, snowboardWidth, helmetSize, bootType, bootSize, polesLength, clothingSize, price)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
                 RETURNING id
             `, [
                 userId,
-                productName,
-                productDescription,
-                brand,
-                model,
-                skiLength || null,
-                skiWidth || null,
-                price
+                trimmedProductName,
+                trimmedDescription || null,
+                trimmedBrand,
+                normalizedModel,
+                normalizedProductType,
+                normalizedProductType === 'ski' ? parseFloat(skiLength) : null,
+                normalizedProductType === 'ski' ? parseFloat(skiWidth) : null,
+                normalizedProductType === 'snowboard' ? parseFloat(snowboardLength) : null,
+                normalizedProductType === 'snowboard' ? parseFloat(snowboardWidth) : null,
+                normalizedProductType === 'helmet' ? parseFloat(helmetSize) : null,
+                normalizedProductType === 'boots' ? normalizedBootType : null,
+                normalizedProductType === 'boots' ? parseFloat(bootSize) : null,
+                normalizedProductType === 'poles' ? parseFloat(polesLength) : null,
+                (['goggles', 'gloves', 'jackets', 'pants'].includes(normalizedProductType)) ? clothingSize : null,
+                parseFloat(price)
             ]);
 
             const productId = product.id;

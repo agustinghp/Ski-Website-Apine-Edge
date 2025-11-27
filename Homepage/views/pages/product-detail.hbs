@@ -67,11 +67,53 @@
                 <div class="mb-3">
                     <h5>Specifications</h5>
                     <ul class="list-unstyled">
-                        {{#if product.skilength}}
-                            <li><strong>Length:</strong> {{product.skilength}} cm</li>
-                        {{/if}}
-                        {{#if product.skiwidth}}
-                            <li><strong>Width:</strong> {{product.skiwidth}} mm</li>
+                        {{#if (eq product.producttype 'snowboard')}}
+                            {{#if product.snowboardlength}}
+                                <li><strong>Length:</strong> {{product.snowboardlength}} cm</li>
+                            {{/if}}
+                            {{#if product.snowboardwidth}}
+                                <li><strong>Width:</strong> {{product.snowboardwidth}} mm</li>
+                            {{/if}}
+                        {{else if (eq product.producttype 'helmet')}}
+                            {{#if product.helmetsize}}
+                                <li><strong>Size:</strong> {{product.helmetsize}} cm</li>
+                            {{/if}}
+                        {{else if (eq product.producttype 'boots')}}
+                            {{#if product.boottype}}
+                                <li><strong>Type:</strong> {{#if (eq product.boottype 'ski')}}Ski Boots{{else}}Snowboard Boots{{/if}}</li>
+                            {{/if}}
+                            {{#if product.bootsize}}
+                                <li><strong>Size:</strong> {{product.bootsize}} (US)</li>
+                            {{/if}}
+                        {{else if (eq product.producttype 'poles')}}
+                            {{#if product.poleslength}}
+                                <li><strong>Length:</strong> {{product.poleslength}} cm</li>
+                            {{/if}}
+                        {{else if (eq product.producttype 'goggles')}}
+                            {{#if product.clothingsize}}
+                                <li><strong>Size:</strong> {{product.clothingsize}}</li>
+                            {{/if}}
+                        {{else if (eq product.producttype 'gloves')}}
+                            {{#if product.clothingsize}}
+                                <li><strong>Size:</strong> {{product.clothingsize}}</li>
+                            {{/if}}
+                        {{else if (eq product.producttype 'jackets')}}
+                            {{#if product.clothingsize}}
+                                <li><strong>Size:</strong> {{product.clothingsize}}</li>
+                            {{/if}}
+                        {{else if (eq product.producttype 'pants')}}
+                            {{#if product.clothingsize}}
+                                <li><strong>Size:</strong> {{product.clothingsize}}</li>
+                            {{/if}}
+                        {{else if (eq product.producttype 'other')}}
+                            <li><em>No specific specifications</em></li>
+                        {{else}}
+                            {{#if product.skilength}}
+                                <li><strong>Length:</strong> {{product.skilength}} cm</li>
+                            {{/if}}
+                            {{#if product.skiwidth}}
+                                <li><strong>Width:</strong> {{product.skiwidth}} mm</li>
+                            {{/if}}
                         {{/if}}
                     </ul>
                 </div>
