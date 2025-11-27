@@ -22,9 +22,23 @@ CREATE TABLE Products (
     productName VARCHAR(50) NOT NULL,
     productDescription TEXT,
     brand VARCHAR(50) NOT NULL,
-    model VARCHAR(50) NOT NULL,
+    model VARCHAR(50),
+    productType VARCHAR(20) DEFAULT 'ski' CHECK (productType IN ('ski', 'snowboard', 'helmet', 'boots', 'poles', 'goggles', 'gloves', 'jackets', 'pants', 'other')),
+    -- Ski dimensions (required for skis)
     skiLength DECIMAL(4,1),
     skiWidth DECIMAL(4,1),
+    -- Snowboard dimensions (required for snowboards)
+    snowboardLength DECIMAL(4,1),
+    snowboardWidth DECIMAL(4,1),
+    -- Helmet size (required for helmets) - in cm
+    helmetSize DECIMAL(4,1),
+    -- Boot fields (required for boots)
+    bootType VARCHAR(20) CHECK (bootType IN ('ski', 'snowboard')),
+    bootSize DECIMAL(4,1), -- US/EU size
+    -- Poles length (required for poles) - in cm
+    polesLength DECIMAL(4,1),
+    -- Clothing size (for goggles, gloves, jackets, pants) - size like S, M, L, XL, etc.
+    clothingSize VARCHAR(10),
     price DECIMAL(7,2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -25,13 +25,15 @@ module.exports = (db) => {
         productOrderBy = 'p.price DESC NULLS LAST, p.id DESC';
         serviceOrderBy = 's.price DESC NULLS LAST, s.id DESC';
       } else if (sortBy === 'length_asc') {
-        productOrderBy = 'p.skiLength ASC NULLS LAST, p.id DESC';
+        // Use COALESCE to combine skiLength and snowboardLength for sorting
+        productOrderBy = 'COALESCE(p.skiLength, p.snowboardLength) ASC NULLS LAST, p.id DESC';
       } else if (sortBy === 'length_desc') {
-        productOrderBy = 'p.skiLength DESC NULLS LAST, p.id DESC';
+        productOrderBy = 'COALESCE(p.skiLength, p.snowboardLength) DESC NULLS LAST, p.id DESC';
       } else if (sortBy === 'width_asc') {
-        productOrderBy = 'p.skiWidth ASC NULLS LAST, p.id DESC';
+        // Use COALESCE to combine skiWidth and snowboardWidth for sorting
+        productOrderBy = 'COALESCE(p.skiWidth, p.snowboardWidth) ASC NULLS LAST, p.id DESC';
       } else if (sortBy === 'width_desc') {
-        productOrderBy = 'p.skiWidth DESC NULLS LAST, p.id DESC';
+        productOrderBy = 'COALESCE(p.skiWidth, p.snowboardWidth) DESC NULLS LAST, p.id DESC';
       }
 
       // If search query is empty or just whitespace, show all items
@@ -41,7 +43,14 @@ module.exports = (db) => {
           const productQuery = `
             SELECT 
               p.id, p.productName as productname, p.productDescription as productdescription, 
-              p.brand, p.model, p.skiLength as skilength, p.skiWidth as skiwidth, p.price,
+              p.brand, p.model, p.productType as producttype,
+              p.skiLength as skilength, p.skiWidth as skiwidth, 
+              p.snowboardLength as snowboardlength, p.snowboardWidth as snowboardwidth,
+              p.helmetSize as helmetsize,
+              p.bootType as boottype, p.bootSize as bootsize,
+              p.polesLength as poleslength,
+              p.clothingSize as clothingsize,
+              p.price,
               u.username as seller_name, u.location as seller_location,
               pi.image_path as primary_image
             FROM Products p 
@@ -86,7 +95,14 @@ module.exports = (db) => {
           const productQuery = `
             SELECT 
               p.id, p.productName as productname, p.productDescription as productdescription, 
-              p.brand, p.model, p.skiLength as skilength, p.skiWidth as skiwidth, p.price,
+              p.brand, p.model, p.productType as producttype,
+              p.skiLength as skilength, p.skiWidth as skiwidth, 
+              p.snowboardLength as snowboardlength, p.snowboardWidth as snowboardwidth,
+              p.helmetSize as helmetsize,
+              p.bootType as boottype, p.bootSize as bootsize,
+              p.polesLength as poleslength,
+              p.clothingSize as clothingsize,
+              p.price,
               u.username as seller_name, u.location as seller_location,
               pi.image_path as primary_image
             FROM Products p 

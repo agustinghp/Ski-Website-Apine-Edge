@@ -32,42 +32,182 @@
         <!-- PRODUCT LISTING FORM -->
         <div class="tab-pane fade {{#if (or (not listingType) (eq listingType 'product'))}}show active{{/if}}" 
              id="product" role="tabpanel">
-            <form action="/create-listing/product" method="POST" enctype="multipart/form-data">
+            <form action="/create-listing/product" method="POST" enctype="multipart/form-data" autocomplete="off">
                 
-                <div class="mb-3">
-                    <label for="brand" class="form-label">Brand *</label>
-                    <input type="text" class="form-control" id="brand" name="brand" 
-                           value="{{formData.brand}}" required>
+                <!-- Product Type Selector -->
+                <div class="mb-4">
+                    <label class="form-label d-block">Product Type *</label>
+                    <div class="btn-group flex-wrap" role="group" aria-label="Product type selection">
+                        <input type="radio" class="btn-check" name="productType" id="productTypeSki" value="ski" 
+                               {{#if (or (not formData.productType) (eq formData.productType 'ski'))}}checked{{/if}} required>
+                        <label class="btn btn-outline-primary" for="productTypeSki">Ski</label>
+                        
+                        <input type="radio" class="btn-check" name="productType" id="productTypeSnowboard" value="snowboard" 
+                               {{#if (eq formData.productType 'snowboard')}}checked{{/if}}>
+                        <label class="btn btn-outline-primary" for="productTypeSnowboard">Snowboard</label>
+                        
+                        <input type="radio" class="btn-check" name="productType" id="productTypeHelmet" value="helmet" 
+                               {{#if (eq formData.productType 'helmet')}}checked{{/if}}>
+                        <label class="btn btn-outline-primary" for="productTypeHelmet">Helmet</label>
+                        
+                        <input type="radio" class="btn-check" name="productType" id="productTypeBoots" value="boots" 
+                               {{#if (eq formData.productType 'boots')}}checked{{/if}}>
+                        <label class="btn btn-outline-primary" for="productTypeBoots">Boots</label>
+                        
+                        <input type="radio" class="btn-check" name="productType" id="productTypePoles" value="poles" 
+                               {{#if (eq formData.productType 'poles')}}checked{{/if}}>
+                        <label class="btn btn-outline-primary" for="productTypePoles">Poles</label>
+                        
+                        <input type="radio" class="btn-check" name="productType" id="productTypeGoggles" value="goggles" 
+                               {{#if (eq formData.productType 'goggles')}}checked{{/if}}>
+                        <label class="btn btn-outline-primary" for="productTypeGoggles">Goggles</label>
+                        
+                        <input type="radio" class="btn-check" name="productType" id="productTypeGloves" value="gloves" 
+                               {{#if (eq formData.productType 'gloves')}}checked{{/if}}>
+                        <label class="btn btn-outline-primary" for="productTypeGloves">Gloves</label>
+                        
+                        <input type="radio" class="btn-check" name="productType" id="productTypeJackets" value="jackets" 
+                               {{#if (eq formData.productType 'jackets')}}checked{{/if}}>
+                        <label class="btn btn-outline-primary" for="productTypeJackets">Jackets</label>
+                        
+                        <input type="radio" class="btn-check" name="productType" id="productTypePants" value="pants" 
+                               {{#if (eq formData.productType 'pants')}}checked{{/if}}>
+                        <label class="btn btn-outline-primary" for="productTypePants">Pants</label>
+                        
+                        <input type="radio" class="btn-check" name="productType" id="productTypeOther" value="other" 
+                               {{#if (eq formData.productType 'other')}}checked{{/if}}>
+                        <label class="btn btn-outline-primary" for="productTypeOther">Other</label>
+                    </div>
                 </div>
 
                 <div class="mb-3">
-                    <label for="model" class="form-label">Model *</label>
+                    <label for="brand" class="form-label">Brand *</label>
+                    <input type="text" class="form-control" id="brand" name="brand" 
+                           value="{{formData.brand}}" required maxlength="50">
+                </div>
+
+                <div class="mb-3">
+                    <label for="model" class="form-label">Model</label>
                     <input type="text" class="form-control" id="model" name="model" 
-                           value="{{formData.model}}" required>
+                           value="{{formData.model}}" maxlength="50">
                 </div>
 
                 <div class="mb-3">
                     <label for="productName" class="form-label">Product Name *</label>
                     <input type="text" class="form-control" id="productName" name="productName" 
-                           value="{{formData.productName}}" required>
+                           value="{{formData.productName}}" required maxlength="50">
                 </div>
 
                 <div class="mb-3">
                     <label for="productDescription" class="form-label">Description</label>
                     <textarea class="form-control" id="productDescription" name="productDescription" 
-                              rows="4">{{formData.productDescription}}</textarea>
+                              rows="4" maxlength="5000">{{formData.productDescription}}</textarea>
                 </div>
 
-                <div class="row">
+                <!-- Ski Dimensions -->
+                <div id="skiDimensions" class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="skiLength" class="form-label">Ski Length (cm)</label>
+                        <label for="skiLength" class="form-label">Ski Length (cm) *</label>
                         <input type="number" class="form-control" id="skiLength" name="skiLength" 
-                               value="{{formData.skiLength}}">
+                               value="{{formData.skiLength}}" min="50" max="250" step="0.1">
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="skiWidth" class="form-label">Ski Width (mm)</label>
+                        <label for="skiWidth" class="form-label">Ski Width (mm) *</label>
                         <input type="number" class="form-control" id="skiWidth" name="skiWidth" 
-                               value="{{formData.skiWidth}}">
+                               value="{{formData.skiWidth}}" min="40" max="200" step="0.1">
+                    </div>
+                </div>
+
+                <!-- Snowboard Dimensions -->
+                <div id="snowboardDimensions" class="row" style="display: none;">
+                    <div class="col-md-6 mb-3">
+                        <label for="snowboardLength" class="form-label">Snowboard Length (cm) *</label>
+                        <input type="number" class="form-control" id="snowboardLength" name="snowboardLength" 
+                               value="{{formData.snowboardLength}}" min="100" max="200" step="0.1">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="snowboardWidth" class="form-label">Snowboard Width (mm) *</label>
+                        <input type="number" class="form-control" id="snowboardWidth" name="snowboardWidth" 
+                               value="{{formData.snowboardWidth}}" min="200" max="300" step="0.1">
+                    </div>
+                </div>
+
+                <!-- Helmet Size -->
+                <div id="helmetDimensions" class="row" style="display: none;">
+                    <div class="col-md-6 mb-3">
+                        <label for="helmetSize" class="form-label">Helmet Size (cm) *</label>
+                        <input type="number" class="form-control" id="helmetSize" name="helmetSize" 
+                               value="{{formData.helmetSize}}" min="48" max="65" step="0.5">
+                        <div class="form-text">Measure around your head, just above your eyebrows</div>
+                    </div>
+                </div>
+
+                <!-- Boots Fields -->
+                <div id="bootsDimensions" style="display: none;">
+                    <!-- Informative message about boots -->
+                    <div class="alert alert-info mb-3" role="alert">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Note:</strong> This section is for <strong>Ski Boots</strong> and <strong>Snowboard Boots</strong> only. 
+                        For other types of boots (hiking, work boots, etc.), please use the "Other" tab.
+                    </div>
+                    
+                    <!-- Boot Type Selector -->
+                    <div class="mb-3">
+                        <label class="form-label d-block">Boot Type *</label>
+                        <div class="btn-group" role="group" aria-label="Boot type selection">
+                            <input type="radio" class="btn-check" name="bootType" id="bootTypeSki" value="ski" 
+                                   {{#if (or (not formData.bootType) (eq formData.bootType 'ski'))}}checked{{/if}}>
+                            <label class="btn btn-outline-secondary" for="bootTypeSki">Ski Boots</label>
+                            
+                            <input type="radio" class="btn-check" name="bootType" id="bootTypeSnowboard" value="snowboard" 
+                                   {{#if (eq formData.bootType 'snowboard')}}checked{{/if}}>
+                            <label class="btn btn-outline-secondary" for="bootTypeSnowboard">Snowboard Boots</label>
+                        </div>
+                    </div>
+                    
+                    <!-- Boot Size -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="bootSize" class="form-label">Boot Size (US) *</label>
+                            <input type="number" class="form-control" id="bootSize" name="bootSize" 
+                                   value="{{formData.bootSize}}" min="3" max="16" step="0.5">
+                            <div class="form-text">US shoe size (e.g., 7, 7.5, 8, etc.)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Poles Length -->
+                <div id="polesDimensions" class="row" style="display: none;">
+                    <div class="col-md-6 mb-3">
+                        <label for="polesLength" class="form-label">Pole Length (cm) *</label>
+                        <input type="number" class="form-control" id="polesLength" name="polesLength" 
+                               value="{{formData.polesLength}}" min="80" max="160" step="1">
+                        <div class="form-text">Length of the pole in centimeters</div>
+                    </div>
+                </div>
+
+                <!-- Clothing Size (for Goggles, Gloves, Jackets, Pants) -->
+                <div id="clothingDimensions" class="row" style="display: none;">
+                    <div class="col-md-6 mb-3">
+                        <label for="clothingSize" class="form-label">Size *</label>
+                        <select class="form-control" id="clothingSize" name="clothingSize">
+                            <option value="">Select Size</option>
+                            <option value="XS" {{#if (eq formData.clothingSize 'XS')}}selected{{/if}}>XS</option>
+                            <option value="S" {{#if (eq formData.clothingSize 'S')}}selected{{/if}}>S</option>
+                            <option value="M" {{#if (eq formData.clothingSize 'M')}}selected{{/if}}>M</option>
+                            <option value="L" {{#if (eq formData.clothingSize 'L')}}selected{{/if}}>L</option>
+                            <option value="XL" {{#if (eq formData.clothingSize 'XL')}}selected{{/if}}>XL</option>
+                            <option value="XXL" {{#if (eq formData.clothingSize 'XXL')}}selected{{/if}}>XXL</option>
+                            <option value="XXXL" {{#if (eq formData.clothingSize 'XXXL')}}selected{{/if}}>XXXL</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Other Products (no specific fields) -->
+                <div id="otherDimensions" style="display: none;">
+                    <div class="alert alert-info mb-3" role="alert">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Note:</strong> Use this option for other types of gear not listed above.
                     </div>
                 </div>
 
@@ -94,7 +234,7 @@
         <!-- SERVICE LISTING FORM -->
         <div class="tab-pane fade {{#if (eq listingType 'service')}}show active{{/if}}" 
              id="service" role="tabpanel">
-            <form action="/create-listing/service" method="POST" enctype="multipart/form-data">
+            <form action="/create-listing/service" method="POST" enctype="multipart/form-data" autocomplete="off">
                 
                 <div class="mb-3">
                     <label for="serviceName" class="form-label">Service Name *</label>
@@ -132,6 +272,123 @@
 </div>
 
 <script>
+// Product type toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const productTypeRadios = document.querySelectorAll('input[name="productType"]');
+    const skiDimensions = document.getElementById('skiDimensions');
+    const snowboardDimensions = document.getElementById('snowboardDimensions');
+    const helmetDimensions = document.getElementById('helmetDimensions');
+    const bootsDimensions = document.getElementById('bootsDimensions');
+    const polesDimensions = document.getElementById('polesDimensions');
+    const clothingDimensions = document.getElementById('clothingDimensions');
+    const otherDimensions = document.getElementById('otherDimensions');
+    
+    const skiLengthInput = document.getElementById('skiLength');
+    const skiWidthInput = document.getElementById('skiWidth');
+    const snowboardLengthInput = document.getElementById('snowboardLength');
+    const snowboardWidthInput = document.getElementById('snowboardWidth');
+    const helmetSizeInput = document.getElementById('helmetSize');
+    const bootSizeInput = document.getElementById('bootSize');
+    const bootTypeSkiInput = document.getElementById('bootTypeSki');
+    const bootTypeSnowboardInput = document.getElementById('bootTypeSnowboard');
+    const polesLengthInput = document.getElementById('polesLength');
+    const clothingSizeInput = document.getElementById('clothingSize');
+
+    let currentProductType = null;
+    
+    function toggleDimensions() {
+        const selectedType = document.querySelector('input[name="productType"]:checked')?.value || 'ski';
+        
+        // Only clear values if product type actually changed
+        const typeChanged = currentProductType !== null && currentProductType !== selectedType;
+        currentProductType = selectedType;
+        
+        // Hide all dimension sections first
+        skiDimensions.style.display = 'none';
+        snowboardDimensions.style.display = 'none';
+        helmetDimensions.style.display = 'none';
+        bootsDimensions.style.display = 'none';
+        polesDimensions.style.display = 'none';
+        clothingDimensions.style.display = 'none';
+        otherDimensions.style.display = 'none';
+        
+        // Remove required from all inputs
+        if (skiLengthInput) skiLengthInput.required = false;
+        if (skiWidthInput) skiWidthInput.required = false;
+        if (snowboardLengthInput) snowboardLengthInput.required = false;
+        if (snowboardWidthInput) snowboardWidthInput.required = false;
+        if (helmetSizeInput) helmetSizeInput.required = false;
+        if (bootSizeInput) bootSizeInput.required = false;
+        if (bootTypeSkiInput) bootTypeSkiInput.required = false;
+        if (bootTypeSnowboardInput) bootTypeSnowboardInput.required = false;
+        if (polesLengthInput) polesLengthInput.required = false;
+        if (clothingSizeInput) clothingSizeInput.required = false;
+        
+        // Only clear values if product type changed (not on initial load or when same type selected)
+        if (typeChanged) {
+            if (skiLengthInput) skiLengthInput.value = '';
+            if (skiWidthInput) skiWidthInput.value = '';
+            if (snowboardLengthInput) snowboardLengthInput.value = '';
+            if (snowboardWidthInput) snowboardWidthInput.value = '';
+            if (helmetSizeInput) helmetSizeInput.value = '';
+            if (bootSizeInput) bootSizeInput.value = '';
+            if (polesLengthInput) polesLengthInput.value = '';
+            if (clothingSizeInput) clothingSizeInput.value = '';
+            // Reset boot type radio buttons
+            if (bootTypeSkiInput) bootTypeSkiInput.checked = false;
+            if (bootTypeSnowboardInput) bootTypeSnowboardInput.checked = false;
+        }
+        
+        // Show and set required for selected type
+        if (selectedType === 'ski') {
+            if (skiDimensions) skiDimensions.style.display = 'flex';
+            if (skiLengthInput) skiLengthInput.required = true;
+            if (skiWidthInput) skiWidthInput.required = true;
+        } else if (selectedType === 'snowboard') {
+            if (snowboardDimensions) snowboardDimensions.style.display = 'flex';
+            if (snowboardLengthInput) snowboardLengthInput.required = true;
+            if (snowboardWidthInput) snowboardWidthInput.required = true;
+        } else if (selectedType === 'helmet') {
+            if (helmetDimensions) helmetDimensions.style.display = 'flex';
+            if (helmetSizeInput) helmetSizeInput.required = true;
+        } else if (selectedType === 'boots') {
+            if (bootsDimensions) bootsDimensions.style.display = 'block';
+            if (bootSizeInput) bootSizeInput.required = true;
+            if (bootTypeSkiInput) bootTypeSkiInput.required = true;
+        } else if (selectedType === 'poles') {
+            if (polesDimensions) polesDimensions.style.display = 'flex';
+            if (polesLengthInput) polesLengthInput.required = true;
+        } else if (['goggles', 'gloves', 'jackets', 'pants'].includes(selectedType)) {
+            if (clothingDimensions) clothingDimensions.style.display = 'flex';
+            if (clothingSizeInput) clothingSizeInput.required = true;
+        } else if (selectedType === 'other') {
+            if (otherDimensions) otherDimensions.style.display = 'block';
+        }
+    }
+
+    // Set initial state (don't clear values on initial load)
+    toggleDimensions();
+    
+    // Add event listeners to radio buttons
+    productTypeRadios.forEach(radio => {
+        radio.addEventListener('change', toggleDimensions);
+    });
+    
+    // Prevent browser from modifying number inputs while typing
+    // This prevents autocomplete/autofill and browser validation from interfering
+    const numberInputs = document.querySelectorAll('input[type="number"]');
+    numberInputs.forEach(input => {
+        // Disable browser autocomplete for number inputs
+        input.setAttribute('autocomplete', 'off');
+        
+        // Prevent browser from validating while typing
+        input.addEventListener('invalid', function(e) {
+            // Don't show browser validation while typing
+            e.preventDefault();
+        }, true);
+    });
+});
+
 // Image preview for product images
 document.getElementById('productImages')?.addEventListener('change', function(e) {
     const preview = document.getElementById('productImagePreview');

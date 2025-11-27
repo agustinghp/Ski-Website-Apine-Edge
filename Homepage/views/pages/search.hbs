@@ -75,8 +75,30 @@
                     <div class="card-body">
                         <h5 class="card-title">{{brand}} {{model}}</h5>
                         <h6 class="card-subtitle mb-2 text-muted">
-                            {{#if skilength}}{{skilength}}cm{{/if}}
-                            {{#if skiwidth}} | Width: {{skiwidth}}mm{{/if}}
+                            {{#if (eq producttype 'snowboard')}}
+                                {{#if snowboardlength}}{{snowboardlength}}cm{{/if}}
+                                {{#if snowboardwidth}} | Width: {{snowboardwidth}}mm{{/if}}
+                            {{else if (eq producttype 'helmet')}}
+                                {{#if helmetsize}}Size: {{helmetsize}}cm{{/if}}
+                            {{else if (eq producttype 'boots')}}
+                                {{#if boottype}}{{#if (eq boottype 'ski')}}Ski Boots{{else}}Snowboard Boots{{/if}}{{/if}}
+                                {{#if bootsize}} | Size: {{bootsize}} (US){{/if}}
+                            {{else if (eq producttype 'poles')}}
+                                {{#if poleslength}}Length: {{poleslength}}cm{{/if}}
+                            {{else if (eq producttype 'goggles')}}
+                                {{#if clothingsize}}Size: {{clothingsize}}{{/if}}
+                            {{else if (eq producttype 'gloves')}}
+                                {{#if clothingsize}}Size: {{clothingsize}}{{/if}}
+                            {{else if (eq producttype 'jackets')}}
+                                {{#if clothingsize}}Size: {{clothingsize}}{{/if}}
+                            {{else if (eq producttype 'pants')}}
+                                {{#if clothingsize}}Size: {{clothingsize}}{{/if}}
+                            {{else if (eq producttype 'other')}}
+                                Other Gear
+                            {{else}}
+                                {{#if skilength}}{{skilength}}cm{{/if}}
+                                {{#if skiwidth}} | Width: {{skiwidth}}mm{{/if}}
+                            {{/if}}
                         </h6>
                         <p class="card-text">{{productdescription}}</p>
                         <p class="text-muted mb-0">
