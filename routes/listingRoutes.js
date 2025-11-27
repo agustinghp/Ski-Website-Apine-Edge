@@ -1,14 +1,48 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
+const fs = require('fs');
 const { upload, processProductImage, processServiceImage } = require('../uploadMiddleware');
 
+// Load brands from JSON file
+function loadBrands() {
+    try {
+        const brandsPath = path.join(__dirname, '..', 'brands.json');
+        const brandsData = JSON.parse(fs.readFileSync(brandsPath, 'utf8'));
+        // Remove _meta field and return only brand data
+        const { _meta, ...brands } = brandsData;
+        return brands;
+    } catch (error) {
+        console.error('Error loading brands.json:', error);
+        // Return empty object if file can't be loaded
+        return {};
+    }
+}
+
+// Format brands for template (convert arrays to comma-separated strings)
+function formatBrandsForTemplate(brands) {
+    const formatted = {};
+    for (const [brandName, categories] of Object.entries(brands)) {
+        if (Array.isArray(categories)) {
+            formatted[brandName] = categories.join(',');
+        } else {
+            formatted[brandName] = categories;
+        }
+    }
+    return formatted;
+}
+
 module.exports = (db, auth) => {
+    // Load brands once when module is initialized
+    const rawBrands = loadBrands();
+    const brands = formatBrandsForTemplate(rawBrands);
 
     // Render Create Listing Page
     router.get('/', auth, (req, res) => {
         res.render('pages/create-listing', {
             title: 'Create Listing',
-            userId: req.session.userId
+            userId: req.session.userId,
+            brands: brands
         });
     });
 
@@ -34,6 +68,7 @@ module.exports = (db, auth) => {
                     userId,
                     listingType: 'product',
                     formData: req.body,
+                    brands: brands,
                     message: {
                         type: 'danger',
                         text: 'Custom brand is required when "Other" is selected. Please enter a brand name.'
@@ -46,6 +81,7 @@ module.exports = (db, auth) => {
                     userId,
                     listingType: 'product',
                     formData: req.body,
+                    brands: brands,
                     message: {
                         type: 'danger',
                         text: `Custom brand cannot exceed ${MAX_BRAND_LENGTH} characters.`
@@ -73,6 +109,7 @@ module.exports = (db, auth) => {
                 userId,
                 listingType: 'product',
                 formData: req.body,
+                brands: brands,
                 message: {
                     type: 'danger',
                     text: 'Brand is required. Please select a brand from the list or choose "Other" to enter a custom brand.'
@@ -86,6 +123,7 @@ module.exports = (db, auth) => {
                 userId,
                 listingType: 'product',
                 formData: req.body,
+                brands: brands,
                 message: {
                     type: 'danger',
                     text: 'Product Name is required and cannot be empty or contain only spaces.'
@@ -99,6 +137,7 @@ module.exports = (db, auth) => {
                 userId,
                 listingType: 'product',
                 formData: req.body,
+                brands: brands,
                 message: {
                     type: 'danger',
                     text: 'Price is required.'
@@ -113,6 +152,7 @@ module.exports = (db, auth) => {
                 userId,
                 listingType: 'product',
                 formData: req.body,
+                brands: brands,
                 message: {
                     type: 'danger',
                     text: `Brand cannot exceed ${MAX_BRAND_LENGTH} characters.`
@@ -126,6 +166,7 @@ module.exports = (db, auth) => {
                 userId,
                 listingType: 'product',
                 formData: req.body,
+                brands: brands,
                 message: {
                     type: 'danger',
                     text: `Product Name cannot exceed ${MAX_PRODUCT_NAME_LENGTH} characters.`
@@ -139,6 +180,7 @@ module.exports = (db, auth) => {
                 userId,
                 listingType: 'product',
                 formData: req.body,
+                brands: brands,
                 message: {
                     type: 'danger',
                     text: `Model cannot exceed ${MAX_MODEL_LENGTH} characters.`
@@ -152,6 +194,7 @@ module.exports = (db, auth) => {
                 userId,
                 listingType: 'product',
                 formData: req.body,
+                brands: brands,
                 message: {
                     type: 'danger',
                     text: `Description cannot exceed ${MAX_DESCRIPTION_LENGTH} characters.`
@@ -167,6 +210,7 @@ module.exports = (db, auth) => {
                 userId,
                 listingType: 'product',
                 formData: req.body,
+                brands: brands,
                 message: {
                     type: 'danger',
                     text: 'Price cannot use scientific notation. Please enter a regular number.'
@@ -182,6 +226,7 @@ module.exports = (db, auth) => {
                     userId,
                     listingType: 'product',
                     formData: req.body,
+                    brands: brands,
                     message: {
                         type: 'danger',
                         text: 'Please fill in all required fields (Ski Length and Ski Width).'
@@ -195,6 +240,7 @@ module.exports = (db, auth) => {
                     userId,
                     listingType: 'product',
                     formData: req.body,
+                    brands: brands,
                     message: {
                         type: 'danger',
                         text: 'Please fill in all required fields (Snowboard Length and Snowboard Width).'
@@ -208,6 +254,7 @@ module.exports = (db, auth) => {
                     userId,
                     listingType: 'product',
                     formData: req.body,
+                    brands: brands,
                     message: {
                         type: 'danger',
                         text: 'Please fill in the required field (Helmet Size).'
@@ -221,6 +268,7 @@ module.exports = (db, auth) => {
                     userId,
                     listingType: 'product',
                     formData: req.body,
+                    brands: brands,
                     message: {
                         type: 'danger',
                         text: 'Please fill in all required fields (Boot Type and Boot Size).'
@@ -238,6 +286,7 @@ module.exports = (db, auth) => {
                     userId,
                     listingType: 'product',
                     formData: req.body,
+                    brands: brands,
                     message: {
                         type: 'danger',
                         text: `Boot Size must be between ${MIN_BOOT_SIZE} and ${MAX_BOOT_SIZE} (US size).`
@@ -251,6 +300,7 @@ module.exports = (db, auth) => {
                     userId,
                     listingType: 'product',
                     formData: req.body,
+                    brands: brands,
                     message: {
                         type: 'danger',
                         text: 'Please fill in the required field (Pole Length).'
@@ -264,6 +314,7 @@ module.exports = (db, auth) => {
                     userId,
                     listingType: 'product',
                     formData: req.body,
+                    brands: brands,
                     message: {
                         type: 'danger',
                         text: 'Please select a size.'
@@ -317,6 +368,7 @@ module.exports = (db, auth) => {
                 title: 'Create Listing',
                 userId,
                 listingType: 'product',
+                brands: brands,
                 message: {
                     type: 'success',
                     text: `Product listing "${productName}" created successfully!`
@@ -330,6 +382,7 @@ module.exports = (db, auth) => {
                 userId,
                 listingType: 'product',
                 formData: req.body,
+                brands: brands,
                 message: {
                     type: 'danger',
                     text: 'Failed to create product listing. Please try again.'
@@ -350,6 +403,7 @@ module.exports = (db, auth) => {
                 userId,
                 listingType: 'service',
                 formData: req.body,
+                brands: brands,
                 message: {
                     type: 'danger',
                     text: 'Please provide a service name.'
@@ -389,6 +443,7 @@ module.exports = (db, auth) => {
                 title: 'Create Listing',
                 userId,
                 listingType: 'service',
+                brands: brands,
                 message: {
                     type: 'success',
                     text: `Service listing "${serviceName}" created successfully!`
@@ -402,6 +457,7 @@ module.exports = (db, auth) => {
                 userId,
                 listingType: 'service',
                 formData: req.body,
+                brands: brands,
                 message: {
                     type: 'danger',
                     text: 'Failed to create service listing. Please try again.'
