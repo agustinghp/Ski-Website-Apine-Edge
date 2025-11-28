@@ -770,25 +770,44 @@ document.addEventListener('DOMContentLoaded', function() {
         const brandCollapse = document.getElementById('brand-collapse');
         const brandToggleBtn = document.querySelector('.brand-toggle-btn');
         const brandHint = document.querySelector('.brand-hint');
+        const brandControlButtons = document.querySelector('.brand-control-buttons');
         
         if (brandCollapse && brandToggleBtn && brandHint) {
-            // Update hint text based on current state
-            function updateHintText() {
+            // Update hint text and control buttons visibility based on current state
+            function updateBrandSectionState() {
                 const isExpanded = brandToggleBtn.getAttribute('aria-expanded') === 'true';
                 brandHint.textContent = isExpanded ? '(click to collapse)' : '(click to expand)';
+                
+                // Hide/show control buttons based on collapse state using CSS class
+                if (brandControlButtons) {
+                    if (isExpanded) {
+                        brandControlButtons.classList.add('show');
+                    } else {
+                        brandControlButtons.classList.remove('show');
+                    }
+                }
             }
             
             // Listen for collapse events
             brandCollapse.addEventListener('shown.bs.collapse', function() {
-                updateHintText();
+                updateBrandSectionState();
             });
             
             brandCollapse.addEventListener('hidden.bs.collapse', function() {
-                updateHintText();
+                updateBrandSectionState();
             });
             
-            // Set initial hint text
-            updateHintText();
+            // Set initial state immediately (before any animations)
+            // Check if collapse is already shown (has 'show' class)
+            const isInitiallyExpanded = brandCollapse.classList.contains('show');
+            if (isInitiallyExpanded) {
+                brandControlButtons?.classList.add('show');
+            }
+            
+            // Also update on next frame to catch any Bootstrap initialization
+            requestAnimationFrame(() => {
+                updateBrandSectionState();
+            });
         }
     }
     

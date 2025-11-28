@@ -234,8 +234,12 @@
 }
 
 .brand-control-buttons {
-    display: flex;
+    display: none; /* Hidden by default, shown when brand section is expanded */
     gap: 8px;
+}
+
+.brand-control-buttons.show {
+    display: flex;
 }
 
 /* Brand toggle button */
