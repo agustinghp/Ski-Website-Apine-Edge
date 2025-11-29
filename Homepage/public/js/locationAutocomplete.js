@@ -54,12 +54,25 @@ function initAutocomplete() {
 
     // Create the PlaceAutocompleteElement
     const autocompleteElement = new google.maps.places.PlaceAutocompleteElement();
-
+    
     // Get the parent container
     const parentDiv = input.parentElement;
     
     // Set placeholder
     autocompleteElement.setAttribute('placeholder', input.getAttribute('placeholder') || 'Enter your location');
+    
+    // Force light theme - try multiple ways
+    try {
+        autocompleteElement.setAttribute('theme', 'light');
+    } catch (e) {}
+    
+    // Set CSS variables directly on the element
+    autocompleteElement.style.setProperty('--gmpx-color-surface', '#fff', 'important');
+    autocompleteElement.style.setProperty('--gmpx-color-on-surface', '#212529', 'important');
+    autocompleteElement.style.setProperty('--gmpx-color-on-surface-variant', '#212529', 'important');
+    autocompleteElement.style.setProperty('--gmpx-color-primary', '#0d6efd', 'important');
+    autocompleteElement.style.setProperty('--gmpx-color-outline', '#ced4da', 'important');
+    autocompleteElement.style.setProperty('--gmpx-color-on-primary', '#fff', 'important');
     
     // Create a wrapper div with relative positioning
     const wrapper = document.createElement('div');
@@ -89,9 +102,6 @@ function initAutocomplete() {
     backgroundOverlay.style.pointerEvents = 'none';
     backgroundOverlay.style.zIndex = '1';
     
-    // Don't add border to autocomplete element - let the overlay handle it
-    // The filter will invert colors, so we want the overlay border to show through
-    
     // Make autocomplete element appear above overlay
     autocompleteElement.style.position = 'relative';
     autocompleteElement.style.zIndex = '2';
@@ -100,6 +110,27 @@ function initAutocomplete() {
     // Insert background overlay first (so it's behind)
     wrapper.insertBefore(backgroundOverlay, autocompleteElement);
     
+    // Function to force text color on input element
+    const forceTextColor = (input) => {
+        if (!input) return;
+        
+        // Set all possible color properties
+        input.style.color = '#212529';
+        input.style.setProperty('color', '#212529', 'important');
+        input.style.setProperty('-webkit-text-fill-color', '#212529', 'important');
+        
+        // Also set computed style directly if possible
+        try {
+            const computedStyle = window.getComputedStyle(input);
+            if (computedStyle.color === 'rgb(255, 255, 255)' || computedStyle.color === 'white') {
+                input.style.setProperty('color', '#212529', 'important');
+                input.style.setProperty('-webkit-text-fill-color', '#212529', 'important');
+            }
+        } catch (e) {
+            // Ignore errors
+        }
+    };
+    
     // Try to make the internal input transparent background and dark text
     const tryMakeTransparent = () => {
         try {
@@ -107,14 +138,20 @@ function initAutocomplete() {
                               autocompleteElement.openOrClosedShadowRoot ||
                               autocompleteElement.__shadowRoot;
             if (shadowRoot) {
-                const internalInput = shadowRoot.querySelector('input');
-                if (internalInput) {
-                    internalInput.style.backgroundColor = 'transparent';
-                    internalInput.style.background = 'transparent';
-                    internalInput.style.color = '#212529';
-                    internalInput.style.setProperty('color', '#212529', 'important');
-                    return true;
-                }
+                // Find all input elements (there might be multiple)
+                const inputs = shadowRoot.querySelectorAll('input');
+                inputs.forEach(input => {
+                    // Ensure background is transparent
+                    input.style.backgroundColor = 'transparent';
+                    input.style.background = 'transparent';
+                    input.style.setProperty('background-color', 'transparent', 'important');
+                    input.style.setProperty('background', 'transparent', 'important');
+                    
+                    // Force text color
+                    forceTextColor(input);
+                });
+                
+                return inputs.length > 0;
             }
         } catch (err) {
             // Can't access
@@ -122,14 +159,70 @@ function initAutocomplete() {
         return false;
     };
     
-    // Try multiple times to make it transparent
-    setTimeout(() => tryMakeTransparent(), 100);
-    setTimeout(() => tryMakeTransparent(), 500);
-    setTimeout(() => tryMakeTransparent(), 1000);
-    setTimeout(() => tryMakeTransparent(), 2000);
+    // Use MutationObserver to watch for changes in shadow DOM
+    const setupMutationObserver = () => {
+        try {
+            const shadowRoot = autocompleteElement.shadowRoot || 
+                              autocompleteElement.openOrClosedShadowRoot ||
+                              autocompleteElement.__shadowRoot;
+            if (shadowRoot) {
+                const observer = new MutationObserver(() => {
+                    tryMakeTransparent();
+                });
+                
+                observer.observe(shadowRoot, {
+                    childList: true,
+                    subtree: true,
+                    attributes: true,
+                    attributeFilter: ['style', 'class']
+                });
+                
+                return true;
+            }
+        } catch (err) {
+            // Can't access
+        }
+        return false;
+    };
     
+    // Set up periodic check as fallback (every 500ms for first 10 seconds, then every 2 seconds)
+    let checkCount = 0;
+    const maxQuickChecks = 20; // 10 seconds at 500ms intervals
+    const periodicCheck = setInterval(() => {
+        tryMakeTransparent();
+        checkCount++;
+        if (checkCount >= maxQuickChecks) {
+            // After initial period, check less frequently
+            clearInterval(periodicCheck);
+            setInterval(tryMakeTransparent, 2000);
+        }
+    }, 500);
+    
+    // Try multiple times to make it transparent and ensure text is visible
+    setTimeout(() => {
+        tryMakeTransparent();
+        setupMutationObserver();
+    }, 100);
+    setTimeout(() => {
+        tryMakeTransparent();
+        setupMutationObserver();
+    }, 500);
+    setTimeout(() => {
+        tryMakeTransparent();
+        setupMutationObserver();
+    }, 1000);
+    setTimeout(() => {
+        tryMakeTransparent();
+        setupMutationObserver();
+    }, 2000);
+    
+    // Also try on various events
     autocompleteElement.addEventListener('focus', tryMakeTransparent);
     autocompleteElement.addEventListener('input', tryMakeTransparent);
+    autocompleteElement.addEventListener('click', tryMakeTransparent);
+    autocompleteElement.addEventListener('keydown', tryMakeTransparent);
+    autocompleteElement.addEventListener('keyup', tryMakeTransparent);
+    autocompleteElement.addEventListener('gmp-suggestionsupdate', tryMakeTransparent);
     
     // Also try to inject a style tag into shadow DOM if accessible
     const tryInjectStyle = () => {
@@ -138,20 +231,56 @@ function initAutocomplete() {
                               autocompleteElement.openOrClosedShadowRoot ||
                               autocompleteElement.__shadowRoot;
             if (shadowRoot) {
+                // Remove existing style if present to re-inject
                 const existingStyle = shadowRoot.querySelector('style[data-custom-override]');
-                if (!existingStyle) {
-                    const styleTag = document.createElement('style');
-                    styleTag.setAttribute('data-custom-override', 'true');
-                    styleTag.textContent = `
-                        input {
-                            background-color: transparent !important;
-                            background: transparent !important;
-                            color: #212529 !important;
-                        }
-                    `;
-                    shadowRoot.appendChild(styleTag);
-                    return true;
+                if (existingStyle) {
+                    existingStyle.remove();
                 }
+                
+                const styleTag = document.createElement('style');
+                styleTag.setAttribute('data-custom-override', 'true');
+                styleTag.textContent = `
+                    input,
+                    input[type="text"],
+                    input[autocomplete],
+                    input[placeholder] {
+                        background-color: transparent !important;
+                        background: transparent !important;
+                        color: #212529 !important;
+                        -webkit-text-fill-color: #212529 !important;
+                        caret-color: #212529 !important;
+                    }
+                    input:focus,
+                    input:focus-visible,
+                    input:active {
+                        background-color: transparent !important;
+                        background: transparent !important;
+                        color: #212529 !important;
+                        -webkit-text-fill-color: #212529 !important;
+                        caret-color: #212529 !important;
+                        outline-color: #0d6efd !important;
+                    }
+                    input::placeholder {
+                        color: #6c757d !important;
+                        -webkit-text-fill-color: #6c757d !important;
+                        opacity: 1 !important;
+                    }
+                    input::-webkit-input-placeholder {
+                        color: #6c757d !important;
+                        -webkit-text-fill-color: #6c757d !important;
+                        opacity: 1 !important;
+                    }
+                    input::-moz-placeholder {
+                        color: #6c757d !important;
+                        opacity: 1 !important;
+                    }
+                    input:-ms-input-placeholder {
+                        color: #6c757d !important;
+                        opacity: 1 !important;
+                    }
+                `;
+                shadowRoot.appendChild(styleTag);
+                return true;
             }
         } catch (err) {
             // Can't access
@@ -161,6 +290,8 @@ function initAutocomplete() {
     
     setTimeout(() => tryInjectStyle(), 200);
     setTimeout(() => tryInjectStyle(), 1000);
+    setTimeout(() => tryInjectStyle(), 2000);
+    setTimeout(() => tryInjectStyle(), 3000);
     
     // Create a hidden input for form submission
     const hiddenInput = document.createElement('input');
