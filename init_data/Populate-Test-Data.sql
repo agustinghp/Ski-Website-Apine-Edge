@@ -606,3 +606,22 @@ INSERT INTO service_images (id, service_id, image_path, is_primary, created_at) 
 -- =====================================================
 
 SELECT 'Database populated successfully!' as status;
+
+-- =============================================================
+-- SEQUENCE RESET (LOWERCASE VERSION)
+-- =============================================================
+
+-- 1. Reset Users Sequence
+SELECT setval('users_id_seq', COALESCE((SELECT MAX(id) FROM users), 1));
+
+-- 2. Reset Products Sequence (Changed from "Products" to products)
+SELECT setval('products_id_seq', COALESCE((SELECT MAX(id) FROM products), 1)); 
+
+-- 3. Reset Product Images Sequence
+SELECT setval('product_images_id_seq', COALESCE((SELECT MAX(id) FROM product_images), 1));
+
+-- 4. Reset Services Sequence (Changed from "Services" to services)
+SELECT setval('services_id_seq', COALESCE((SELECT MAX(id) FROM services), 1));
+
+-- 5. Reset Service Images Sequence
+SELECT setval('service_images_id_seq', COALESCE((SELECT MAX(id) FROM service_images), 1));

@@ -1,9 +1,14 @@
+//Run this once to fix the sequence after bulk inserts or manual ID inserts
+// Then comment out or delete this code
+//db.one("SELECT setval('product_images_id_seq', (SELECT MAX(id) FROM product_images))")
+  //.then(() => console.log("✅ Sequence fixed!"))
+  //.catch(err => console.log("Fix error:", err));
+
 const express = require('express');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const { upload, processProductImage, processServiceImage } = require('../uploadMiddleware');
-
 // Load brands from JSON file
 function loadBrands() {
     try {
@@ -48,9 +53,10 @@ module.exports = (db, auth) => {
 
     // Handle Product Listing Creation with Images
     router.post('/product', auth, upload.array('productImages', 5), async (req, res) => {
+        // 1. Setup variables and basic validation
         const { brand, customBrand, model, productName, productDescription, productType, skiLength, skiWidth, snowboardLength, snowboardWidth, helmetSize, bootType, bootSize, polesLength, clothingSize, price } = req.body;
         const userId = req.session.userId;
-
+        
         // Character limits
         const MAX_BRAND_LENGTH = 50;
         const MAX_PRODUCT_NAME_LENGTH = 50;
@@ -324,51 +330,75 @@ module.exports = (db, auth) => {
         }
         // 'other' type doesn't need validation
 
+// 2. Main Transaction Block
         try {
-            // Insert product first to get the product ID (using trimmed values)
+            // A. Create the Product Entry in the Database
+            // We do this first to get the Product ID
             const product = await db.one(`
-                INSERT INTO Products (user_id, productName, productDescription, brand, model, productType, skiLength, skiWidth, snowboardLength, snowboardWidth, helmetSize, bootType, bootSize, polesLength, clothingSize, price)
+                INSERT INTO Products (
+                    user_id, productName, productDescription, brand, model, productType, 
+                    skiLength, skiWidth, snowboardLength, snowboardWidth, helmetSize, 
+                    bootType, bootSize, polesLength, clothingSize, price
+                )
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
                 RETURNING id
             `, [
                 userId,
-                trimmedProductName,
-                trimmedDescription || null,
-                trimmedBrand,
-                normalizedModel,
-                normalizedProductType,
-                normalizedProductType === 'ski' ? parseFloat(skiLength) : null,
-                normalizedProductType === 'ski' ? parseFloat(skiWidth) : null,
-                normalizedProductType === 'snowboard' ? parseFloat(snowboardLength) : null,
-                normalizedProductType === 'snowboard' ? parseFloat(snowboardWidth) : null,
-                normalizedProductType === 'helmet' ? parseFloat(helmetSize) : null,
-                normalizedProductType === 'boots' ? normalizedBootType : null,
-                normalizedProductType === 'boots' ? parseFloat(bootSize) : null,
-                normalizedProductType === 'poles' ? parseFloat(polesLength) : null,
-                (['goggles', 'gloves', 'jackets', 'pants'].includes(normalizedProductType)) ? clothingSize : null,
+                productName.trim(),
+                productDescription ? productDescription.trim() : null,
+                brand === 'Other' ? customBrand : brand, // Simple brand logic
+                model ? model.trim() : null,
+                productType,
+                productType === 'ski' ? parseFloat(skiLength) : null,
+                productType === 'ski' ? parseFloat(skiWidth) : null,
+                productType === 'snowboard' ? parseFloat(snowboardLength) : null,
+                productType === 'snowboard' ? parseFloat(snowboardWidth) : null,
+                productType === 'helmet' ? parseFloat(helmetSize) : null,
+                productType === 'boots' ? bootType : null,
+                productType === 'boots' ? parseFloat(bootSize) : null,
+                productType === 'poles' ? parseFloat(polesLength) : null,
+                (['goggles', 'gloves', 'jackets', 'pants'].includes(productType)) ? clothingSize : null,
                 parseFloat(price)
             ]);
 
             const productId = product.id;
+            console.log(`✅ Product created with ID: ${productId}`);
 
-            // Process and save images if any were uploaded
+            // B. Handle Image Uploads (The critical part)
             if (req.files && req.files.length > 0) {
+                console.log(`📸 Found ${req.files.length} images to upload...`);
+
+                // Process images sequentially
                 for (let i = 0; i < req.files.length; i++) {
-                    const imagePath = await processProductImage(req.files[i].buffer, productId, i);
-                    
-                    // Save image path to database
-                    await db.none(`
-                        INSERT INTO product_images (product_id, image_path, is_primary)
-                        VALUES ($1, $2, $3)
-                    `, [productId, imagePath, i === 0]); // First image is primary
+                    try {
+                        console.log(`   Processing image ${i + 1}...`);
+                        
+                        // 1. Upload to R2 (Cloudflare)
+                        // This uses your middleware to resize and send to cloud
+                        const imageUrl = await processProductImage(req.files[i].buffer, productId, i);
+                        console.log(`   cloud url: ${imageUrl}`);
+
+                        // 2. Save URL to Database
+                        await db.none(`
+                            INSERT INTO product_images (product_id, image_path, is_primary)
+                            VALUES ($1, $2, $3)
+                        `, [productId, imageUrl, i === 0]); // First image (i=0) is set as primary
+
+                    } catch (imageError) {
+                        console.error(`❌ FAILED to upload image ${i + 1}:`, imageError);
+                        // We continue the loop so one bad image doesn't kill the whole post
+                    }
                 }
+            } else {
+                console.log('⚠️ No images attached to request.');
             }
 
+            // C. Success Response
             res.render('pages/create-listing', {
                 title: 'Create Listing',
                 userId,
                 listingType: 'product',
-                brands: brands,
+                brands: brands, // Ensure 'brands' variable is available from your outer scope
                 message: {
                     type: 'success',
                     text: `Product listing "${productName}" created successfully!`
@@ -376,7 +406,9 @@ module.exports = (db, auth) => {
             });
 
         } catch (error) {
-            console.error('Error creating product listing:', error);
+            console.error('❌ CRITICAL ERROR creating product:', error);
+            
+            // D. Error Response
             res.render('pages/create-listing', {
                 title: 'Create Listing',
                 userId,
@@ -385,12 +417,11 @@ module.exports = (db, auth) => {
                 brands: brands,
                 message: {
                     type: 'danger',
-                    text: 'Failed to create product listing. Please try again.'
+                    text: 'Failed to create product listing. Check server console for details.'
                 }
             });
         }
     });
-
     // Handle Service Listing Creation with Images
     router.post('/service', auth, upload.array('serviceImages', 5), async (req, res) => {
         const { serviceName, serviceDescription, price } = req.body;
