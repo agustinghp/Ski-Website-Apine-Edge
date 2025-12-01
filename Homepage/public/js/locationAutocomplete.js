@@ -294,14 +294,38 @@ function initAutocomplete() {
     setTimeout(() => tryInjectStyle(), 3000);
     
     // Create a hidden input for form submission
-    const hiddenInput = document.createElement('input');
-    hiddenInput.type = 'hidden';
-    hiddenInput.id = 'autocomplete';
-    hiddenInput.name = 'autocomplete';
-    parentDiv.appendChild(hiddenInput);
+    // Check if this is advanced search form (which uses locationName instead of autocomplete)
+    const formForCheck = parentDiv.closest('form');
+    const isAdvancedSearch = formForCheck && (formForCheck.id === 'advanced-search-form' || formForCheck.action.includes('advanced-search'));
+    const hiddenInputName = isAdvancedSearch ? 'locationName' : 'autocomplete';
+    
+    // Check if hidden input already exists (for advanced search)
+    let hiddenInput = document.getElementById('locationNameHidden') || document.querySelector(`input[name="${hiddenInputName}"][type="hidden"]`);
+    
+    if (!hiddenInput) {
+        hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.id = isAdvancedSearch ? 'locationNameHidden' : 'autocomplete';
+        hiddenInput.name = hiddenInputName;
+        parentDiv.appendChild(hiddenInput);
+    }
+    
+    // Store the formatted address when a place is selected
+    let storedFormattedAddress = null;
+    let placeJustSelected = false;
     
     // Update hidden input whenever autocomplete value changes
     const updateHiddenInput = () => {
+        // If we have a stored formatted address (from place selection), use that for register form
+        if (storedFormattedAddress && hiddenInput && hiddenInput.name === 'autocomplete' && placeJustSelected) {
+            hiddenInput.value = storedFormattedAddress;
+            // Reset flag after a short delay to allow for normal updates
+            setTimeout(() => {
+                placeJustSelected = false;
+            }, 100);
+            return;
+        }
+        
         let value = '';
         
         // Try to get value from shadow DOM
@@ -330,8 +354,20 @@ function initAutocomplete() {
     };
     
     // Listen for input changes and place selection
-    autocompleteElement.addEventListener('input', updateHiddenInput);
-    autocompleteElement.addEventListener('change', updateHiddenInput);
+    autocompleteElement.addEventListener('input', () => {
+        // Only clear stored formatted address if place wasn't just selected
+        if (!placeJustSelected) {
+            storedFormattedAddress = null;
+        }
+        updateHiddenInput();
+    });
+    autocompleteElement.addEventListener('change', () => {
+        // Only clear stored formatted address if place wasn't just selected
+        if (!placeJustSelected) {
+            storedFormattedAddress = null;
+        }
+        updateHiddenInput();
+    });
     
     // Also listen for any other events that might indicate value changes
     autocompleteElement.addEventListener('gmp-suggestionsupdate', updateHiddenInput);
@@ -475,7 +511,25 @@ function initAutocomplete() {
 
             if (currentLocationField) currentLocationField.value = cityState;
             if (hiddenInput) {
-                hiddenInput.value = place.formattedAddress || cityState || autocompleteElement.value;
+                // For advanced search, use cityState; for register, use formatted address
+                const formForCheck = parentDiv.closest('form');
+                const isAdvancedSearch = formForCheck && (formForCheck.id === 'advanced-search-form' || formForCheck.action.includes('advanced-search'));
+                if (isAdvancedSearch) {
+                    hiddenInput.value = cityState || place.formattedAddress || '';
+                    storedFormattedAddress = null; // Clear for advanced search
+                    placeJustSelected = false;
+                } else {
+                    // Store formatted address for register form
+                    storedFormattedAddress = place.formattedAddress || null;
+                    placeJustSelected = true; // Set flag to preserve formatted address
+                    hiddenInput.value = place.formattedAddress || cityState || autocompleteElement.value;
+                }
+            }
+            
+            // Also update locationNameHidden if it exists (for advanced search)
+            const locationNameHidden = document.getElementById('locationNameHidden');
+            if (locationNameHidden) {
+                locationNameHidden.value = cityState || place.formattedAddress || '';
             }
         } catch (error) {
             console.error("Error processing place selection:", error);
@@ -584,7 +638,7 @@ function initAutocomplete() {
                         cityState = result.formatted_address || address;
                     }
                     
-                    resolve({ lat, lng, location: cityState, formattedAddress: result.formatted_address });
+                    resolve({ lat, lng, location: cityState });
                 } else {
                     reject(new Error(`Geocoding failed: ${status}`));
                 }
@@ -593,9 +647,53 @@ function initAutocomplete() {
     };
 
     // Form validation
-    const form = parentDiv.closest('form');
-    if (form) {
-        form.addEventListener('submit', async (e) => {
+    const formForValidation = parentDiv.closest('form');
+    if (formForValidation) {
+        // Check if location is required (check original input's required attribute)
+        const isLocationRequired = input.hasAttribute('required');
+        
+        formForValidation.addEventListener('submit', async (e) => {
+            // If location is not required, allow form to submit normally
+            if (!isLocationRequired) {
+                // Still try to geocode if there's a value, but don't block submission
+                const currentLatField = document.getElementById('latitude');
+                const currentLngField = document.getElementById('longitude');
+                const currentLocationField = document.getElementById('location');
+                
+                updateHiddenInput();
+                
+                const autocompleteValue = getAutocompleteValue();
+                if (autocompleteValue && autocompleteValue.trim() !== '') {
+                    const hasLat = currentLatField && currentLatField.value && currentLatField.value.trim() !== '';
+                    const hasLng = currentLngField && currentLngField.value && currentLngField.value.trim() !== '';
+                    
+                    if (!hasLat || !hasLng) {
+                        try {
+                            const geocodeResult = await geocodeAddress(autocompleteValue);
+                            if (currentLatField) currentLatField.value = geocodeResult.lat;
+                            if (currentLngField) currentLngField.value = geocodeResult.lng;
+                            if (currentLocationField) currentLocationField.value = geocodeResult.location;
+                            
+                            // Update locationName field if it exists (for advanced search)
+                            const locationNameHidden = document.getElementById('locationNameHidden');
+                            if (locationNameHidden) {
+                                locationNameHidden.value = geocodeResult.location || geocodeResult.formattedAddress;
+                            }
+                            // Also update the main hidden input if it's for advanced search
+                            if (hiddenInput && hiddenInput.name === 'locationName') {
+                                hiddenInput.value = geocodeResult.location || geocodeResult.formattedAddress;
+                            }
+                        } catch (error) {
+                            // Silently fail for optional location
+                            console.log('Could not geocode location, but continuing with form submission');
+                        }
+                    }
+                }
+                // Allow form to submit normally
+                return true;
+            }
+            
+            // Location is required - validate it
             e.preventDefault();
             
             // Re-fetch the fields in case they were moved or recreated
@@ -605,6 +703,11 @@ function initAutocomplete() {
             
             // Update hidden input one more time before submission
             updateHiddenInput();
+            
+            // Ensure formatted address is set for register form if we have it stored
+            if (hiddenInput && hiddenInput.name === 'autocomplete' && storedFormattedAddress) {
+                hiddenInput.value = storedFormattedAddress;
+            }
             
             let hasLat = currentLatField && currentLatField.value && currentLatField.value.trim() !== '';
             let hasLng = currentLngField && currentLngField.value && currentLngField.value.trim() !== '';
@@ -621,6 +724,12 @@ function initAutocomplete() {
                         if (currentLatField) currentLatField.value = geocodeResult.lat;
                         if (currentLngField) currentLngField.value = geocodeResult.lng;
                         if (currentLocationField) currentLocationField.value = geocodeResult.location;
+                        
+                        // Update the hidden input with formatted address for registration
+                        if (hiddenInput && hiddenInput.name === 'autocomplete') {
+                            storedFormattedAddress = geocodeResult.formattedAddress || null;
+                            hiddenInput.value = geocodeResult.formattedAddress || geocodeResult.location || autocompleteValue;
+                        }
                         
                         hasLat = true;
                         hasLng = true;
@@ -643,7 +752,7 @@ function initAutocomplete() {
                 return false;
             }
             
-            form.submit();
+            formForValidation.submit();
         });
     }
 }

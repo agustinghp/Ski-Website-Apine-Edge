@@ -75,6 +75,12 @@ const hbs = handlebars.create({
     inArray: function (array, value) {
       if (!array || !Array.isArray(array)) return false;
       return array.includes(value);
+    },
+    
+    // Get array length
+    length: function (array) {
+      if (!array || !Array.isArray(array)) return 0;
+      return array.length;
     }
   }
 

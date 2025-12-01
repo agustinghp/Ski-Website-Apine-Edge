@@ -34,8 +34,13 @@
             
             {{#unless hasLocation}}
             <div class="mt-2 text-danger small">
-                <i class="bi bi-geo-alt-fill"></i> 
-                Note: We couldn't detect your location from your profile. Showing results from everywhere.
+                {{#if userId}}
+                    <i class="bi bi-geo-alt-fill"></i> 
+                    Note: We couldn't detect your location from your profile. Showing results from everywhere.
+                {{else}}
+                    <i class="bi bi-geo-alt-fill"></i> 
+                    <a href="/login">Log in</a> to use your location for better search results. Currently showing results from everywhere.
+                {{/if}}
             </div>
             {{/unless}}
         </div>

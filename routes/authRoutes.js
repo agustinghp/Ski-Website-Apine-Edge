@@ -96,7 +96,7 @@ module.exports = (db) => {
 
     // Handle Register Form Submission
     router.post('/register', async (req, res) => {
-        const { username, email, password, location, latitude, longitude } = req.body;
+        const { username, email, password, location, autocomplete, latitude, longitude } = req.body;
 
         if (!username || !email || !password || !location) {
             return res.render('pages/register', {

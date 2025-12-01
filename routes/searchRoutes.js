@@ -28,10 +28,12 @@ function getBrandsForCategory(category) {
 }
 
 // Helper: Haversine SQL
+// Security: Rounds other users' coordinates to 3 decimal places (~111m accuracy)
+// to prevent exact location tracking while maintaining reasonable distance calculations
 const getHaversineDistance = (lat, lng, tableAlias = 'u') => {
-  return `( 3959 * acos( cos( radians(${lat}) ) * cos( radians( ${tableAlias}.latitude ) ) 
-    * cos( radians( ${tableAlias}.longitude ) - radians(${lng}) ) + sin( radians(${lat}) ) 
-    * sin( radians( ${tableAlias}.latitude ) ) ) )`;
+  return `( 3959 * acos( cos( radians(${lat}) ) * cos( radians( ROUND(${tableAlias}.latitude::numeric, 3) ) ) 
+    * cos( radians( ROUND(${tableAlias}.longitude::numeric, 3) ) - radians(${lng}) ) + sin( radians(${lat}) ) 
+    * sin( radians( ROUND(${tableAlias}.latitude::numeric, 3) ) ) ) )`;
 };
 
 module.exports = (db) => {
@@ -56,7 +58,9 @@ module.exports = (db) => {
         clothingSizes = '', brands = '', customBrands = '',
         sortBy = '',
         // Location params (from the new input)
-        lat, lng, radius, locationName
+        lat, lng, radius, locationName,
+        // UI state
+        brandsExpanded = ''
       } = req.query;
 
       // --- 1. Determine Location ---
@@ -125,8 +129,15 @@ module.exports = (db) => {
       let allCustomBrands = Array.isArray(customBrands) ? customBrands : (customBrands ? [customBrands] : []);
       allCustomBrands = allCustomBrands.filter(b => b && b.trim() !== '');
       
+      // If no brands are selected, select all available brands by default
+      if (selectedBrands.length === 0 && availableBrands.length > 0) {
+        selectedBrands = [...availableBrands];
+      }
+      
       const brandsToFilter = [...selectedBrands.filter(b => availableBrands.includes(b)), ...allCustomBrands];
       
+      // Only filter by brands if not all brands are selected (or if there are custom brands)
+      // If all available brands are selected, don't add the filter (show all brands)
       if (brandsToFilter.length > 0 && (brandsToFilter.length < availableBrands.length || allCustomBrands.length > 0)) {
          conditions.push(`p.brand = ANY($${paramIndex}::text[])`);
          params.push(brandsToFilter);
@@ -198,7 +209,9 @@ module.exports = (db) => {
         minSkiLength, maxSkiLength, minSkiWidth, maxSkiWidth,
         clothingSizes: Array.isArray(clothingSizes) ? clothingSizes : (clothingSizes ? [clothingSizes] : []),
         brands: selectedBrands, customBrands: allCustomBrands, availableBrands,
-        sortBy, 
+        sortBy,
+        // UI state
+        brandsExpanded: brandsExpanded === 'true' ? 'true' : '',
         products, resultCount: products.length, hasResults: products.length > 0,
         userId: currentUserId
       });

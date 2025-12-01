@@ -1,5 +1,15 @@
 // Advanced Search JavaScript
 document.addEventListener('DOMContentLoaded', function() {
+    // Restore scroll position after form submission
+    const savedScrollPos = sessionStorage.getItem('advancedSearchScrollPos');
+    if (savedScrollPos !== null) {
+        // Use setTimeout to ensure page is fully rendered
+        setTimeout(function() {
+            window.scrollTo(0, parseInt(savedScrollPos, 10));
+            sessionStorage.removeItem('advancedSearchScrollPos'); // Clean up
+        }, 100);
+    }
+    
     const productTypeSelect = document.getElementById('productType');
     const categoryFilters = document.querySelectorAll('.category-filters');
     
@@ -109,6 +119,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     brandContainer.innerHTML = '<p class="text-muted small mb-0">No brands available for this category</p>';
                 }
             } else {
+                // If no brands were previously selected, select all by default
+                const shouldSelectAll = selectedBrands.length === 0;
+                
                 brands.forEach(brand => {
                     const button = document.createElement('button');
                     button.type = 'button';
@@ -116,8 +129,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     button.dataset.brand = brand;
                     button.textContent = brand;
                     
-                    // Preserve selection if brand was previously selected and exists in new category
-                    if (selectedBrands.includes(brand)) {
+                    // Select if it was previously selected OR if we should select all (no previous selection)
+                    if (shouldSelectAll || selectedBrands.includes(brand)) {
                         button.classList.add('selected');
                     }
                     
@@ -728,13 +741,23 @@ document.addEventListener('DOMContentLoaded', function() {
     function initBrandButtons() {
         // Initialize buttons from their current DOM state (set by server-side template)
         // The template already sets the 'selected' class based on brands array
-        // We just need to sync the hidden input with the button states
+        // If no brands are selected, select all by default
+        
+        const brandButtons = document.querySelectorAll('.brand-button');
+        const selectedButtons = document.querySelectorAll('.brand-button.selected');
+        
+        // If no brands are selected, select all by default
+        if (selectedButtons.length === 0 && brandButtons.length > 0) {
+            brandButtons.forEach(button => {
+                button.classList.add('selected');
+            });
+        }
         
         // Update the hidden input based on current button states
         updateBrandInput();
         
         // Handle brand button clicks
-        document.querySelectorAll('.brand-button').forEach(button => {
+        brandButtons.forEach(button => {
             button.addEventListener('click', function(e) {
                 e.stopPropagation(); // Prevent event from bubbling up
                 this.classList.toggle('selected');
@@ -771,6 +794,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const brandToggleBtn = document.querySelector('.brand-toggle-btn');
         const brandHint = document.querySelector('.brand-hint');
         const brandControlButtons = document.querySelector('.brand-control-buttons');
+        const brandsExpandedInput = document.getElementById('brandsExpanded');
         
         if (brandCollapse && brandToggleBtn && brandHint) {
             // Update hint text and control buttons visibility based on current state
@@ -785,6 +809,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else {
                         brandControlButtons.classList.remove('show');
                     }
+                }
+                
+                // Update hidden input to persist state
+                if (brandsExpandedInput) {
+                    brandsExpandedInput.value = isExpanded ? 'true' : '';
                 }
             }
             
@@ -1090,7 +1119,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle form submission - ensure hidden inputs are populated
     const searchForm = document.getElementById('advanced-search-form');
     if (searchForm) {
+        // Store scroll position before form submission
         searchForm.addEventListener('submit', function(e) {
+            // Save current scroll position
+            sessionStorage.setItem('advancedSearchScrollPos', window.pageYOffset || document.documentElement.scrollTop);
+            
             // Update hidden inputs with slider/text input values
             const sliders = document.querySelectorAll('.range-slider-container');
             sliders.forEach(container => {
@@ -1156,7 +1189,66 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Initialize "Use my location" checkbox functionality
+    initUseMyLocationCheckbox();
 });
+
+// Initialize "Use my location" checkbox
+function initUseMyLocationCheckbox() {
+    const useMyLocationCheckbox = document.getElementById('useMyLocation');
+    const locationInputContainer = document.getElementById('locationInputContainer');
+    const latitudeInput = document.getElementById('latitude');
+    const longitudeInput = document.getElementById('longitude');
+    const locationNameHidden = document.getElementById('locationNameHidden');
+    const locationDisplay = document.getElementById('location');
+    
+    if (!useMyLocationCheckbox || !locationInputContainer) return;
+    
+    // Function to update input visibility based on checkbox
+    function updateLocationInputVisibility() {
+        const useMyLocation = useMyLocationCheckbox.checked;
+        
+        if (useMyLocation) {
+            // Hide the input and clear location values so backend uses profile location
+            locationInputContainer.style.display = 'none';
+            
+            // Clear location values so backend uses profile location
+            if (latitudeInput) latitudeInput.value = '';
+            if (longitudeInput) longitudeInput.value = '';
+            if (locationNameHidden) locationNameHidden.value = '';
+            if (locationDisplay) locationDisplay.value = '';
+            
+            // Clear the autocomplete input value if it exists
+            const locationInput = document.getElementById('autocomplete');
+            if (locationInput) {
+                locationInput.value = '';
+            }
+            
+            // Also clear Google Maps autocomplete if it exists
+            const autocompleteWrapper = locationInputContainer.querySelector('div[style*="position: relative"]');
+            if (autocompleteWrapper) {
+                const autocompleteElement = autocompleteWrapper.querySelector('gmpx-place-autocomplete');
+                if (autocompleteElement) {
+                    try {
+                        autocompleteElement.value = '';
+                    } catch (e) {
+                        // Property might not exist or be read-only
+                    }
+                }
+            }
+        } else {
+            // Show the input
+            locationInputContainer.style.display = 'block';
+        }
+    }
+    
+    // Set initial state
+    updateLocationInputVisibility();
+    
+    // Handle checkbox change
+    useMyLocationCheckbox.addEventListener('change', updateLocationInputVisibility);
+}
 
 // Initialize radius input validation
     initRadiusInput();
@@ -1165,13 +1257,83 @@ document.addEventListener('DOMContentLoaded', function() {
         const radiusInput = document.getElementById('searchRadius');
         if (!radiusInput) return;
 
-        radiusInput.addEventListener('change', function() {
-            if (this.value && this.value < 1) {
-                this.value = 1; // Minimum 1 mile
+        const MIN_RADIUS = 1;
+        const MAX_RADIUS = 1000;
+        const DEFAULT_RADIUS = 25;
+
+        // Set default value if empty on page load
+        if (!radiusInput.value || radiusInput.value.trim() === '') {
+            radiusInput.value = DEFAULT_RADIUS;
+        }
+
+        // Validation function to clamp values
+        function validateAndClampRadius() {
+            let value = parseFloat(radiusInput.value);
+            
+            // If empty or invalid, set to default
+            if (isNaN(value) || radiusInput.value.trim() === '') {
+                radiusInput.value = DEFAULT_RADIUS;
+                return;
             }
-            // Ensure whole number
-            if (this.value) {
-                this.value = Math.floor(parseFloat(this.value));
+
+            // Clamp to min/max bounds
+            if (value < MIN_RADIUS) {
+                value = MIN_RADIUS;
+            } else if (value > MAX_RADIUS) {
+                value = MAX_RADIUS;
+            }
+
+            // Ensure whole number (no decimals)
+            value = Math.floor(value);
+
+            // Update the input value
+            radiusInput.value = value;
+            
+            // Reset border color after validation
+            radiusInput.style.borderColor = '';
+        }
+
+        // Validate on blur (when user finishes typing and leaves field)
+        radiusInput.addEventListener('blur', validateAndClampRadius);
+
+        // Validate on change (when value changes via spinner/arrows)
+        radiusInput.addEventListener('change', validateAndClampRadius);
+
+        // Prevent form submission on Enter key - just clamp the value instead
+        radiusInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Prevent form submission
+                validateAndClampRadius(); // Clamp the value
+                this.blur(); // Remove focus from the field
             }
         });
+
+        // Validate on input (real-time, but only show visual feedback, don't clamp yet)
+        radiusInput.addEventListener('input', function() {
+            // Allow typing, but if value exceeds max, show visual feedback
+            const value = parseFloat(this.value);
+            if (!isNaN(value) && this.value.trim() !== '') {
+                if (value > MAX_RADIUS) {
+                    this.style.borderColor = '#dc3545'; // Red border as warning
+                } else if (value < MIN_RADIUS) {
+                    this.style.borderColor = '#dc3545'; // Red border as warning
+                } else {
+                    this.style.borderColor = ''; // Reset to default
+                }
+            } else {
+                this.style.borderColor = ''; // Reset if empty
+            }
+        });
+
+        // Prevent form submission if radius is invalid
+        const searchForm = document.getElementById('advanced-search-form');
+        if (searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                validateAndClampRadius(); // Ensure value is valid before submit
+                const value = parseFloat(radiusInput.value);
+                if (isNaN(value) || value < MIN_RADIUS || value > MAX_RADIUS) {
+                    radiusInput.value = DEFAULT_RADIUS; // Fallback to default
+                }
+            });
+        }
     }
