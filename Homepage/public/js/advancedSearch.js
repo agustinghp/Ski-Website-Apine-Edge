@@ -1158,3 +1158,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Initialize radius input validation
+    initRadiusInput();
+
+    function initRadiusInput() {
+        const radiusInput = document.getElementById('searchRadius');
+        if (!radiusInput) return;
+
+        radiusInput.addEventListener('change', function() {
+            if (this.value && this.value < 1) {
+                this.value = 1; // Minimum 1 mile
+            }
+            // Ensure whole number
+            if (this.value) {
+                this.value = Math.floor(parseFloat(this.value));
+            }
+        });
+    }

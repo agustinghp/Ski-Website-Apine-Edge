@@ -1,57 +1,59 @@
 <div class="container mt-4">
-    <!-- Search Form -->
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
             <form action="/search" method="GET" class="row g-3">
+                
                 <div class="col-md-6">
                     <input type="text" name="query" class="form-control form-control-lg"
                         placeholder="Search gear, services, or people..." value="{{query}}">
                 </div>
+
                 <div class="col-md-2">
                     <select name="type" class="form-select form-select-lg">
-                        <option value="all" {{#if (eq searchType 'all' )}}selected{{/if}}>All</option>
+                        <option value="all" {{#if (eq searchType 'all' )}}selected{{/if}}>All Types</option>
                         <option value="products" {{#if (eq searchType 'products' )}}selected{{/if}}>Products</option>
                         <option value="services" {{#if (eq searchType 'services' )}}selected{{/if}}>Services</option>
                         <option value="users" {{#if (eq searchType 'users' )}}selected{{/if}}>Users</option>
                     </select>
                 </div>
+
                 <div class="col-md-2">
-                    <select name="sortBy" class="form-select form-select-lg">
-                        <option value="" {{#unless sortBy}}selected{{/unless}}>Sort By</option>
-                        <option value="price_asc" {{#if (eq sortBy 'price_asc')}}selected{{/if}}>Price: Low to High</option>
-                        <option value="price_desc" {{#if (eq sortBy 'price_desc')}}selected{{/if}}>Price: High to Low</option>
-                        <option value="length_asc" {{#if (eq sortBy 'length_asc')}}selected{{/if}}>Length: Short to Long</option>
-                        <option value="length_desc" {{#if (eq sortBy 'length_desc')}}selected{{/if}}>Length: Long to Short</option>
-                        <option value="width_asc" {{#if (eq sortBy 'width_asc')}}selected{{/if}}>Width: Narrow to Wide</option>
-                        <option value="width_desc" {{#if (eq sortBy 'width_desc')}}selected{{/if}}>Width: Wide to Narrow</option>
+                    <select name="radius" class="form-select form-select-lg">
+                        <option value="10" {{#if (eq radius 10)}}selected{{/if}}>Within 10 mi</option>
+                        <option value="25" {{#if (eq radius 25)}}selected{{/if}}>Within 25 mi</option>
+                        <option value="50" {{#if (eq radius 50)}}selected{{/if}}>Within 50 mi</option>
+                        <option value="100" {{#if (eq radius 100)}}selected{{/if}}>Within 100 mi</option>
+                        <option value="5000" {{#if (eq radius 5000)}}selected{{/if}}>Anywhere</option>
                     </select>
                 </div>
+
                 <div class="col-md-2">
                     <button type="submit" class="btn btn-primary btn-lg w-100">Search</button>
                 </div>
             </form>
+            
+            {{#unless hasLocation}}
+            <div class="mt-2 text-danger small">
+                <i class="bi bi-geo-alt-fill"></i> 
+                Note: We couldn't detect your location from your profile. Showing results from everywhere.
+            </div>
+            {{/unless}}
         </div>
     </div>
 
-    <!-- Results Summary -->
-    {{#if query}}
     <div class="mb-3">
+        {{#if query}}
         <h5>Search results for: <span class="text-primary">"{{query}}"</span></h5>
-        <p class="text-muted">Found {{resultCount}} result(s){{#if sortBy}} - Sorted by {{sortBy}}{{/if}}</p>
+        {{/if}}
+        <p class="text-muted">Found {{resultCount}} result(s)</p>
     </div>
-    {{/if}}
 
     {{#unless hasResults}}
     <div class="alert alert-info" role="alert">
-        {{#if query}}
-        No results found for "{{query}}". Try adjusting your search terms.
-        {{else}}
-        Enter a search term to find products, services, and people.
-        {{/if}}
+        No results found. Try increasing your search radius or changing your search terms.
     </div>
     {{/unless}}
 
-    <!-- Products Section -->
     {{#if products}}
     {{#if products.length}}
     <div class="mb-5">
@@ -73,40 +75,22 @@
                         </div>
                     {{/if}}
                     <div class="card-body">
-                        <h5 class="card-title">{{brand}} {{model}}</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">
-                            {{#if (eq producttype 'snowboard')}}
-                                {{#if snowboardlength}}{{snowboardlength}}cm{{/if}}
-                                {{#if snowboardwidth}} | Width: {{snowboardwidth}}mm{{/if}}
-                            {{else if (eq producttype 'helmet')}}
-                                {{#if helmetsize}}Size: {{helmetsize}}cm{{/if}}
-                            {{else if (eq producttype 'boots')}}
-                                {{#if boottype}}{{#if (eq boottype 'ski')}}Ski Boots{{else}}Snowboard Boots{{/if}}{{/if}}
-                                {{#if bootsize}} | Size: {{bootsize}} (US){{/if}}
-                            {{else if (eq producttype 'poles')}}
-                                {{#if poleslength}}Length: {{poleslength}}cm{{/if}}
-                            {{else if (eq producttype 'goggles')}}
-                                {{#if clothingsize}}Size: {{clothingsize}}{{/if}}
-                            {{else if (eq producttype 'gloves')}}
-                                {{#if clothingsize}}Size: {{clothingsize}}{{/if}}
-                            {{else if (eq producttype 'jackets')}}
-                                {{#if clothingsize}}Size: {{clothingsize}}{{/if}}
-                            {{else if (eq producttype 'pants')}}
-                                {{#if clothingsize}}Size: {{clothingsize}}{{/if}}
-                            {{else if (eq producttype 'other')}}
-                                Other Gear
-                            {{else}}
-                                {{#if skilength}}{{skilength}}cm{{/if}}
-                                {{#if skiwidth}} | Width: {{skiwidth}}mm{{/if}}
+                        <h5 class="card-title">{{productname}}</h5>
+                        <p class="card-text text-truncate">{{productdescription}}</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                             <p class="text-muted mb-0">
+                                <small>
+                                    <i class="bi bi-person"></i> {{seller_name}}
+                                </small>
+                            </p>
+                            
+                            {{#if seller_location}}
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-geo-alt"></i> {{seller_location}}
+                            </span>
                             {{/if}}
-                        </h6>
-                        <p class="card-text">{{productdescription}}</p>
-                        <p class="text-muted mb-0">
-                            <small>
-                                <i class="bi bi-person"></i> {{seller_name}}
-                                {{#if seller_location}} | <i class="bi bi-geo-alt"></i> {{seller_location}}{{/if}}
-                            </small>
-                        </p>
+                        </div>
                     </div>
                     <div class="card-footer bg-transparent border-0 pb-3">
                         <span class="fs-4 fw-bold text-primary">${{price}}</span>
@@ -120,7 +104,6 @@
     {{/if}}
     {{/if}}
 
-    <!-- Services Section -->
     {{#if services}}
     {{#if services.length}}
     <div class="mb-5">
@@ -146,13 +129,21 @@
                             <div class="badge bg-info text-dark me-2">Service</div>
                         </div>
                         <h5 class="card-title">{{servicename}}</h5>
-                        <p class="card-text">{{servicedescription}}</p>
-                        <p class="text-muted mb-0">
-                            <small>
-                                <i class="bi bi-person"></i> {{provider_name}}
-                                {{#if provider_location}} | <i class="bi bi-geo-alt"></i> {{provider_location}}{{/if}}
-                            </small>
-                        </p>
+                        <p class="card-text text-truncate">{{servicedescription}}</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                             <p class="text-muted mb-0">
+                                <small>
+                                    <i class="bi bi-person"></i> {{provider_name}}
+                                </small>
+                            </p>
+                            
+                            {{#if provider_location}}
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-geo-alt"></i> {{provider_location}}
+                            </span>
+                            {{/if}}
+                        </div>
                     </div>
                     <div class="card-footer bg-transparent border-0 pb-3">
                         {{#if price}}
@@ -170,7 +161,6 @@
     {{/if}}
     {{/if}}
 
-    <!-- Users Section -->
     {{#if users}}
     {{#if users.length}}
     <div class="mb-5">
@@ -191,30 +181,19 @@
                                 </div>
                             {{/if}}
                             <div>
-                                <div class="badge bg-primary mb-1">User</div>
                                 <h5 class="card-title mb-0">{{username}}</h5>
+                                {{#if location}}
+                                <small class="text-muted"><i class="bi bi-geo-alt"></i> {{location}}</small>
+                                {{else}}
+                                <small class="text-muted">No location listed</small>
+                                {{/if}}
                             </div>
                         </div>
-                        <p class="text-muted mb-1">
-                            {{#if location}}
-                            <i class="bi bi-geo-alt"></i> {{location}}
-                            {{else}}
-                            <span class="text-muted">Location not specified</span>
-                            {{/if}}
-                        </p>
                     </div>
                     <div class="card-footer bg-transparent border-0 pb-3 d-flex justify-content-between">
-                        <a href="/users/{{id}}" class="btn btn-outline-secondary btn-sm">
+                        <a href="/users/{{id}}" class="btn btn-outline-secondary btn-sm w-100">
                             View Profile
                         </a>
-                        {{#if ../userId}}
-                        {{#if (eq connectionStatus 'accepted')}}
-                        <a href="/chat?user={{id}}" class="btn btn-primary btn-sm">Message</a>
-                        {{else}}
-                        <button class="btn btn-secondary btn-sm" disabled>Connect to message</button>
-                        {{/if}}
-
-                        {{/if}}
                     </div>
                 </div>
             </div>
@@ -224,6 +203,3 @@
     {{/if}}
     {{/if}}
 </div>
-
-<!-- Add Bootstrap Icons if not already included -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
