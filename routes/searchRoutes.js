@@ -225,49 +225,77 @@ module.exports = (db) => {
     }
   });
 
-  // ==========================================
+ // ==========================================
   // 2. REGULAR SEARCH PAGE
   // ==========================================
   router.get('/', async (req, res) => {
     try {
       const currentUserId = req.session.userId;
       
-      // Default Location Logic for Regular Search (User's Profile)
+      // 1. Get User's Registered Location
       let userLat = null;
       let userLng = null;
       
       if (currentUserId) {
         const currentUser = await db.oneOrNone('SELECT latitude, longitude FROM users WHERE id = $1', [currentUserId]);
-        if (currentUser && currentUser.latitude) {
+        if (currentUser && currentUser.latitude && currentUser.longitude) {
             userLat = parseFloat(currentUser.latitude);
             userLng = parseFloat(currentUser.longitude);
         }
       }
 
+      // 2. Get Query Params
       const searchQuery = req.query.query || '';
       const searchType = req.query.type || 'all';
-      const radius = parseFloat(req.query.radius) || 50; 
+      const sortBy = req.query.sortBy || '';
+      
+      // LOGIC FIX: 
+      // If radius is undefined (first load), default to 50. 
+      // If user selected "Anywhere" (value="0"), use 0.
+      let radius;
+      if (req.query.radius === undefined) {
+          radius = 50; 
+      } else {
+          radius = parseFloat(req.query.radius);
+      }
+
       const hasLocation = userLat !== null && userLng !== null;
 
+      // 3. Prepare Sort Logic
       let productOrderBy = 'p.id DESC';
       let serviceOrderBy = 's.id DESC';
       let userOrderBy = 'u.id DESC';
 
-      if (hasLocation) {
+      if (hasLocation && !sortBy) {
+        // Default sort by distance (nearest first)
         productOrderBy = 'distance ASC';
         serviceOrderBy = 'distance ASC';
         userOrderBy = 'distance ASC';
+      } else if (sortBy === 'price_asc') {
+        productOrderBy = 'p.price ASC NULLS LAST, p.id DESC';
+        serviceOrderBy = 's.price ASC NULLS LAST, s.id DESC';
+      } else if (sortBy === 'price_desc') {
+        productOrderBy = 'p.price DESC NULLS LAST, p.id DESC';
+        serviceOrderBy = 's.price DESC NULLS LAST, s.id DESC';
       }
 
+      // 4. Prepare Distance SQL
       let distanceSelect = '';
       let distanceWhere = '';
 
       if (hasLocation) {
         const distCalc = getHaversineDistance(userLat, userLng, 'u');
+        // Round distance to 1 decimal
         distanceSelect = `, ROUND((${distCalc})::numeric, 1) as distance`;
-        distanceWhere = ` AND ${distCalc} < ${radius}`;
+        
+        // LOGIC FIX: Only apply WHERE clause if radius > 0. 
+        // If radius is 0 (Anywhere), we just calculate distance but don't filter.
+        if (radius > 0) {
+            distanceWhere = ` AND ${distCalc} < ${radius}`;
+        }
       }
 
+      // 5. Build Queries
       const searchPattern = `%${searchQuery.trim()}%`;
       const params = searchQuery.trim() === '' ? [] : [searchPattern];
       const searchPlaceholder = searchQuery.trim() === '' ? '' : '$1';
@@ -278,16 +306,27 @@ module.exports = (db) => {
       if (searchType === 'all' || searchType === 'products') {
         let whereClause = '1=1'; 
         if (searchQuery.trim() !== '') {
-          whereClause += ` AND (p.productName ILIKE ${searchPlaceholder} OR p.productDescription ILIKE ${searchPlaceholder} OR p.brand ILIKE ${searchPlaceholder})`;
+          whereClause += ` AND (
+            p.productName ILIKE ${searchPlaceholder} 
+            OR p.productDescription ILIKE ${searchPlaceholder} 
+            OR p.brand ILIKE ${searchPlaceholder} 
+            OR p.model ILIKE ${searchPlaceholder}
+          )`;
         }
         whereClause += distanceWhere;
 
         const productQuery = `
-          SELECT p.*, u.username as seller_name, u.location as seller_location, pi.image_path as primary_image
-          ${distanceSelect}
-          FROM Products p JOIN users u ON p.user_id = u.id
+          SELECT 
+            p.id, p.productName as productname, p.productDescription as productdescription, 
+            p.brand, p.model, p.price,
+            u.username as seller_name, u.location as seller_location,
+            pi.image_path as primary_image
+            ${distanceSelect}
+          FROM Products p 
+          JOIN users u ON p.user_id = u.id
           LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = true
-          WHERE ${whereClause} ORDER BY ${productOrderBy}
+          WHERE ${whereClause}
+          ORDER BY ${productOrderBy}
         `;
         products = await db.any(productQuery, params);
       }
@@ -296,16 +335,24 @@ module.exports = (db) => {
       if (searchType === 'all' || searchType === 'services') {
         let whereClause = '1=1';
         if (searchQuery.trim() !== '') {
-          whereClause += ` AND (s.serviceName ILIKE ${searchPlaceholder} OR s.serviceDescription ILIKE ${searchPlaceholder})`;
+          whereClause += ` AND (
+            s.serviceName ILIKE ${searchPlaceholder} 
+            OR s.serviceDescription ILIKE ${searchPlaceholder}
+          )`;
         }
         whereClause += distanceWhere;
 
         const serviceQuery = `
-          SELECT s.*, u.username as provider_name, u.location as provider_location, si.image_path as primary_image
-          ${distanceSelect}
-          FROM Services s JOIN users u ON s.user_id = u.id
+          SELECT 
+            s.id, s.serviceName as servicename, s.serviceDescription as servicedescription, s.price,
+            u.username as provider_name, u.location as provider_location,
+            si.image_path as primary_image
+            ${distanceSelect}
+          FROM Services s 
+          JOIN users u ON s.user_id = u.id
           LEFT JOIN service_images si ON s.id = si.service_id AND si.is_primary = true
-          WHERE ${whereClause} ORDER BY ${serviceOrderBy}
+          WHERE ${whereClause}
+          ORDER BY ${serviceOrderBy}
         `;
         services = await db.any(serviceQuery, params);
       }
@@ -314,32 +361,48 @@ module.exports = (db) => {
       if (searchType === 'all' || searchType === 'users') {
         let whereClause = '1=1';
         if (searchQuery.trim() !== '') {
-           whereClause += ` AND (u.username ILIKE ${searchPlaceholder} OR u.location ILIKE ${searchPlaceholder})`;
+           whereClause += ` AND (
+             u.username ILIKE ${searchPlaceholder} 
+             OR u.location ILIKE ${searchPlaceholder}
+           )`;
         }
         whereClause += distanceWhere;
 
         const userQuery = `
-          SELECT u.id, u.username, u.location, u.profile_image ${distanceSelect}
-          FROM users u WHERE ${whereClause} ORDER BY ${userOrderBy}
+          SELECT 
+            u.id, u.username, u.location, u.profile_image 
+            ${distanceSelect}
+          FROM users u
+          WHERE ${whereClause}
+          ORDER BY ${userOrderBy}
         `;
         users = await db.any(userQuery, params);
       }
 
-      if (users.length > 0) users = users.filter(u => u.id !== currentUserId);
+      if(users.length > 0) users = users.filter(u => u.id !== currentUserId);
 
       const resultCount = products.length + services.length + users.length;
 
       res.render('pages/search', {
-        title: 'Search',
-        query: searchQuery, searchType, radius, hasLocation,
+        title: 'Search Results',
+        query: searchQuery,
+        searchType,
+        radius,
+        hasLocation,
         products, services, users,
-        resultCount, hasResults: resultCount > 0,
+        resultCount,
+        hasResults: resultCount > 0,
         userId: currentUserId
       });
 
     } catch (error) {
       console.error('Search error:', error);
-      res.render('pages/search', { title: 'Search', products: [], hasResults: false });
+      res.render('pages/search', {
+        title: 'Search',
+        products: [], services: [], users: [],
+        resultCount: 0, hasResults: false,
+        error: 'Search failed.'
+      });
     }
   });
 
