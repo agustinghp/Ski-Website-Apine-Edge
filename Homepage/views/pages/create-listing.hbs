@@ -122,12 +122,14 @@
                     <div class="col-md-6 mb-3">
                         <label for="skiLength" class="form-label">Ski Length (cm) *</label>
                         <input type="number" class="form-control" id="skiLength" name="skiLength" 
-                               value="{{formData.skiLength}}" min="50" max="250" step="0.1" autocomplete="off" inputmode="numeric">
+                               value="{{formData.skiLength}}" min="50" max="250" step="0.1" autocomplete="off" inputmode="numeric"
+                               placeholder="50 - 250 cm">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="skiWidth" class="form-label">Ski Width (mm) *</label>
                         <input type="number" class="form-control" id="skiWidth" name="skiWidth" 
-                               value="{{formData.skiWidth}}" min="40" max="200" step="0.1" autocomplete="off" inputmode="numeric">
+                               value="{{formData.skiWidth}}" min="40" max="200" step="0.1" autocomplete="off" inputmode="numeric"
+                               placeholder="40 - 200 mm">
                     </div>
                 </div>
 
@@ -136,12 +138,14 @@
                     <div class="col-md-6 mb-3">
                         <label for="snowboardLength" class="form-label">Snowboard Length (cm) *</label>
                         <input type="number" class="form-control" id="snowboardLength" name="snowboardLength" 
-                               value="{{formData.snowboardLength}}" min="100" max="200" step="0.1" autocomplete="off" inputmode="numeric">
+                               value="{{formData.snowboardLength}}" min="100" max="200" step="0.1" autocomplete="off" inputmode="numeric"
+                               placeholder="100 - 200 cm">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="snowboardWidth" class="form-label">Snowboard Width (mm) *</label>
                         <input type="number" class="form-control" id="snowboardWidth" name="snowboardWidth" 
-                               value="{{formData.snowboardWidth}}" min="200" max="300" step="0.1" autocomplete="off" inputmode="numeric">
+                               value="{{formData.snowboardWidth}}" min="200" max="300" step="0.1" autocomplete="off" inputmode="numeric"
+                               placeholder="200 - 300 mm">
                     </div>
                 </div>
 
@@ -150,7 +154,8 @@
                     <div class="col-md-6 mb-3">
                         <label for="helmetSize" class="form-label">Helmet Size (cm) *</label>
                         <input type="number" class="form-control" id="helmetSize" name="helmetSize" 
-                               value="{{formData.helmetSize}}" min="48" max="65" step="0.5" autocomplete="off" inputmode="numeric">
+                               value="{{formData.helmetSize}}" min="48" max="65" step="0.5" autocomplete="off" inputmode="numeric"
+                               placeholder="48 - 65 cm">
                         <div class="form-text">Measure around your head, just above your eyebrows</div>
                     </div>
                 </div>
@@ -185,6 +190,7 @@
                             <input type="number" class="form-control" id="bootSize" name="bootSize" 
                                    value="{{formData.bootSize}}" min="3" max="16" step="0.5" 
                                    autocomplete="off" inputmode="numeric"
+                                   placeholder="3 - 16 (US)"
                                    oninvalid="this.setCustomValidity('Boot size must be between 3 and 16 (US size)')" 
                                    oninput="this.setCustomValidity('')">
                             <div class="form-text">US shoe size (e.g., 7, 7.5, 8, etc.) Must be between 3 and 16.</div>
@@ -197,7 +203,8 @@
                     <div class="col-md-6 mb-3">
                         <label for="polesLength" class="form-label">Pole Length (cm) *</label>
                         <input type="number" class="form-control" id="polesLength" name="polesLength" 
-                               value="{{formData.polesLength}}" min="80" max="160" step="1" autocomplete="off" inputmode="numeric">
+                               value="{{formData.polesLength}}" min="80" max="160" step="1" autocomplete="off" inputmode="numeric"
+                               placeholder="80 - 160 cm">
                         <div class="form-text">Length of the pole in centimeters</div>
                     </div>
                 </div>
@@ -230,7 +237,8 @@
                 <div class="mb-3">
                     <label for="price" class="form-label">Price ($) *</label>
                     <input type="number" step="0.01" class="form-control" id="price" name="price" 
-                           value="{{formData.price}}" required autocomplete="off" inputmode="decimal">
+                           value="{{formData.price}}" required autocomplete="off" inputmode="decimal"
+                           placeholder="$0.01 - $99,999.99">
                 </div>
 
                 <!-- IMAGE UPLOAD -->
@@ -267,7 +275,8 @@
                 <div class="mb-3">
                     <label for="servicePrice" class="form-label">Price ($)</label>
                     <input type="number" step="0.01" class="form-control" id="servicePrice" name="price" 
-                           value="{{formData.price}}" autocomplete="off" inputmode="decimal">
+                           value="{{formData.price}}" autocomplete="off" inputmode="decimal"
+                           placeholder="$0.01 - $99,999.99 (optional)">
                 </div>
 
                 <!-- IMAGE UPLOAD -->
@@ -482,6 +491,88 @@ document.addEventListener('DOMContentLoaded', function() {
         input.setAttribute('autocorrect', 'off');
         input.setAttribute('autocapitalize', 'off');
         input.setAttribute('spellcheck', 'false');
+        
+        // Disable scroll wheel from changing number input values
+        // This prevents accidental value changes when scrolling over number inputs
+        input.addEventListener('wheel', function(e) {
+            // Prevent scroll from changing the value
+            e.preventDefault();
+            return false;
+        }, { passive: false });
+        
+        // Helper function to clamp and round a value
+        const clampAndRound = function(inputElement) {
+            const valueStr = inputElement.value.trim();
+            
+            // Skip if empty (let validation handle required fields)
+            if (!valueStr) {
+                return;
+            }
+            
+            // Parse the current value
+            let value = parseFloat(valueStr);
+            
+            // Skip if not a valid number
+            if (isNaN(value) || !isFinite(value)) {
+                return;
+            }
+            
+            // Get min, max, and step from attributes
+            const minAttr = inputElement.getAttribute('min');
+            const maxAttr = inputElement.getAttribute('max');
+            const stepAttr = inputElement.getAttribute('step') || '1';
+            
+            let min = minAttr !== null ? parseFloat(minAttr) : null;
+            let max = maxAttr !== null ? parseFloat(maxAttr) : null;
+            const step = parseFloat(stepAttr);
+            
+            // Special handling for price inputs (no min/max in HTML, but validation exists)
+            if (inputElement.id === 'price' || inputElement.id === 'servicePrice') {
+                min = 0.01;
+                max = 99999.99;
+            }
+            
+            // Clamp to min/max bounds
+            if (min !== null && value < min) {
+                value = min;
+            }
+            if (max !== null && value > max) {
+                value = max;
+            }
+            
+            // Round to nearest step
+            if (step > 0) {
+                // Handle decimal precision for step
+                const stepDecimals = (step.toString().split('.')[1] || '').length;
+                const rounded = Math.round(value / step) * step;
+                
+                // Fix floating point precision issues
+                value = parseFloat(rounded.toFixed(stepDecimals));
+            }
+            
+            // Update the input value if it changed
+            const newValueStr = value.toString();
+            if (newValueStr !== valueStr) {
+                inputElement.value = newValueStr;
+                
+                // Trigger input event to notify any listeners
+                inputElement.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        };
+        
+        // Clamp and round values when user exits the field (blur event)
+        input.addEventListener('blur', function() {
+            clampAndRound(this);
+        });
+        
+        // Also clamp and round when Enter is pressed
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                clampAndRound(this);
+                // Blur the field after clamping/rounding
+                this.blur();
+            }
+        });
         
         // Store the value before any potential browser modification
         let previousValue = input.value;

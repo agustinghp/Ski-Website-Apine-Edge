@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { deleteImage } = require('../uploadMiddleware');
 
 module.exports = (db) => {
 
@@ -108,6 +109,26 @@ module.exports = (db) => {
 
             if (product.user_id !== userId) {
                 return res.status(403).send('Unauthorized');
+            }
+
+            // Get all image URLs before deleting
+            const images = await db.any(`
+                SELECT image_path
+                FROM product_images
+                WHERE product_id = $1
+            `, [productId]);
+
+            // Delete images from R2 cloud storage
+            if (images && images.length > 0) {
+                for (const image of images) {
+                    try {
+                        await deleteImage(image.image_path);
+                        console.log(`Deleted image from R2: ${image.image_path}`);
+                    } catch (error) {
+                        console.error(`Error deleting image ${image.image_path}:`, error);
+                        // Continue with other images even if one fails
+                    }
+                }
             }
 
             // Delete the product (CASCADE will handle related records)
