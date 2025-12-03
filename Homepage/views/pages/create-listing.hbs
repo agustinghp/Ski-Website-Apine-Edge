@@ -676,54 +676,354 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Image preview for product images
+const productImageFiles = []; // Store files array for product images
+
 document.getElementById('productImages')?.addEventListener('change', function(e) {
+    const preview = document.getElementById('productImagePreview');
+    const input = this;
+    
+    // Get current files from input
+    const newFiles = Array.from(input.files);
+    
+    // If we already have files, preserve their order and only add truly new ones
+    if (productImageFiles.length > 0) {
+        // Keep existing files in their current order
+        const existingFiles = [...productImageFiles];
+        
+        // Find files that are truly new (not already in our array)
+        const filesToAdd = newFiles.filter(newFile => {
+            return !existingFiles.find(existingFile => 
+                existingFile.name === newFile.name && 
+                existingFile.size === newFile.size && 
+                existingFile.lastModified === newFile.lastModified
+            );
+        });
+        
+        // Add new files to the end (preserving primary as first)
+        productImageFiles.push(...filesToAdd);
+    } else {
+        // First time selecting files - use input order
+        productImageFiles.length = 0;
+        productImageFiles.push(...newFiles);
+    }
+    
+    if (productImageFiles.length > 5) {
+        alert('Maximum 5 images allowed');
+        productImageFiles.splice(5); // Keep only first 5 (primary stays first)
+    }
+    
+    updateProductImagePreview();
+    updateProductImageInput();
+});
+
+function updateProductImagePreview() {
     const preview = document.getElementById('productImagePreview');
     preview.innerHTML = '';
     
-    if (this.files.length > 5) {
-        alert('Maximum 5 images allowed');
-        this.value = '';
-        return;
-    }
+    // Ensure primary image is always first (index 0)
+    // The first image in the array is always primary and displayed on the left
+    // Create placeholder divs first to maintain order
+    const placeholderDivs = [];
+    productImageFiles.forEach((file, index) => {
+        const div = document.createElement('div');
+        div.className = 'position-relative';
+        div.setAttribute('data-file-index', index);
+        div.style.cursor = index === 0 ? 'default' : 'pointer';
+        div.style.minWidth = '100px';
+        div.style.minHeight = '100px';
+        div.innerHTML = `
+            <div style="width: 100px; height: 100px; background: #f0f0f0; border-radius: 0.25rem; display: flex; align-items: center; justify-content: center;">
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+            </div>
+        `;
+        placeholderDivs.push(div);
+        preview.appendChild(div);
+    });
     
-    Array.from(this.files).forEach((file, index) => {
+    // Now load images and update divs in order
+    productImageFiles.forEach((file, index) => {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const div = document.createElement('div');
-            div.className = 'position-relative';
+            const div = placeholderDivs[index];
+            if (!div) return; // Safety check
+            
             div.innerHTML = `
-                <img src="${e.target.result}" style="width: 100px; height: 100px; object-fit: cover;" class="rounded">
+                <img src="${e.target.result}" style="width: 100px; height: 100px; object-fit: cover;" class="rounded ${index === 0 ? '' : 'opacity-75'}" 
+                     title="${index === 0 ? 'Primary image' : 'Click to make primary'}">
                 ${index === 0 ? '<span class="badge bg-primary position-absolute top-0 start-0">Primary</span>' : ''}
+                <button type="button" class="btn btn-sm position-absolute top-0 end-0" 
+                        style="width: 24px; height: 24px; padding: 0; font-size: 16px; line-height: 1; border-radius: 50%; z-index: 10; background-color: rgba(128, 128, 128, 0.7); color: white; border: none; font-weight: bold;"
+                        aria-label="Remove image">
+                    ×
+                </button>
             `;
-            preview.appendChild(div);
+            
+            // Add click handler to make image primary (move to front)
+            if (index !== 0) {
+                div.addEventListener('click', function(event) {
+                    // Don't trigger if clicking the remove button
+                    if (event.target.tagName === 'BUTTON') return;
+                    
+                    const fileIndex = parseInt(div.getAttribute('data-file-index'));
+                    // Move this file to the front
+                    const fileToMove = productImageFiles.splice(fileIndex, 1)[0];
+                    productImageFiles.unshift(fileToMove);
+                    updateProductImagePreview();
+                    updateProductImageInput();
+                });
+            }
+            
+            // Add click handler to remove button
+            const removeBtn = div.querySelector('button');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', function(event) {
+                    event.stopPropagation(); // Prevent triggering the div click
+                    const fileIndex = parseInt(div.getAttribute('data-file-index'));
+                    productImageFiles.splice(fileIndex, 1);
+                    updateProductImagePreview();
+                    updateProductImageInput();
+                });
+            }
         };
         reader.readAsDataURL(file);
     });
-});
+}
+
+function updateProductImageInput() {
+    const input = document.getElementById('productImages');
+    if (!input) return;
+    
+    // Create a new DataTransfer object to update the file input
+    const dataTransfer = new DataTransfer();
+    productImageFiles.forEach(file => {
+        dataTransfer.items.add(file);
+    });
+    input.files = dataTransfer.files;
+}
 
 // Image preview for service images
+const serviceImageFiles = []; // Store files array for service images
+
 document.getElementById('serviceImages')?.addEventListener('change', function(e) {
+    const preview = document.getElementById('serviceImagePreview');
+    const input = this;
+    
+    // Get current files from input
+    const newFiles = Array.from(input.files);
+    
+    // If we already have files, preserve their order and only add truly new ones
+    if (serviceImageFiles.length > 0) {
+        // Keep existing files in their current order
+        const existingFiles = [...serviceImageFiles];
+        
+        // Find files that are truly new (not already in our array)
+        const filesToAdd = newFiles.filter(newFile => {
+            return !existingFiles.find(existingFile => 
+                existingFile.name === newFile.name && 
+                existingFile.size === newFile.size && 
+                existingFile.lastModified === newFile.lastModified
+            );
+        });
+        
+        // Add new files to the end (preserving primary as first)
+        serviceImageFiles.push(...filesToAdd);
+    } else {
+        // First time selecting files - use input order
+        serviceImageFiles.length = 0;
+        serviceImageFiles.push(...newFiles);
+    }
+    
+    if (serviceImageFiles.length > 5) {
+        alert('Maximum 5 images allowed');
+        serviceImageFiles.splice(5); // Keep only first 5 (primary stays first)
+    }
+    
+    updateServiceImagePreview();
+    updateServiceImageInput();
+});
+
+function updateServiceImagePreview() {
     const preview = document.getElementById('serviceImagePreview');
     preview.innerHTML = '';
     
-    if (this.files.length > 5) {
-        alert('Maximum 5 images allowed');
-        this.value = '';
-        return;
-    }
+    // Ensure primary image is always first (index 0)
+    // The first image in the array is always primary and displayed on the left
+    // Create placeholder divs first to maintain order
+    const placeholderDivs = [];
+    serviceImageFiles.forEach((file, index) => {
+        const div = document.createElement('div');
+        div.className = 'position-relative';
+        div.setAttribute('data-file-index', index);
+        div.style.cursor = index === 0 ? 'default' : 'pointer';
+        div.style.minWidth = '100px';
+        div.style.minHeight = '100px';
+        div.innerHTML = `
+            <div style="width: 100px; height: 100px; background: #f0f0f0; border-radius: 0.25rem; display: flex; align-items: center; justify-content: center;">
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+            </div>
+        `;
+        placeholderDivs.push(div);
+        preview.appendChild(div);
+    });
     
-    Array.from(this.files).forEach((file, index) => {
+    // Now load images and update divs in order
+    serviceImageFiles.forEach((file, index) => {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const div = document.createElement('div');
-            div.className = 'position-relative';
+            const div = placeholderDivs[index];
+            if (!div) return; // Safety check
+            
             div.innerHTML = `
-                <img src="${e.target.result}" style="width: 100px; height: 100px; object-fit: cover;" class="rounded">
+                <img src="${e.target.result}" style="width: 100px; height: 100px; object-fit: cover;" class="rounded ${index === 0 ? '' : 'opacity-75'}" 
+                     title="${index === 0 ? 'Primary image' : 'Click to make primary'}">
                 ${index === 0 ? '<span class="badge bg-primary position-absolute top-0 start-0">Primary</span>' : ''}
+                <button type="button" class="btn btn-sm position-absolute top-0 end-0" 
+                        style="width: 24px; height: 24px; padding: 0; font-size: 16px; line-height: 1; border-radius: 50%; z-index: 10; background-color: rgba(128, 128, 128, 0.7); color: white; border: none; font-weight: bold;"
+                        aria-label="Remove image">
+                    ×
+                </button>
             `;
-            preview.appendChild(div);
+            
+            // Add click handler to make image primary (move to front)
+            if (index !== 0) {
+                div.addEventListener('click', function(event) {
+                    // Don't trigger if clicking the remove button
+                    if (event.target.tagName === 'BUTTON') return;
+                    
+                    const fileIndex = parseInt(div.getAttribute('data-file-index'));
+                    // Move this file to the front
+                    const fileToMove = serviceImageFiles.splice(fileIndex, 1)[0];
+                    serviceImageFiles.unshift(fileToMove);
+                    updateServiceImagePreview();
+                    updateServiceImageInput();
+                });
+            }
+            
+            // Add click handler to remove button
+            const removeBtn = div.querySelector('button');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', function(event) {
+                    event.stopPropagation(); // Prevent triggering the div click
+                    const fileIndex = parseInt(div.getAttribute('data-file-index'));
+                    serviceImageFiles.splice(fileIndex, 1);
+                    updateServiceImagePreview();
+                    updateServiceImageInput();
+                });
+            }
         };
         reader.readAsDataURL(file);
     });
+}
+
+function updateServiceImageInput() {
+    const input = document.getElementById('serviceImages');
+    if (!input) return;
+    
+    // Create a new DataTransfer object to update the file input
+    const dataTransfer = new DataTransfer();
+    serviceImageFiles.forEach(file => {
+        dataTransfer.items.add(file);
+    });
+    input.files = dataTransfer.files;
+}
+
+// Helper function to display error message using message partial format
+function showImageSizeError(messageText) {
+    // Remove any existing error messages
+    const existingAlert = document.querySelector('.alert.alert-danger');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+    
+    // Create error message in the same format as the message partial
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+    alertDiv.setAttribute('role', 'alert');
+    alertDiv.innerHTML = `
+        ${messageText}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Insert at the top of the container (after the h1)
+    const container = document.querySelector('.container.mt-5');
+    if (container) {
+        const h1 = container.querySelector('h1');
+        if (h1 && h1.nextSibling) {
+            container.insertBefore(alertDiv, h1.nextSibling);
+        } else {
+            container.insertBefore(alertDiv, container.firstChild.nextSibling);
+        }
+    }
+    
+    // Scroll to top to show the error
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Image size validation - Product form
+document.querySelector('form[action="/create-listing/product"]')?.addEventListener('submit', function(e) {
+    const imageInput = document.getElementById('productImages');
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+    
+    if (imageInput && imageInput.files.length > 0) {
+        const oversizedFiles = [];
+        
+        Array.from(imageInput.files).forEach((file, index) => {
+            if (file.size > MAX_FILE_SIZE) {
+                const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                oversizedFiles.push({
+                    name: file.name,
+                    size: fileSizeMB,
+                    index: index + 1
+                });
+            }
+        });
+        
+        if (oversizedFiles.length > 0) {
+            e.preventDefault();
+            
+            let errorMessage = 'One or more images exceed the 5MB size limit:<ul class="mb-0 mt-2">';
+            oversizedFiles.forEach(file => {
+                errorMessage += `<li>Image ${file.index} (${file.name}): ${file.size} MB</li>`;
+            });
+            errorMessage += '</ul>Please compress or resize your images before uploading.';
+            
+            showImageSizeError(errorMessage);
+            return false;
+        }
+    }
+});
+
+// Image size validation - Service form
+document.querySelector('form[action="/create-listing/service"]')?.addEventListener('submit', function(e) {
+    const imageInput = document.getElementById('serviceImages');
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+    
+    if (imageInput && imageInput.files.length > 0) {
+        const oversizedFiles = [];
+        
+        Array.from(imageInput.files).forEach((file, index) => {
+            if (file.size > MAX_FILE_SIZE) {
+                const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                oversizedFiles.push({
+                    name: file.name,
+                    size: fileSizeMB,
+                    index: index + 1
+                });
+            }
+        });
+        
+        if (oversizedFiles.length > 0) {
+            e.preventDefault();
+            
+            let errorMessage = 'One or more images exceed the 5MB size limit:<ul class="mb-0 mt-2">';
+            oversizedFiles.forEach(file => {
+                errorMessage += `<li>Image ${file.index} (${file.name}): ${file.size} MB</li>`;
+            });
+            errorMessage += '</ul>Please compress or resize your images before uploading.';
+            
+            showImageSizeError(errorMessage);
+            return false;
+        }
+    }
 });
 </script>
