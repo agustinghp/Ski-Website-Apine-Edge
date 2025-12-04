@@ -88,6 +88,7 @@ PORT=3000
 NODE_ENV=development
 SESSION_SECRET="super duper secret!"
 ```
+(.env has more required parts that is sensitive information like API's)
 
 ---
 
@@ -205,9 +206,7 @@ docker compose down -v
 
 ### 🪄 **Tips**
 - The database initializes from any `.sql` files placed inside the `init_data/` directory.  
-- You can modify your `.env` safely without rebuilding Docker images (just restart with `docker compose restart`).  
-- Keep your `.env` file **out of version control** by adding it to `.gitignore`.
+- Connect to DB from terminal: "docker exec -it alpineedge_db psql -U postgres -d alpineedge"
 
-
-Connect to DB:
-docker exec -it alpineedge_db psql -U postgres -d alpineedge
+### Deployed Website Link:
+https://alpineedge-web.onrender.com/

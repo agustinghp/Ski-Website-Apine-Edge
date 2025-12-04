@@ -78,7 +78,7 @@ describe('Authentication Middleware (auth)', () => {
 
 describe('User Registration (POST /register)', () => {
 
-  it('Positive: should successfully register a new user and show a message', done => {
+  it('Positive: should successfully register a new user and redirect to home', done => {
     const uniqueEmail = `testuser_${Date.now()}@example.com`;
     const uniqueUsername = `testuser_${Date.now()}`;
 
@@ -88,11 +88,15 @@ describe('User Registration (POST /register)', () => {
       .send({
         username: uniqueUsername,
         email: uniqueEmail,
-        password: 'password123'
+        password: 'password123',
+        location: 'Denver, CO, USA',
+        latitude: '39.7392',
+        longitude: '-104.9903'
       })
+      .redirects(0) // Prevent chai from following the redirect
       .end((err, res) => {
-        expect(res).to.have.status(200); // Renders the page with a message
-        expect(res.text).to.include('Registration successful!');
+        expect(res).to.have.status(302); // Redirects to home page
+        expect(res).to.redirectTo(/\/$/); // Check it redirects to /
         done();
       });
   });
@@ -105,10 +109,11 @@ describe('User Registration (POST /register)', () => {
         username: 'testuser',
         email: '', // Missing email
         password: 'password123'
+        // Missing location field
       })
       .end((err, res) => {
         expect(res).to.have.status(200); // Renders the page
-        expect(res.text).to.include('Username, email, and password are required.');
+        expect(res.text).to.include('Username, email, location, and password are required.');
         done();
       });
   });

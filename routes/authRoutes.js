@@ -149,6 +149,10 @@ module.exports = (db) => {
 
             req.session.userId = newUser.id;
             req.session.username = newUser.username;
+            req.session.message = {
+                type: 'success',
+                text: 'Registration successful! Welcome to Alpine Edge!'
+            };
 
             req.session.save((err) => {
                 if (err) console.error('Session save error:', err);
