@@ -28,7 +28,7 @@ Tester:
 Agustin G.
 
 Actual Result:
-(To be filled after testing)
+User was able to log in succesfully
 
 --------------------------------------------------
 Feature 2: Posting a Product (Skis)
@@ -59,10 +59,10 @@ Environment:
 localhost (Docker Compose)
 
 Tester:
-Team Member
+Charlie Kasic
 
 Actual Result:
-(To be filled after testing)
+Was able to succesfully post the product
 
 --------------------------------------------------
 Feature 3: User Chat Functionality
@@ -92,10 +92,10 @@ Environment:
 localhost (Docker Compose)
 
 Tester:
-Team Member
+Agustin G with Chalie Kasic
 
 Actual Result:
-(To be filled after testing)
+Users were able to message each other.
 
 --------------------------------------------------
 Risks
