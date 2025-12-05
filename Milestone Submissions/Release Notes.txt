@@ -2,3 +2,76 @@ Week 1 (10/27 - 11/02):
 - Finished the barebones of the database tables
 - Made the program functional
     - Can initialize image of docker, and connect database and nodejs
+
+Week 2 (11/03 - 11/09):
+- Implemented user authentication system
+    - User registration with email, username, password, and location
+    - Login/logout functionality with session management
+    - Password hashing using bcryptjs for security
+    - Location autocomplete integration using Google Places API
+    - User location stored with latitude/longitude coordinates
+- Built core listing functionality
+    - Product creation form supporting multiple product types (skis, snowboards, helmets, boots, poles, goggles, gloves, jackets, pants, other)
+    - Service listing creation form
+    - Product and service detail pages
+    - Basic validation for required fields and data types
+- Implemented basic search functionality
+    - Simple text-based search across products, services, and users
+    - Search results page with basic filtering
+- Created user profile pages
+    - Personal profile view showing user's listings
+    - View other users' profiles
+    - Profile information display
+
+Week 3 (11/10 - 11/16):
+- Integrated image upload system
+    - Cloudflare R2 cloud storage integration for image hosting
+    - Image processing with Sharp library (resizing, compression, format conversion)
+    - Support for multiple images per product/service listing (up to 5 images)
+    - Primary image designation for listings
+    - Profile picture upload functionality
+- Enhanced search capabilities
+    - Advanced search page with comprehensive filtering options
+    - Filter by product type, price range, brand, and product-specific dimensions
+    - Location-based search with distance radius filtering
+    - Haversine distance calculation for accurate location-based results
+    - Sort by price, distance, or product dimensions
+    - Brand filtering with dynamic brand list based on product category
+- Implemented connection system
+    - Send connection requests to other users
+    - Accept/decline connection requests
+    - Connection requests management page
+    - Connection status tracking (pending, accepted, declined)
+    - Email visibility restricted to connected users only
+- Improved user experience
+    - Better error handling and user feedback messages
+    - Form validation improvements
+    - Enhanced UI for listing creation with dynamic form fields based on product type
+    - Location privacy: coordinates rounded to prevent exact tracking while maintaining search accuracy
+
+Week 4 (11/17 - 11/23):
+- Implemented real-time chat system
+    - Socket.io integration for instant messaging
+    - Real-time message delivery between connected users
+    - Chat history loading and persistence
+    - Typing indicators showing when users are typing
+    - Read receipt functionality (single checkmark for sent, double checkmark for read)
+    - Chat interface with sidebar for connection list
+    - Mobile-responsive chat design with collapsible sidebar
+    - Auto-mark messages as read when chat is opened
+- Enhanced product and service management
+    - Delete product functionality with automatic image cleanup from cloud storage
+    - Improved image display on product/service detail pages
+    - Better image gallery handling
+- Refined search and filtering
+    - Custom location input for search (not just user's registered location)
+    - Improved brand filtering logic
+    - Better handling of "Anywhere" radius option
+    - Enhanced search result display with distance information
+- Bug fixes and optimizations
+    - Fixed session management issues
+    - Improved error handling throughout the application
+    - Performance optimizations for database queries
+    - Better mobile responsiveness across all pages
+    - Fixed connection request edge cases
+    - Improved form validation and user feedback
