@@ -1,133 +1,251 @@
-## 🏔️ **Alpine Edge**
+# 🏔️ Alpine Edge
 
+**Alpine Edge** is a community-driven web platform where skiers and snowboarders can buy, sell, or offer ski-related equipment and services. It connects people passionate about skiing — allowing users to post listings for gear or offer services like waxing, tuning, or lessons — all without handling payments directly.
 
-**Alpine Edge** is a community-driven web platform where skiers and snowboarders can buy, sell, or offer ski-related equipment and services.  
-It connects people passionate about skiing — allowing users to post listings for gear or offer services like waxing, tuning, or lessons — all without handling payments directly.
+## 📋 Table of Contents
 
+- [Project Overview](#-project-overview)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+- [Development](#-development)
+- [Deployment](#-deployment)
+- [Contributors](#-contributors)
 
-
-!!New step!! run 
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
-npm install socket.io 
-then 
-docker compose run --rm -u root web sh -lc "npm install"
-for chat feature!
 ---
 
-### 🧭 **Project Overview**
+## 🧭 Project Overview
 
-**Vision:**  
+### Vision
 > Keep the value in skiing and make buying easier.
 
-**Core Features:**
-- ⛷️ Buy and sell used ski and snowboard gear  
-- 🔧 Offer or request ski services (e.g., tuning, waxing, lessons)  
-- 📍 Filter listings by location, price, and category  
-- 💬 Message or negotiate directly with other users  
-
-**Tech Stack:**
-- **Frontend:** Handlebars (templating)
-- **Backend:** Node.js + Express
-- **Database:** PostgreSQL
-- **Containerization:** Docker + Docker Compose
-- **Architecture:** MVC pattern with RESTful routes
+### Core Features
+- ⛷️ **Buy and sell** used ski and snowboard gear
+- 🔧 **Offer or request** ski services (e.g., tuning, waxing, lessons)
+- 📍 **Filter listings** by location, price, and category
+- 💬 **Message or negotiate** directly with other users via real-time chat
 
 ---
 
-### #1  
-To run the code, you will need to download:
-    
-**Docker:**  
-Visit the following Link to download  
-👉 https://www.docker.com/products/docker-desktop/
+## 🛠️ Tech Stack
 
-**Node.js:**  
-For **Mac:**
+- **Frontend:** Handlebars (templating engine)
+- **Backend:** Node.js + Express
+- **Database:** PostgreSQL
+- **Real-time Communication:** Socket.io
+- **Containerization:** Docker + Docker Compose
+- **Architecture:** MVC pattern with RESTful routes
+- **File Storage:** AWS S3
+- **Image Processing:** Sharp
+
+---
+
+## 📁 Project Structure
+
+```
+Ski-Website.-Apine-Edge/
+│
+├── Homepage/                    # Frontend assets and views
+│   ├── public/                  # Static files
+│   │   ├── css/                 # Stylesheets
+│   │   │   ├── style.css        # Main styles
+│   │   │   ├── advanced-search.css
+│   │   │   ├── chat.css
+│   │   │   └── product-detail.css
+│   │   └── js/                  # Client-side JavaScript
+│   │       ├── advancedSearch.js
+│   │       ├── chat.js
+│   │       ├── createListing.js
+│   │       └── locationAutocomplete.js
+│   └── views/                   # Handlebars templates
+│       ├── layouts/
+│       │   └── main.hbs         # Main layout template
+│       ├── pages/                # Page templates
+│       │   ├── home.hbs
+│       │   ├── login.hbs
+│       │   ├── register.hbs
+│       │   ├── search.hbs
+│       │   ├── advanced-search.hbs
+│       │   ├── create-listing.hbs
+│       │   ├── product-detail.hbs
+│       │   ├── service-detail.hbs
+│       │   ├── profile.hbs
+│       │   ├── userProfile.hbs
+│       │   ├── chat.hbs
+│       │   └── connection-requests.hbs
+│       └── partials/             # Reusable components
+│           ├── header.hbs
+│           ├── footer.hbs
+│           ├── nav.hbs
+│           ├── message.hbs
+│           ├── contact-button.hbs
+│           └── title.hbs
+│
+├── routes/                       # Express route handlers
+│   ├── authRoutes.js            # Authentication (login, register, logout)
+│   ├── homeRoutes.js            # Homepage routes
+│   ├── userRoutes.js            # User management routes
+│   ├── profileRoutes.js         # User profile routes
+│   ├── searchRoutes.js          # Search functionality
+│   ├── listingRoutes.js         # Create listing routes
+│   ├── productRoutes.js         # Product detail routes
+│   ├── serviceRoutes.js         # Service detail routes
+│   └── chatRoutes.js            # Chat and messaging routes
+│
+├── init_data/                    # Database initialization
+│   ├── Create-Tables.sql        # Database schema
+│   └── Populate-Test-Data.sql   # Sample data
+│
+├── test/                         # Test files
+│   └── server.spec.js           # Server tests
+│
+├── Milestone Submissions/        # Project documentation
+│   ├── WIreframes/              # UI wireframes
+│   ├── Team Meeting Logs/       # Meeting notes
+│   ├── ProjectReport_016-1.pdf
+│   ├── ProjectPresentation_016-1.pdf
+│   ├── UAT_Test_Plan.txt
+│   └── Release Notes.txt
+│
+├── index.js                      # Main application entry point
+├── uploadMiddleware.js           # File upload middleware
+├── docker-compose.yaml          # Docker configuration
+├── package.json                 # Node.js dependencies
+├── nodemon.json                 # Nodemon configuration
+└── brands.json                  # Ski brand data
+```
+
+### Key Components
+
+- **`index.js`**: Main server file that sets up Express, Handlebars, database connections, Socket.io, and routes
+- **`routes/`**: Modular route handlers following RESTful conventions
+- **`Homepage/views/`**: Handlebars templates organized by layouts, pages, and partials
+- **`Homepage/public/`**: Static assets (CSS, JavaScript, images)
+- **`init_data/`**: SQL scripts for database initialization
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Docker Desktop** - [Download here](https://www.docker.com/products/docker-desktop/)
+- **Node.js** (v14 or higher)
+
+#### Installing Node.js
+
+**macOS:**
 ```bash
 brew install node
 ```
-*(Requires brew — see Brew Installer below)*  
 
-For **Linux:**
+**Linux:**
 ```bash
 sudo apt update
 sudo apt install nodejs npm -y
 ```
 
-For **Windows:**  
-Visit this link and download:  
-👉 https://nodejs.org/en/download
+**Windows:**
+Download from [nodejs.org](https://nodejs.org/en/download)
 
-**Brew Installer (For downloading Node on Mac):**
+> **Note for macOS:** If you don't have Homebrew installed, install it first:
+> ```bash
+> /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+> echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+> eval "$(/opt/homebrew/bin/brew shellenv)"
+> ```
+
+### Installation Steps
+
+#### 1. Install Socket.io (Required for Chat Feature)
+
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
-eval "$(/opt/homebrew/bin/brew shellenv)"
-```
--------------
-** Also, you must install socket.io for the chat feature!
-
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
 npm install socket.io
-then 
+```
+
+Then install dependencies inside Docker:
+```bash
 docker compose run --rm -u root web sh -lc "npm install"
+```
 
+#### 2. Configure Environment Variables
 
----
-
-### #2  
-Then you will need to create a `.env` file with the following contents (default options):
+Create a `.env` file in the root directory with the following content:
 
 ```bash
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=alpineedge
+POSTGRES_HOST=db
 DATABASE_URL=postgres://postgres:postgres@db:5432/alpineedge
 
 PORT=3000
 NODE_ENV=development
 SESSION_SECRET="super duper secret!"
+
+# Add your API keys here (Google Maps API, AWS S3, etc.)
+GOOGLE_API_KEY=your_google_api_key_here
 ```
-(.env has more required parts that is sensitive information like API's)
 
----
+> **Note:** The `.env` file contains sensitive information like API keys. Make sure it's listed in `.gitignore` and never commit it to version control.
 
-### #3  
-First create node_modules folder:
-   docker compose run --rm -u root web sh -lc "npm install"
+#### 3. Install Dependencies
 
-To run the program, start the containers with the following command:
+Install Node.js dependencies inside Docker:
+
+```bash
+docker compose run --rm -u root web sh -lc "npm install"
+```
+
+#### 4. Start the Application
+
+Start the Docker containers:
 
 ```bash
 docker compose up --build
 ```
-"NOTE FROM CHARLIE"
-Ive had to use this- 
-docker compose run --rm -u root web sh -lc "npm install"
-before
-docker compose up 
-Then open your browser and visit:  
-👉 [http://localhost:3000](http://localhost:3000)
 
-**To view logs:**
+The application will be available at: **http://localhost:3000**
+
+#### 5. View Logs (Optional)
+
+To monitor application logs:
+
 ```bash
-docker logs -f alpineedge_web     # App logs
-docker logs -f alpineedge_db      # Database logs
+# App logs
+docker logs -f alpineedge_web
+
+# Database logs
+docker logs -f alpineedge_db
+
+# All logs
+docker compose logs -f
+```
+
+#### 6. Stop the Application
+
+To stop the containers:
+
+```bash
+docker compose down
+```
+
+To stop and remove volumes (resets database):
+
+```bash
+docker compose down -v
 ```
 
 ---
 
-### 🌀 **Auto-Restart Mode (Live Reload) and Normal Mode**
+## 💻 Development
 
-The Docker setup supports two ways to run the app: **development mode** (auto-restart) and **normal mode** (no auto-restart).
+### Development Mode (Auto-Restart)
 
----
+The application runs in development mode by default with **nodemon**, which automatically restarts the server when files change.
 
-#### 🧱 **1. Development Mode (Auto-Restart with nodemon)**
-
-In **dev mode**, the server restarts automatically every time you save a file — perfect for active coding sessions.
-
-Start the app in **development mode**:
 ```bash
 docker compose up
 ```
@@ -139,20 +257,16 @@ You should see:
 Database connection successful
 ```
 
-   Now, any time you save a file, nodemon automatically restarts the server.
+### Normal Mode (No Auto-Restart)
 
----
+To run without auto-restart, modify `docker-compose.yaml`:
 
-#### 🚀 **2. Normal Mode (No Auto-Restart)**
-
-When you want to run the app normally (without nodemon), temporarily change this line in your `docker-compose.yaml`:
-
+Change:
 ```yaml
 command: "npm run dev"
 ```
 
-to:
-
+To:
 ```yaml
 command: "npm start"
 ```
@@ -162,51 +276,55 @@ Then start normally:
 docker compose up
 ```
 
-> 💡 This runs the server once, without watching for file changes — useful for demos or performance testing.
+### Updating Dependencies
 
-To switch back to auto-reload, just revert `npm start` → `npm run dev`.
+When installing new packages, update dependencies inside Docker:
 
----
-
-#### 🔁 **Updating Dependencies**
-
-If you install new packages (for example, `npm install express-session`), update inside Docker:
 ```bash
 docker compose run --rm -u root web sh -lc "npm install"
 ```
 
-This updates `node_modules` inside your project and your `package.json` so everyone gets the same setup.
+This ensures `node_modules` and `package.json` are updated consistently.
 
----
+### Database Access
 
-### #4  
-Then close it with the following:
+Access the PostgreSQL shell:
 
 ```bash
-docker compose down
+docker exec -it alpineedge_db psql -U postgres -d alpineedge
 ```
 
-If you also want to delete the database volume (to reset data):
-```bash
-docker compose down -v
-```
-
----
-
-### 🧰 **Optional Developer**
+### Useful Commands
 
 | Command | Description |
-|----------|-------------|
+|---------|-------------|
 | `docker compose restart web` | Restart only the Node.js container |
-| `docker exec -it alpineedge_db psql -U postgres -d alpineedge` | Access PostgreSQL shell inside the container |
+| `docker exec -it alpineedge_db psql -U postgres -d alpineedge` | Access PostgreSQL shell |
 | `docker compose logs -f` | View all container logs in real time |
-| `npm run dev` | Run server with nodemon for hot reload (outside Docker) |
+| `npm run dev` | Run server with nodemon (outside Docker) |
+| `npm test` | Run test suite |
 
 ---
 
-### 🪄 **Tips**
-- The database initializes from any `.sql` files placed inside the `init_data/` directory.  
-- Connect to DB from terminal: "docker exec -it alpineedge_db psql -U postgres -d alpineedge"
+## 🌐 Deployment
 
-### Deployed Website Link:
-https://alpineedge-web.onrender.com/
+### Deployed Website
+
+**Live URL:** https://alpineedge-web.onrender.com/
+
+---
+
+  ## 👥 Contributors
+
+- **Charlie Kasic**
+- **Agustin Garcia-Huidobro**
+- **David Poston**
+
+---
+
+## 📝 Additional Notes
+
+- The database initializes automatically from SQL files in the `init_data/` directory
+- Session data is stored in PostgreSQL using `connect-pg-simple`
+- File uploads are handled via AWS S3 with image processing using Sharp
+- Real-time chat functionality uses Socket.io with room-based messaging
